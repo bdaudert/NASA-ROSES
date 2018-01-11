@@ -1,0 +1,26 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /static/
+  static_dir: static
+- url: /oauth2callback
+  script: oauth2client.appengine.application
+- url: /.*
+  script: main.app
+- url: /templates
+  static_dir: templates
+
+libraries:
+- name: jinja2
+  version: "2.6"
+- name: webapp2
+  version: "2.5.2"
+- name: pycrypto
+  version: "2.6"
+- name: numpy
+  version: "1.6.1"
+
+inbound_services:
+- warmup
