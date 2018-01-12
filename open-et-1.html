@@ -5,14 +5,10 @@ for Earth Engine map tiles.  See Google Maps documentation on Custom Map Types
 for details.
 -->
 <html>
-  <head>
-    <title>Open-ET-1</title>
-     <!-- Load our JavaScript file. -->
-    <script type="text/javascript" src="/static/myjs/utils.js"></script>
-  </head>
+  <head>{% include 'head.html'%}</head>
   <body>
     <!-- The element into which we render the Google Map. -->
-    <div id="map" style="width: 640px; height: 480px;"></div>
+    <div id="main-map" style="width: 640px; height: 480px;"></div>
 
     <!-- Create a callback to boot our application. -->
     <script>

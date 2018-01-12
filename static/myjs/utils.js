@@ -27,7 +27,7 @@ var initialize = function(mapId, token) {
 
   // Create the base Google Map.
   var map = new google.maps.Map(
-      document.getElementById('map'), mapOptions);
+      document.getElementById('main-map'), mapOptions);
 
   // Add the EE layer to the map.
   map.overlayMapTypes.push(mapType);

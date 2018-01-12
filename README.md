@@ -63,10 +63,11 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 - app.yaml (configuration file for webapp2 templating)
 - main.py (python script that sets up the framework environment and defines classes for handling URL requests)
 - statics
+    - css
     - myjs (custom, open-et-1 specific javascript files)
     - js (general javascript files downloaded from the internet)
 - media
-    -img Images
+    -img (Images)
 - templates
     - all html files other than the main file
 

@@ -8,16 +8,42 @@
 # displayed in a Google Map.  See accompanying README file for
 # instructions on how to set up authentication.
 
-import os
-
 import config
+
+import datetime
+import httplib2
+import json
+import logging
+import os
+import time
+from copy import deepcopy as deepcopy
+
 import ee
+from google.appengine.api import urlfetch
+from google.appengine.ext import ndb
 import jinja2
 import webapp2
 
-jinja_environment = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
+import JinjaFilters
 
+# SET STATICS
+urlfetch.set_default_fetch_deadline(180000)
+httplib2.Http(timeout=180000)
+
+
+# Set the JINJA_ENVIRONMENT
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+JINJA_ENVIRONMENT = jinja2.Environment(
+    autoescape=True,
+    loader=jinja2.FileSystemLoader(template_dir),
+    extensions=['jinja2.ext.with_'])
+
+# Register custom filters
+JINJA_ENVIRONMENT.filters['is_in'] = JinjaFilters.is_in
+JINJA_ENVIRONMENT.filters['not_in'] = JinjaFilters.not_in
+JINJA_ENVIRONMENT.filters['make_string_range'] = JinjaFilters.make_string_range
+JINJA_ENVIRONMENT.filters['make_int_range'] = JinjaFilters.make_int_range
+JINJA_ENVIRONMENT.filters['divisibleby'] = JinjaFilters.divisibleby
 
 class MainPage(webapp2.RequestHandler):
 
@@ -34,7 +60,11 @@ class MainPage(webapp2.RequestHandler):
         'token': mapid['token'],
         'GMAP_API_KEY': config.GMAP_API_KEY
     }
-    template = jinja_environment.get_template('open-et-1.html')
+    template = JINJA_ENVIRONMENT.get_template('open-et-1.html')
     self.response.out.write(template.render(template_values))
 
-app = webapp2.WSGIApplication([('/', MainPage)], debug=True)
+app = webapp2.WSGIApplication([
+        ('/', MainPage)
+    ],
+    debug=True
+)
