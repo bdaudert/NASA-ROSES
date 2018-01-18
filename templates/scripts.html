@@ -1,16 +1,31 @@
 <!--css-->
 <link rel="stylesheet" href="static/css/open-et-1.css">
 <!--Bootstrap-->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <!--jQuery-->
 <script src="//code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <!--Highcharts-->
-<!--
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/highcharts-more.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
--->
+<script src="//code.highcharts.com/highcharts.js"></script>
+<script src="//code.highcharts.com/highcharts-more.js"></script>
+<script src="//code.highcharts.com/modules/exporting.js"></script>
+<!--Google Maps-->
+<!-- Load the Google Maps API, and run the initMap() callback when finished. -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GMAP_API_KEY }}&callback=initMap&libraries=drawing" async defer></script>
 <!--My JS-->
 <script src="static/myjs/utils.js"></script>
+<script src="static/myjs/map-functions.js"></script>
+<script src="static/myjs/ts-functions.js"></script>
+
+
+<!--Run Time Scripts-->
+<script>
+    var initMap = function() {
+        initialize_map();
+    };
+    $(function(){
+        $( ".draggable" ).draggable();
+    }); 
+</script>

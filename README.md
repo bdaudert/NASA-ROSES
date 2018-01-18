@@ -62,14 +62,17 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 - open-et-1.html (index html, main html file for open-et-1 project)
 - app.yaml (configuration file for webapp2 templating)
 - main.py (python script that sets up the framework environment and defines classes for handling URL requests)
+- myphyton (custom python scripts)
 - statics
+    statics.py (predefined static objects)
     - css
     - myjs (custom, open-et-1 specific javascript files)
     - js (general javascript files downloaded from the internet)
+    - json (json files)
 - media
     -img (Images)
 - templates
-    - all html files other than the main file
+    - all html files
 
 #### Conda Environment
 To create the "ee-python" conda environment, execute the following:
