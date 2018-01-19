@@ -3,81 +3,74 @@
         <h1>Map Form</h1>
         <div class="panel panel-default">
             <div class="panel-body panel-forms">
-                <b><span style="color:blue;font-size:medium">Visualization Layer:</span></b>
-                <select class="region" id="region" name="region">
-                    <option value="map">Image</option>
-                    <option value="fields" selected>Fields</option>
-                    <option value="huc6">Huc 6</option>
-                    <option value="huc8">Huc 8</option>
-                    <option value="state">State</option>
-                    <option value="county">County</option>
-                </select><br>
-                 <b>Year (only for fields): </b><br>
-                <select class="year" id="year" name="year">
-                    <option value="2011">2011</option>
-                    <option value="2012">2012</option>
-                    <option value="2013" selected>2013</option>
-                    <option value="2014">2014</option>
-                    <option value="2015">2015</option>
-                    <option value="2016">2016</option>
-                    <option value="2017">2017</option>
-                </select> 
+                <div id="form-region">
+                    <b><span style="color:blue;font-size:medium">Visualization Layer:</span></b>
+                    <select class="region" id="region" name="region">
+                        {% for x,y in form_options.region.items() %}
+                        <option value="{{ x }}" {% if x == variables.region  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %} 
+                   </select><br>
+                </div>
+                <div id='form-field_year' 
+                {% if variables.region != "fields" %}style="display:none;"{%endif%}>
+                    <b>Year (only for fields): </b><br>
+                    <select class="year" id="field_year" name="field_year">
+                        {% for x in form_options.field_year %}
+                        <option value="{{ x }}" {% if x == variables.field_year  %} selected {% endif %}>{{ x }}</option>
+                        {% endfor %}
+                    </select> 
+                </div>
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
         <div class="panel panel-default">
             <div class="panel-body panel-forms">
-                <b><span style="color:blue;font-size:medium">Pick your variable:</span></b><br>
-                <b>Dataset: </b><br>
-                <select class="product" id="product" name="product">
-                    <option value="Landsat">Landsat</option>
-                    <option value="MODIS" selected>MODIS</option>
-                </select><br> 
-                <b>Variable: </b><br>
-                <select class="variable" id="variable" name="variable">
-                    <option value="ETa">Evapotranspiration</option>
-                    <option value="ETf">Fractional Evapotranspiration</option>
-                    <option value="ETr">Reference Evapotranspiration</option>
-                    <option value="ppt">Precipitation</option>
-                    <option value="scene_count">Scene Count</option>
-                </select><br>
-                <b>ET Model(only for Eta, Etf): </b>
-                <select class="et_model" id="et_model" name="et_model">
-                    <option value="SSEBob">SSEBob</option>
-                    <option value="METRIC">METRIC</option>
-                    <option value="METRIC">Ensemble</option>
-                </select><br>
+                <b><span style="color:blue;font-size:medium">Pick your dataset:</span></b><br>
+                <div id="form-variable">
+                    <b>Variable: </b><br>
+                    <select class="variable" id="variable" name="variable">
+                        {% for x,y in form_options.variable.items() %}
+                        <option value="{{ x }}" {% if x == variables.variable  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
+                <div id='form-dataset' 
+                {% if variables.variable == "scene_count" %}style="display:none;"{%endif%}>
+                    <b>Dataset: </b><br>
+                    <select class="product" id="product" name="product">
+                        {% for x,y in form_options.dataset.items() %}
+                        <option value="{{ x }}" {% if x == variables.dataset  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select><br> 
+                </div>
+                <div id='form-model' 
+                {% if variables.variable|not_in('ETa,ETf') %}style="display:none;"{%endif%}>
+                    <b>ET Model: </b>
+                    <select class="et_model" id="et_model" name="et_model">
+                        {% for x,y in form_options.et_model.items() %}
+                        <option value="{{ x }}" {% if x == variables.et_model  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
         <div class="panel panel-default">
             <div class="panel-body panel-forms">
                 <b><span style="color:blue;font-size:medium">Processing:</span></b><br>
-                <b>Resolution (Depends on most above): </b>
-                <select class="temporal_resolution" id="temporal_resolution" name="temporal_resolution">
-                    <option value="daily" selected>Daily</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="seasonal">Seasonal (April - October)</option>
-                    <option value="annual">Annual</option>
-                </select><br> 
-                <b>Timeperiod (Depends on resolution): </b>
-                <select id="timeperiod" name="timeperiod" class="timeperiod" style="width:100%">
-                    <option value="custom" >Custom Date Range</option>
-                    <option value="last15days" >Last 15 Days of Data</option>
-                    <option value="last30days" >Last 30 Days of Data</option>
-                    <option value="last60days"  selected >Last 60 Days of Data</option>
-                    <option value="last90days" >Last 90 Days of Data</option>
-                    <option value="lastDJF" >Last DJF (Dec-Feb)</option>
-                    <option value="lastMAM" >Last MAM (Mar-May)</option>
-                    <option value="lastJJA" >Last JJA (Jun-Aug)</option>
-                    <option value="lastSON" >Last SON (Sept-Nov)</option>
-                    <option value="lastANN" >Last Year</option>
-                    <option value="lastWY" >Last Northern Water Year (Oct - Sept)</option>
-                    <option value="lastWY-S" >Last Southern Water Year (Apr - Mar)</option>
-                    <option value="lastGS" >Last Northern Growing Season (Apr - Oct)</option>
-                    <option value="lastGS-S" >Last Southern Growing Season (Nov - Mar)</option>
-                    <option value="nwy-todate" >Northern Water Year To Date</option>
-                    <option value="swy-todate" >Southern Water Year To Date</option>
-                    <option value="cy-todate" >Calendar Year Year To Date</option>
-                </select> 
+                <div id="form-temporal_resolution">
+                    <b>Resolution (Depends on most above): </b>
+                    <select class="temporal_resolution" id="temporal_resolution" name="temporal_resolution">
+                        {% for x,y in form_options.temporal_resolution.items() %}
+                        <option value="{{ x }}" {% if x == variables.temporal_resolution  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div> 
+                <div id="form-timpeperiod">
+                    <b>Timeperiod (Depends on resolution): </b>
+                    <select id="time_period" name="time_period" class="time_period">
+                        {% for x,y in form_options.time_period.items() %}
+                        <option value="{{ x }}" {% if x == variables.time_period  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select> 
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
         <p class="bg-info" style="padding:5%;">
