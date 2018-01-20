@@ -1,19 +1,24 @@
 #!/usr/bin/env python
-import statics
+# import statics
+import json
+
+from config import statics
 
 
 def set_form_options(variables):
-    form_options = statics.form_options
+    form_options = {}
+    for var_key, dflt in variables.iteritems():
+        form_options[var_key] = statics['all_' + var_key]
     # Override default form options if needed
     var = variables['variable']
     # Set field year form option
     if var == 'fields':
-        years = statics.Polygons.fields.keys()
+        years = statics['Fusiontables'].fields.keys()
         form_options['field_year'] = years
     # Set datasets
     form_ds = {}
-    for ds in statics.dataset_by_var[var]:
-    	form_ds[ds] = statics.all_datasets[ds]
+    for ds in statics['dataset_by_var'][var]:
+        form_ds[ds] = statics['all_dataset'][ds]
     form_options['dataset'] = form_ds
     return form_options
 
@@ -33,7 +38,7 @@ def set_initial_template_values(RequestHandler, app_name, method):
     '''
     tv = {
         'app_name': app_name,
-        'variables': statics.variable_defaults,
+        'variables': statics['variable_defaults'],
         'form_options': {},
         'map_options': {},
         'ts_options': {},

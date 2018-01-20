@@ -27,6 +27,11 @@ import webapp2
 import JinjaFilters
 import templateMethods
 
+global statics
+with open('static/json/statics.json', 'r') as fin:
+    statics = json.load(fin)
+
+
 # SET STATICS
 '''
 # Load the statics file

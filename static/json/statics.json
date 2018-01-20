@@ -1,0 +1,102 @@
+{
+    "all_region":  {
+        "fields": "Fields",
+        "ee_map": "Map",
+        "huc6": "HUC 6",
+        "huc8": "HUC 8",
+        "state": "States",
+        "county": "Counties"
+    },
+    "all_field_year": {
+        "2000": "2000",
+        "2001": "2001",
+        "2002": "2002", 
+        "2003": "2003",
+        "2004": "2004", 
+        "2005": "2005",
+        "2006": "2006",
+        "2007": "2007",
+        "2008": "2008",
+        "2009": "2009",
+        "2010": "2010"
+    },
+    "all_dataset":  {
+        "MODIS": "MODIS",
+        "Landsat": "Landsat",
+        "gridMET": "UI METDATA/gridMET"
+    },
+    "all_variable":  {
+        "ETa": "Actual ET",
+        "ETf": "Fractional ET",
+        "ETr": "Refernce ET",
+        "ppt": "Precipitation",
+        "scene_count": "Scene Count"
+    },
+    "all_et_model":  {
+        "METRIC": "METRIC",
+        "SSEBop": "SSEBop",
+        "ensemble": "Ensemble"
+    },
+    "all_temporal_resolution":  {
+        "daily": "Daily",
+        "monthly": "Monthly",
+        "seasonal": "Seasonal (Apr - Oct)",
+        "annual": "Annual"
+    },
+    "all_time_period":  {
+        "last15days": "Last 15 days",
+        "last30days": "Last 30 days",
+        "last60days": "Last 60 days",
+        "last90days": "Last 90 days",
+        "lastDJF": "Last DJF (Dec-Feb)",
+        "lastMAM": "Last MAM (Mar-May)",
+        "lastJJA": "Last JJA (Jun - Aug)",
+        "lastSON": "Last SON (Sept-Nov)",
+        "lastNWY": "Last Northern Water Year",
+        "lastSWY": "Last Southern Water Year",
+        "lastNGS": "Last Northern Growing Season (Apr - Oct)",
+        "lastSGS": "Last Southern Growing Season (Nov - Mar)",
+        "todateNWY": "Northern Water Year To Date",
+        "todateSWY": "Southern Water Year To Date",
+        "todateCY": "Calendar Year Year To Date",
+        "lastAnn": "Last Year",
+        "custom": "Custom"
+    },
+    "variable_defaults":  {
+        "region": "fields",
+        "field_year": "",
+        "variable": "ETa",
+        "dataset": "MODIS",
+        "et_model": "METRIC",
+        "temporal_resolution": "monthly",
+        "time_period": "lastANN"
+    },
+    "dataset_by_var":  {
+        "ETa": ["MODIS", "Landsat"],
+        "ETf": ["MODIS", "Landsat"],
+        "ETr": [],
+        "PPT": ["gridMET"],
+        "scene_count": []
+    },
+    "Fusiontables":  {
+        "fields": {
+            "2001": "1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk",
+            "2002": "1ii2Z1UOoLYDaHHO72TBtt6LlJJ_4p-gZVEmJ-o4V",
+            "2003": "12tHBgFbDkogHUazB-Mxn-NOpW7gT_PZlGLorD6rY",
+            "2004": "15wHWbDct1jZUlgw3rOAfTT2ngdwCDPyUAfmK4F3q",
+            "2005": "1RGzGnR3v2eZ47_jzl5e8-4425DI_n7nJL8A38GEZ",
+            "2006": "1J6AKBJvTcL92Zi3VsUTPv6OmIxDrJl5-2nVcLkQ_",
+            "2007": "1p2VMpL2h_GxpwYW3hcUHmoLzrlB_l1jM7XxShSgG",
+            "2008": "1F6dmw2kkUE3KPFWmd4RMWDKSt-xPxOHtu__Jaqia",
+            "2009": "1gXcGPzZH4-b-nh8haKYlGy3DPCv8lWDi7yBqP2y5",
+            "2010": "1y3PrbGJ8rMtlh-O7MB9VZD8MqslFnaafnnSdE-je",
+            "2011": "1Tp068fF_M5PJV2f_tHa_l7QK9JkEhU2LHndmKY2t"
+        }
+    },
+    "ft_styles": {
+        "fields": {
+            "styleId": 2,
+            "templateId": 2
+        }
+    }
+}

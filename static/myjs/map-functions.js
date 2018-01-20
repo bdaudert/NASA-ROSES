@@ -1,5 +1,4 @@
 /* MAP Utils*/
-
 var MAP_APP = MAP_APP || {};
 MAP_APP = {
     setMarkerOptions: function(){
@@ -58,6 +57,92 @@ MAP_APP = {
             polygonOptions: polyOptions
         });
         return drawingManager;
+    },
+    get_fusiontable_id: function(region, field_year){
+        var ft_id = null;
+        if (field_year){
+            ft_id = statics.Fusiontables[region][field_year];
+        }
+        return ft_id
+    },
+    set_fusiontableBounds: function(query) {
+        if (!query || !query.getDataTable()) {
+          return;
+        }
+        var bounds =  new google.maps.LatLngBounds(),
+            data = query.getDataTable(),
+            num_rows = data.getNumberOfRows(),
+            row_idx, LatLons, latLonList, count, ll_str,
+            kml, geoXml;
+
+        for (row_idx = 0; row_idx < num_rows; row_idx++) {
+            kml = query.getDataTable().getValue(row_idx, 0);
+            geoXml = new geoXML3.parser({});
+            geoXml.parseKmlString('<Placemark>' + kml + '</Placemark>');
+            lon_bounds = geoXml.docs[0].internals.bounds.b;
+            lat_bounds = geoXml.docs[0].internals.bounds.f;
+            ll_NE = new google.maps.LatLng(String(lat_bounds.b), String(lon_bounds.b));
+            ll_SW = new google.maps.LatLng(String(lat_bounds.f), String(lon_bounds.f));
+            bounds.extend(ll_NE);
+            bounds.extend(ll_SW);
+        }
+        window.map.fitBounds(bounds);
+        /*
+        WEIRD: on sharelink request the zoom 
+        somehow is 0 after the fitBounds call
+        so we need to save the zoom beforehand and reset 
+        it after
+        */
+
+        mapZoom = window.map.getZoom();
+        //note: fitBounds happens asynchronously
+        window.map.fitBounds(bounds);
+        google.maps.event.addListenerOnce(window.map, 'bounds_changed', function(event) {
+            if(mapZoom) {
+                window.map.setZoom(mapZoom);
+            }
+        });
+    },
+    zoomToFusiontable: function(queryText) {
+        var g_url = 'http://www.google.com/fusiontables/gvizdata?tq=';
+        var query = new google.visualization.Query(g_url  + queryText);
+        //set the callback function
+        query.send(MAP_APP.set_fusiontableBounds);
+    },
+    get_fusiontableQuery: function(ft_id, columnname, subchoice, needExact) {
+        var query = null,
+            where_text = null;
+
+        if (needExact) {
+            where_text = "'" + columnname + "' = '" + subchoice + "'";
+        } else {
+            if (subChoice && columnname) {
+                where_text = "'" + columnname + "' CONTAINS '" + subchoice + "'";
+            }
+        }
+        query = {
+            select: 'geometry',
+            from: ft_id
+        };
+
+        if (where_text) {
+            query['where'] = where_text;
+        }
+        return query;
+    },
+    get_fusiontableQueryText: function(ft_id, columnname, subChoice, needExact) {
+        var queryText = '';
+        if (needExact) { //plot exactly 1 region
+            queryText = "SELECT 'geometry' FROM " + ft_id + " WHERE '" + columnname + "' = '" + subchoice + "'";
+        } else {
+            if (subChoice && columnname) { //plot lots of regions w/ filter
+                queryText = "SELECT 'geometry' FROM " + ft_id + " WHERE '" + columnname + "' CONTAINS '" + subchoice + "'";
+            } else {
+                queryText = "SELECT 'geometry' FROM " + ft_id;
+            }
+        }
+        queryText = encodeURIComponent(queryText);
+        return queryText;
     }
 }
 
@@ -69,19 +154,31 @@ var initialize_map = function() {
         zoom: 6,
         mapTypeId: 'satellite'
     });
-    
+    //Need to set global var for zooming
+    window.map = map;
     // Darwing Manager
     var drawingManager = MAP_APP.setDrawingManager();
     drawingManager.setMap(map);
     
+    var region = $('#region').val(), 
+        field_year = null;
+    if (region == 'fields'){
+        field_year = $('#field_year').val();
+    }
+    var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
+    //var ft_id = '1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk';
     // Fusiontable layer
+    //Old: '1c4aL4VIVlBhSoxbPxzk_xh-Wo738FZhDOcS3fg'
     var layer = new google.maps.FusionTablesLayer({
         query: {
             select: '\'County Name\'',
-            from: '1c4aL4VIVlBhSoxbPxzk_xh-Wo738FZhDOcS3fg'
-        }
+            from: ft_id
+        },
+        options: statics.ft_styles[region]
     });
     layer.setMap(map);
+    queryText = MAP_APP.get_fusiontableQueryText(ft_id, null, null, null);
+    MAP_APP.zoomToFusiontable(queryText);
 }
 
 var initialize_test = function(mapId, token) {

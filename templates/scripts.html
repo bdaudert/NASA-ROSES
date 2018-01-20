@@ -13,8 +13,13 @@
 <script src="//code.highcharts.com/modules/exporting.js"></script>
 <!--Google Maps-->
 <!-- Load the Google Maps API, and run the initMap() callback when finished. -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GMAP_API_KEY }}&callback=initMap&libraries=drawing" async defer></script>
+<script src="//maps.googleapis.com/maps/api/js?key={{ GMAP_API_KEY }}&libraries=drawing"></script>
+<script src="//www.gstatic.com/charts/loader.js"></script>
+</script>
+<!--Needed to zoom to fusiontables!!!-->
+<script src="/static/js/geoxml3.js"></script>
 <!--My JS-->
+<!--<script src="static/myjs/statics.js"></script>-->
 <script src="static/myjs/utils.js"></script>
 <script src="static/myjs/listeners.js"></script>
 <script src="static/myjs/map-functions.js"></script>
@@ -23,10 +28,13 @@
 
 <!--Run Time Scripts-->
 <script>
-    var initMap = function() {
-        initialize_map();
-    };
-    $(function(){
-        $( ".draggable" ).draggable();
-    }); 
+    //Set the statics
+    var statics;
+    $.getJSON( 'static/json/statics.json', function( data ) {
+        statics = data;
+    });
+    google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
+    //google.load('visualization', '1', {'packages':['corechart', 'table', 'geomap']});
+    google.charts.setOnLoadCallback(initialize_map);
+    
 </script>
