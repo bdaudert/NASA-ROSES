@@ -61,7 +61,7 @@ MAP_APP = {
     get_fusiontable_id: function(region, field_year){
         var ft_id = null;
         if (field_year){
-            ft_id = statics.Fusiontables[region][field_year];
+            ft_id = statics.fusiontables[region][field_year];
         }
         return ft_id
     },
@@ -93,7 +93,7 @@ MAP_APP = {
         so we need to save the zoom beforehand and reset 
         it after
         */
-
+        /*
         mapZoom = window.map.getZoom();
         //note: fitBounds happens asynchronously
         window.map.fitBounds(bounds);
@@ -102,6 +102,7 @@ MAP_APP = {
                 window.map.setZoom(mapZoom);
             }
         });
+        */
     },
     zoomToFusiontable: function(queryText) {
         var g_url = 'http://www.google.com/fusiontables/gvizdata?tq=';

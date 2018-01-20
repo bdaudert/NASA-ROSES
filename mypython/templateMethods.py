@@ -3,6 +3,7 @@
 import json
 
 from config import statics
+from config import GMAP_API_KEY as GMAP_API_KEY
 
 
 def set_form_options(variables):
@@ -27,7 +28,7 @@ def set_initial_template_values(RequestHandler, app_name, method):
     '''
     Args:
     RequestHandler: webapp2.RequestHandler object
-    appName: application name, e.g. OpenET-1
+    app_name: application name, e.g. OpenET-1
     dOn: default or not; if dOn =  default
     default values are used
     otherwisee we try to get the variable
@@ -37,6 +38,7 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv: a dictionary of template variables
     '''
     tv = {
+        'GMAP_API_KEY': GMAP_API_KEY,
         'app_name': app_name,
         'variables': statics['variable_defaults'],
         'form_options': {},

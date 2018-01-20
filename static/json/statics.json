@@ -1,4 +1,10 @@
 {
+    "all_tool_action":  {
+        "None": "None",        
+        "get_map": "Get Map",
+        "get_ts": "Get Time Series",
+        "get_value": "Get Value"
+    },
     "all_region":  {
         "fields": "Fields",
         "ee_map": "Map",
@@ -63,6 +69,7 @@
         "custom": "Custom"
     },
     "variable_defaults":  {
+        "tool_action": "None",
         "region": "fields",
         "field_year": "",
         "variable": "ETa",
@@ -78,7 +85,13 @@
         "PPT": ["gridMET"],
         "scene_count": []
     },
-    "Fusiontables":  {
+    "response_vars": {
+        "None": [],
+        "get_map": ["mapid", "token", "sharelink_map", "sharelink_ts"],
+        "get_ts": ["ts_data", "token", "sharelink_map", "sharelink_ts"],
+        "get_value": ["point_value"]
+    },
+    "fusiontables":  {
         "fields": {
             "2001": "1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk",
             "2002": "1ii2Z1UOoLYDaHHO72TBtt6LlJJ_4p-gZVEmJ-o4V",
