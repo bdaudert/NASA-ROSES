@@ -4,6 +4,8 @@
             <div class="panel-body panel-forms">
                 <!--Hidden vars-->
                 <input type="hidden" class="tool_action" id="tool_action" name="tool_action" value="{{ tool_action }}">
+                <input type="hidden" class="min_date" id="min_date" name="min_date" value="{{ min_date }}">
+                <input type="hidden" class="max_date" id="max_date" name="max_date" value="{{ max_date }}">
                 <div id="form-region">
                     <b><span style="color:blue;font-size:medium">Visualization Layer:</span></b>
                     <select class="region" id="region" name="region">
@@ -34,8 +36,7 @@
                         {% endfor %}
                     </select><br>
                 </div>
-                <div id='form-dataset' 
-                {% if variables.variable == "scene_count" %}style="display:none;"{%endif%}>
+                <div id='form-dataset'>
                     <b>Dataset: </b><br>
                     <select class="product" id="product" name="product">
                         {% for x,y in form_options.dataset.items() %}
@@ -44,7 +45,7 @@
                     </select><br> 
                 </div>
                 <div id='form-model' 
-                {% if variables.variable|not_in('ETa,ETf') %}style="display:none;"{%endif%}>
+                {% if variables.variable|not_in('ET,ETRF') %}style="display:none;"{%endif%}>
                     <b>ET Model: </b>
                     <select class="et_model" id="et_model" name="et_model">
                         {% for x,y in form_options.et_model.items() %}
@@ -61,7 +62,10 @@
                     <b>Resolution (Depends on most above): </b>
                     <select class="temporal_resolution" id="temporal_resolution" name="temporal_resolution">
                         {% for x,y in form_options.temporal_resolution.items() %}
-                        <option value="{{ x }}" {% if x == variables.temporal_resolution  %} selected {% endif %}>{{ y }}</option>
+                        <option value="{{ x }}" 
+                        {% if x == variables.temporal_resolution  %} selected {% endif %}
+                        {% if x == "DLY"%} disabled {% endif %}
+                        >{{ y }}</option>
                         {% endfor %}
                     </select><br>
                 </div> 
@@ -72,6 +76,15 @@
                         <option value="{{ x }}" {% if x == variables.time_period  %} selected {% endif %}>{{ y }}</option>
                         {% endfor %}
                     </select> 
+                </div>
+                <div id="form-start_date" style="display:none;">
+                    <b>Start Date: </b>
+                    <input class="form-control" type='text' id="start_date" name="start_date" value="{{variables.start_date}}"/>
+                </div>
+                <div id="form-end_date" style="display:none;">
+                    <b>End Date: </b>
+                    <input class="form-control" type='text' id="end_date" name="end_date" value="{{variables.end_date}}"/>
+                </div>
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
         <p class="bg-info" style="padding:5%;">

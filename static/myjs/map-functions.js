@@ -144,6 +144,42 @@ MAP_APP = {
         }
         queryText = encodeURIComponent(queryText);
         return queryText;
+    },
+    populate_dataModal: function(ft_id, e){
+        // e is the click event
+        var col_name, col_names = [], t_res,
+            m_idx, m_str, c_idx, data_val,
+            html, data_div = $('#modal_data');
+            //Title
+            html = $('#variable').val();
+            if ($('#form-field_year').css('display') != 'none'){
+                html += ' Year ' + $('#field_year').val();
+            }
+            $('#dataModal_title').append(html);
+            html = '';
+            //Populate the columnnames
+            t_res = $('#temporal_resolution').val();
+            m_str = '';
+            if (t_res == 'M'){
+                for (m_idx = 1; m_idx <= 12; m_idx++){
+                    m_str = String(m_idx);
+                    if (m_idx < 10) {
+                        m_str = '0' + m_str;
+                    }
+                    col_name = $('#variable').val() + '_' + t_res + m_str;
+                    col_names.push(col_name);
+                }
+            }
+            else{
+                col_names.push($('#variable').val() + '_' + t_res);
+            }
+            //populate html with data
+            for (c_idx = 0; c_idx < col_names.length; c_idx++){
+                col_name = col_names[c_idx];
+                data_val = e.row[col_name].value;
+                html += col_name + ': ' + data_val + '<br>'
+            }
+            $('#dataModal_data').append(html);
     }
 }
 
@@ -167,9 +203,6 @@ var initialize_map = function() {
         field_year = $('#field_year').val();
     }
     var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
-    //var ft_id = '1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk';
-    // Fusiontable layer
-    //Old: '1c4aL4VIVlBhSoxbPxzk_xh-Wo738FZhDOcS3fg'
     var layer = new google.maps.FusionTablesLayer({
         query: {
             select: '\'County Name\'',
@@ -177,42 +210,14 @@ var initialize_map = function() {
         },
         options: statics.ft_styles[region]
     });
+    google.maps.event.addListener(layer, 'click', function(e) {
+        //Hide old data modal
+        $('#dataModal').modal('hide');
+        $('#dataModal_data').html('');
+        MAP_APP.populate_dataModal(ft_id, e);
+        $('#dataModal').modal('toggle');
+    });
     layer.setMap(map);
     queryText = MAP_APP.get_fusiontableQueryText(ft_id, null, null, null);
     MAP_APP.zoomToFusiontable(queryText);
 }
-
-var initialize_test = function(mapId, token) {
-    // The Google Maps API calls getTileUrl() when it tries to display a map
-    // tile.  This is a good place to swap in the MapID and token we got from
-    // the Python script. The other values describe other properties of the
-    // custom map type.
-    var eeMapOptions = {
-        getTileUrl: function(tile, zoom) {
-            var baseUrl = 'https://earthengine.googleapis.com/map';
-            var url = [baseUrl, mapId, zoom, tile.x, tile.y].join('/');
-            url += '?token=' + token;
-            return url;
-        },
-        tileSize: new google.maps.Size(256, 256)
-    };
-
-    // Create the map type.
-    var mapType = new google.maps.ImageMapType(eeMapOptions);
-
-    var myLatLng = new google.maps.LatLng(-34.397, 150.644);
-    var mapOptions = {
-        center: myLatLng,
-        zoom: 8,
-        maxZoom: 10,
-        streetViewControl: false
-    };
-
-    // Create the base Google Map.
-    var map = new google.maps.Map(
-        document.getElementById('main-map'), mapOptions);
-
-    // Add the EE layer to the map.
-    map.overlayMapTypes.push(mapType);
-}
-

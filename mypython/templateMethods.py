@@ -9,7 +9,8 @@ from config import GMAP_API_KEY as GMAP_API_KEY
 def set_form_options(variables):
     form_options = {}
     for var_key, dflt in variables.iteritems():
-        form_options[var_key] = statics['all_' + var_key]
+        if var_key in statics['form_option_keys']:
+            form_options[var_key] = statics['all_' + var_key]
     # Override default form options if needed
     var = variables['variable']
     # Set field year form option
@@ -22,6 +23,18 @@ def set_form_options(variables):
         form_ds[ds] = statics['all_dataset'][ds]
     form_options['dataset'] = form_ds
     return form_options
+
+
+def set_dates():
+    min_date = '2000-01-01'
+    max_date = '2009-12-31'
+    dates = {
+        'start_date': '2009-01-01',
+        'end_date': '2009-12-31',
+        'min_date': min_date,
+        'max_date': max_date
+    }
+    return dates
 
 
 def set_initial_template_values(RequestHandler, app_name, method):
@@ -51,6 +64,9 @@ def set_initial_template_values(RequestHandler, app_name, method):
         for var_key, dflt in tv['variables'].iteritems():
             RequestHandler.request.get(var_key, dflt)
 
+    # Set dates
+    dates = set_dates()
+    tv['variables'].update(dates)
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
     return tv
