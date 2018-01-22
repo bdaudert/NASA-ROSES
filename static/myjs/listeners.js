@@ -51,6 +51,7 @@ $(document).ready(function () {
         MAP_APP.delete_layer(1);
         //Set new layer
         MAP_APP.set_map_layer(1);
+        change_inRegion($(this).val());
 
     });
     $('#field_year').on('change', function(){
@@ -64,6 +65,8 @@ $(document).ready(function () {
         MAP_APP.delete_layer(1);
         //Set new layer
         MAP_APP.set_map_layer(1);
+        //Set the dataset options
+        change_inVariable($(this).val());
     });
     $('#temporal_resolution').on('change', function(){
     	//Delete old layer
@@ -71,6 +74,7 @@ $(document).ready(function () {
         //Set new layer
         MAP_APP.set_map_layer(1);
     	//Set time_period
+        change_inResolution($(this).val());
     });
     
 });

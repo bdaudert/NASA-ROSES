@@ -99,6 +99,55 @@
         "get_ts": ["ts_data", "token", "sharelink_map", "sharelink_ts"],
         "get_value": ["point_value"]
     },
+    "time_period_by_res":{
+        "DLY": {
+            "last15days": "Last 15 days",
+            "last30days": "Last 30 days",
+            "last60days": "Last 60 days",
+            "last90days": "Last 90 days",
+            "lastDJF": "Last DJF (Dec-Feb)",
+            "lastMAM": "Last MAM (Mar-May)",
+            "lastJJA": "Last JJA (Jun - Aug)",
+            "lastSON": "Last SON (Sept-Nov)",
+            "lastNWY": "Last Northern Water Year",
+            "lastSWY": "Last Southern Water Year",
+            "lastNGS": "Last Northern Growing Season (Apr - Oct)",
+            "lastSGS": "Last Southern Growing Season (Nov - Mar)",
+            "todateNWY": "Northern Water Year To Date",
+            "todateSWY": "Southern Water Year To Date",
+            "todateCY": "Calendar Year Year To Date",
+            "lastAnn": "Last Year",
+            "custom": "Custom"
+        },
+        "M": {
+            "last30days": "Last 30 days",
+            "last60days": "Last 60 days",
+            "last90days": "Last 90 days",
+            "lastDJF": "Last DJF (Dec-Feb)",
+            "lastMAM": "Last MAM (Mar-May)",
+            "lastJJA": "Last JJA (Jun - Aug)",
+            "lastSON": "Last SON (Sept-Nov)",
+            "lastNWY": "Last Northern Water Year",
+            "lastSWY": "Last Southern Water Year",
+            "lastNGS": "Last Northern Growing Season (Apr - Oct)",
+            "lastSGS": "Last Southern Growing Season (Nov - Mar)",
+            "todateNWY": "Northern Water Year To Date",
+            "todateSWY": "Southern Water Year To Date",
+            "todateCY": "Calendar Year Year To Date",
+            "lastAnn": "Last Year",
+            "custom": "Custom"
+        },
+        "SEASON": {
+            "lastNGS": "Last Northern Growing Season (Apr - Oct)",
+            "lastSGS": "Last Southern Growing Season (Nov - Mar)",
+            "custom": "Custom"
+        },
+        "ANNUAL": {
+            "todateCY": "Calendar Year Year To Date",
+            "lastAnn": "Last Year",
+            "custom": "Custom"
+        }
+    },
     "fusiontables":  {
         "fields": {
             "2001": "1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk",

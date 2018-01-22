@@ -20,9 +20,7 @@ def not_in(var, args):
         arg_list = [str(arg).strip() for arg in args.split(',')]
     else:
         arg_list = [str(arg).strip() for arg in args]
-    if str(var) in arg_list:
-        return True
-    return False
+    return str(var) not in arg_list
 
 def make_string_range(start,end):
     try:

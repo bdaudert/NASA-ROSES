@@ -40,10 +40,13 @@
                     </select><br>
                 </div>
                 <div id='form-dataset'>
-                    <b>Dataset: </b><br>
-                    <select class="product" id="product" name="product">
+                    <b>Dataset:</b><br>
+                    <select class="dataset" id="dataset" name="dataset">
                         {% for x,y in form_options.dataset.items() %}
-                        <option value="{{ x }}" {% if x == variables.dataset  %} selected {% endif %}>{{ y }}</option>
+                        <option value="{{ x }}" 
+                        {% if x == variables.dataset  %} selected {% endif %}
+                        {% if x == "Landsat"  %} disabled {% endif %}
+                        >{{ y }}</option>
                         {% endfor %}
                     </select><br> 
                 </div>
