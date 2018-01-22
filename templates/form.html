@@ -10,7 +10,10 @@
                     <b><span style="color:blue;font-size:medium">Visualization Layer:</span></b>
                     <select class="region" id="region" name="region">
                         {% for x,y in form_options.region.items() %}
-                        <option value="{{ x }}" {% if x == variables.region  %} selected {% endif %}>{{ y }}</option>
+                        <option value="{{ x }}" 
+                        {% if x == variables.region  %} selected {% endif %}
+                        {% if x != "fields"  %} disabled {% endif %}
+                        >{{ y }}</option>
                         {% endfor %} 
                    </select><br>
                 </div>
@@ -87,14 +90,5 @@
                 </div>
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
-        <p class="bg-info" style="padding:5%;">
-            NOTES: 
-            <ul class="bg-info">
-                <li>As the fields in the form area changed,
-                    the map will update showing the predefined,
-                    colorcoded ET stats or EE maps.
-                </li>
-            </ul>
-        </p>
     </div><!--end colxs-12-->
 </div><!--end row-->

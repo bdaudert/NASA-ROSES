@@ -63,7 +63,7 @@ MAP_APP = {
         if (field_year){
             ft_id = statics.fusiontables[region][field_year];
         }
-        return ft_id
+        return ft_id;
     },
     set_fusiontableBounds: function(query) {
         if (!query || !query.getDataTable()) {
@@ -147,77 +147,94 @@ MAP_APP = {
     },
     populate_dataModal: function(ft_id, e){
         // e is the click event
-        var col_name, col_names = [], t_res,
-            m_idx, m_str, c_idx, data_val,
+        var col_name, col_names = [], 
+            v, t_res, m_idx, m_str, c_idx, data_val,
             html, data_div = $('#modal_data');
-            //Title
-            html = $('#variable').val();
-            if ($('#form-field_year').css('display') != 'none'){
-                html += ' Year ' + $('#field_year').val();
-            }
-            $('#dataModal_title').append(html);
-            html = '';
-            //Populate the columnnames
-            t_res = $('#temporal_resolution').val();
-            m_str = '';
-            if (t_res == 'M'){
-                for (m_idx = 1; m_idx <= 12; m_idx++){
-                    m_str = String(m_idx);
-                    if (m_idx < 10) {
-                        m_str = '0' + m_str;
-                    }
-                    col_name = $('#variable').val() + '_' + t_res + m_str;
-                    col_names.push(col_name);
-                }
-            }
-            else{
-                col_names.push($('#variable').val() + '_' + t_res);
-            }
-            //populate html with data
-            for (c_idx = 0; c_idx < col_names.length; c_idx++){
-                col_name = col_names[c_idx];
-                data_val = e.row[col_name].value;
-                html += col_name + ': ' + data_val + '<br>'
-            }
-            $('#dataModal_data').append(html);
+        //Clear out old modal content
+        $('#dataModal_title').html('');
+        $('#dataModal_data').html('');
+        v = $('#variable').val();
+        t_res = $('#temporal_resolution').val();
+        html = '';
+        //Title
+        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
+            col_name = statics.title_columns[c_idx];
+            html += '<b>' + col_name + '</b>'+ ': ';
+            html += e.row[col_name].value + '<br>';
+        }
+        html += '<b>' + v + '</b>';
+        if ($('#form-field_year').css('display') != 'none'){
+            html += '<b>Year ' + $('#field_year').val() + '</b>:';
+        }
+        $('#dataModal_title').append(html);
+        html = '';
+        //Populate the columnnames
+        col_names = statics.ft_cols[v][t_res];
+        //populate html with data
+        for (c_idx = 0; c_idx < col_names.length; c_idx++){
+            col_name = col_names[c_idx];
+            data_val = e.row[col_name].value;
+            html += col_name + ': ' + data_val + '<br>'
+        }
+        $('#dataModal_data').append(html);
+    },
+    get_map_layer: function(ft_id, region){
+        var layer = new google.maps.FusionTablesLayer({
+            query: {
+                select: 'geometry',
+                from: ft_id
+            },
+            options: statics.ft_styles[region],
+            suppressInfoWindows: true
+        });
+        google.maps.event.addListener(layer, 'click', function(e) {
+            //Hide old data modal
+            $('#dataModal').modal('hide');
+            $('#dataModal_data').html('');
+            MAP_APP.populate_dataModal(ft_id, e);
+            $('#dataModal').modal('toggle');
+        });
+        return layer;
+    },
+    set_map_layer: function(idx){
+        //Get the map layer
+        var region = $('#region').val(), 
+            field_year = null;
+        if (region == 'fields'){
+            field_year = $('#field_year').val();
+        }
+        var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
+        var layer = MAP_APP.get_map_layer(ft_id, region);
+
+        //Set the map layer
+        layer.setMap(window.map);
+        window.layers[idx - 1] = layer;
+        //Zoom to layer
+        queryText = MAP_APP.get_fusiontableQueryText(ft_id, null, null, null);
+        MAP_APP.zoomToFusiontable(queryText);
+    },
+    delete_layer: function(idx){
+        if (window.layers.length && window.layers[idx - 1] != null){
+            window.layers[idx - 1].setMap(null);
+            window.layers[idx - 1] = null;
+        }
     }
 }
 
 // Initialize the Google Map and add our custom layer overlay.
 var initialize_map = function() {
     // Map
-    var map = new google.maps.Map(document.getElementById('main-map'), {
+    window.map = new google.maps.Map(document.getElementById('main-map'), {
         center: {lat: 39.23, lng:-116.94},
         zoom: 6,
         mapTypeId: 'satellite'
     });
-    //Need to set global var for zooming
-    window.map = map;
-    // Darwing Manager
+    //Need to set global vars for zooming and listeners
+    window.layers = [null];
+    // Drawing Manager
+    /*
     var drawingManager = MAP_APP.setDrawingManager();
     drawingManager.setMap(map);
-    
-    var region = $('#region').val(), 
-        field_year = null;
-    if (region == 'fields'){
-        field_year = $('#field_year').val();
-    }
-    var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
-    var layer = new google.maps.FusionTablesLayer({
-        query: {
-            select: '\'County Name\'',
-            from: ft_id
-        },
-        options: statics.ft_styles[region]
-    });
-    google.maps.event.addListener(layer, 'click', function(e) {
-        //Hide old data modal
-        $('#dataModal').modal('hide');
-        $('#dataModal_data').html('');
-        MAP_APP.populate_dataModal(ft_id, e);
-        $('#dataModal').modal('toggle');
-    });
-    layer.setMap(map);
-    queryText = MAP_APP.get_fusiontableQueryText(ft_id, null, null, null);
-    MAP_APP.zoomToFusiontable(queryText);
+    */
+    MAP_APP.set_map_layer(1);
 }

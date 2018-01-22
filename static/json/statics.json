@@ -124,6 +124,42 @@
             "ETRF_M01"
         ]
     },
+    "title_columns": ["BASIN", "STATE","HUC8", "HUC8_NAME"],
+    "ft_cols":{
+        "ET": {
+            "DLY": [],
+            "ANNUAL": ["ET_ANNUAL"],
+            "M": ["ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
+                "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12"
+            ],
+            "SEASON": ["ET_SEASON", "NET_SEASON"]
+        },
+        "ETR": {
+            "DLY": [],
+            "ANNUAL": ["ETR_ANNUAL", "ET_ANNUAL", "ETRF_ANNUL", "PPT_ANNUAL", "NET_ANNUAL"],
+            "M": [ "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
+                "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12"
+            ],
+            "SEASON": ["ETR_SEASON", "NET_SEASON"]
+        },
+        "ETRF": {
+            "DLY": [],
+            "ANNUAL": ["ETRF_ANNUL"],
+            "M": ["ETRF_M01"],
+            "SEASON": ["ETRF_SEASN", "NET_SEASON"]
+        },
+        "PPT": {
+            "DLY": [],
+            "ANNUAL": ["PPT_ANNUAL"],
+            "M": [ "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
+                "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12",
+                "ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
+                "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12",
+                "ETRF_M01"
+            ],
+            "SEASON": [ "PPT_SEASON", "NET_SEASON"]
+        }
+    },
      "ft_styles": {
         "fields": {
             "styleId": 2,

@@ -28,7 +28,6 @@ $(document).ready(function () {
         }
     });
 
-
     $( "#end_date" ).datepicker({
         showOn: "button",
         buttonImage: "media/img/calendar_logo.gif",
@@ -48,16 +47,29 @@ $(document).ready(function () {
 
     
     $('#region').on('change', function(){
-    	//Update field map
+    	//Delete old layer
+        MAP_APP.delete_layer(1);
+        //Set new layer
+        MAP_APP.set_map_layer(1);
+
     });
     $('#field_year').on('change', function(){
-    	//Update field map
+    	//Delete old layer
+        MAP_APP.delete_layer(1);
+        //Set new layer
+        MAP_APP.set_map_layer(1);
     });
     $('#variable').on('change', function(){
-    	//Update data modal
+    	//Delete old layer
+        MAP_APP.delete_layer(1);
+        //Set new layer
+        MAP_APP.set_map_layer(1);
     });
     $('#temporal_resolution').on('change', function(){
-    	//Update data modal
+    	//Delete old layer
+        MAP_APP.delete_layer(1);
+        //Set new layer
+        MAP_APP.set_map_layer(1);
     	//Set time_period
     });
     
