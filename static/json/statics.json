@@ -38,7 +38,12 @@
     },
     "all_et_model":  {
         "METRIC": "METRIC",
+        "ALEXI": "ALEXI",
+        "Dis-ALEXI": "Dis-ALEXI",
+        "SEBAL": "SEBAL",
+        "SIMS": "SIMS",
         "SSEBop": "SSEBop",
+        "JPL-PT": "JPL-PT",
         "ensemble": "Ensemble"
     },
     "all_temporal_resolution":  {
