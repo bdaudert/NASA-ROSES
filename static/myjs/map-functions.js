@@ -145,7 +145,7 @@ MAP_APP = {
         queryText = encodeURIComponent(queryText);
         return queryText;
     },
-    populate_dataModal: function(ft_id, e){
+    populate_dataModalFromFT: function(e){
         // e is the click event
         var col_name, col_names = [], 
             v, t_res, m_idx, m_str, c_idx, data_val,
@@ -178,7 +178,55 @@ MAP_APP = {
         }
         $('#dataModal_data').append(html);
     },
-    get_map_layer: function(ft_id, region){
+    populate_dataModalFromGeojson: function(e){
+        // e is the click event
+        var prop_name, prop_names = [], 
+            v, t_res, m_idx, m_str, c_idx, data_val,
+            html, data_div = $('#modal_data');
+        //Clear out old modal content
+        $('#dataModal_title').html('');
+        $('#dataModal_data').html('');
+        v = $('#variable').val();
+        t_res = $('#temporal_resolution').val();
+        html = '';
+        //Title
+        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
+            prop_name = statics.title_columns[c_idx];
+            html += '<b>' + prop_name + '</b>'+ ': ';
+            html += e.feature.getProperty(prop_name) + '<br>';
+        }
+        html += '<b>' + v + '</b>';
+        if ($('#form-field_year').css('display') != 'none'){
+            html += '<b>Year ' + $('#field_year').val() + '</b>:';
+        }
+        $('#dataModal_title').append(html);
+        html = '';
+        //Populate the columnnames
+        prop_names = statics.ft_cols[v][t_res];
+        //populate html with data
+        for (c_idx = 0; c_idx < prop_names.length; c_idx++){
+            prop_name = prop_names[c_idx];
+            data_val = e.feature.getProperty(prop_name);
+            html += prop_name + ': ' + data_val + '<br>'
+        }
+        $('#dataModal_data').append(html);
+    },
+    populate_layerInfoModalFromGeojson: function(e){
+        // used on mouseover of a layer
+        // e is the click event
+        var html, c_idx, prop_name;
+        html = '';
+        //Clear out old modal content
+        $('#layerInfoModal_data').html('');
+        //Title
+        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
+            prop_name = statics.title_columns[c_idx];
+            html += '<b>' + prop_name + '</b>'+ ': ';
+            html += e.feature.getProperty(prop_name) + '<br>';
+        }
+        $('#layerInfoModal_data').append(html);
+    },
+    get_ft_map_layer: function(ft_id, region){
         var layer = new google.maps.FusionTablesLayer({
             query: {
                 select: 'geometry',
@@ -190,13 +238,12 @@ MAP_APP = {
         google.maps.event.addListener(layer, 'click', function(e) {
             //Hide old data modal
             $('#dataModal').modal('hide');
-            $('#dataModal_data').html('');
-            MAP_APP.populate_dataModal(ft_id, e);
+            MAP_APP.populate_dataModalFromFT(e);
             $('#dataModal').modal('toggle');
         });
         return layer;
     },
-    set_map_layer: function(idx){
+    set_ft_map_layer: function(idx){
         //Get the map layer
         var region = $('#region').val(), 
             field_year = null;
@@ -204,7 +251,7 @@ MAP_APP = {
             field_year = $('#field_year').val();
         }
         var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
-        var layer = MAP_APP.get_map_layer(ft_id, region);
+        var layer = MAP_APP.get_ft_map_layer(ft_id, region);
 
         //Set the map layer
         layer.setMap(window.map);
@@ -213,13 +260,7 @@ MAP_APP = {
         queryText = MAP_APP.get_fusiontableQueryText(ft_id, null, null, null);
         MAP_APP.zoomToFusiontable(queryText);
     },
-    delete_layer: function(idx){
-        if (window.layers.length && window.layers[idx - 1] != null){
-            window.layers[idx - 1].setMap(null);
-            window.layers[idx - 1] = null;
-        }
-    },
-    set_geojson_layer: function(idx){
+    set_geojson_map_layer: function(idx){
         function processPoints(geometry, callback, thisArg) {
             if (geometry instanceof google.maps.LatLng) {
                 callback.call(thisArg, geometry);
@@ -231,37 +272,70 @@ MAP_APP = {
                 });
             }
         }
-        //Get the map layer
-        var region = $('#region').val(), 
-            field_year = null;
+        var region = $('#region').val(), field_year = null, 
+            featureStyle, bounds
+            data = new google.maps.Data();
 
+        //Load the geojson
+        data.loadGeoJson(featureGeoJSON);
         if (region == 'fields'){
             field_year = $('#field_year').val();
         }
-        var featureStyle = {
+        featureStyle = {
             fillColor: '#ADFF2F',
             fillOpacity: 0.1,
             strokeColor: '#ADFF2F',
             strokeWeight: 0.5
         };
         // zoom to show all the features
-        var bounds = new google.maps.LatLngBounds();
-        window.map.data.addListener('addfeature', function(e) {
-            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
-            map.fitBounds(bounds);
-        });
+        bounds = new google.maps.LatLngBounds();
 
-        // zoom to the clicked feature
-        window.map.data.addListener('click', function(e) {
+        //window.map.data.addListener('addfeature', function(e) {
+        data.addListener('addfeature', function(e) {
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            window.map.fitBounds(bounds);
+        });
+        data.setMap(window.map);
+        window.layers[idx -1] = data;
+        /*
+        FIX ME: not working right
+        //onmouseover show layer info
+        data.addListener('mouseover', function(e) {
+            console.log('MOUSOVER');
+            //Hide old info modal
+            $('#layerInfoModal').modal('hide');
+            MAP_APP.populate_layerInfoModalFromGeojson(e);
+            $('#layerInfoModal').modal('toggle');
+        });
+        data.addListener('mouseout', function(e) {
+            //Hide the info modal
+            $('#layerInfoModal').modal('hide');
+        });
+        */
+        // onclick populate dataModal
+        //window.map.data.addListener('click', function(e) {
+        data.addListener('click', function(e) {
+            /*
             var bounds = new google.maps.LatLngBounds();
             processPoints(e.feature.getGeometry(), bounds.extend, bounds);
             map.fitBounds(bounds);
+            */
+            //Hide old data modal
+            $('#dataModal').modal('hide');
+            MAP_APP.populate_dataModalFromGeojson(e);
+            $('#dataModal').modal('toggle');
         });
         //Load mapdata via geoJson
         //var featureGeoJSON = 'static/geojson/Mason_' + field_year + '.geojson' ;
         //featureGeoJSON defined in templates/scripts.html
-        window.map.data.loadGeoJson(featureGeoJSON);
-    }
+        //window.map.data.loadGeoJson(featureGeoJSON);
+    },
+    delete_layer: function(idx){
+        if (window.layers.length && window.layers[idx - 1] != null){
+            window.layers[idx - 1].setMap(null);
+            window.layers[idx - 1] = null;
+        }
+    },
 }
 
 // Initialize the Google Map and add our custom layer overlay.
@@ -279,6 +353,6 @@ var initialize_map = function() {
     var drawingManager = MAP_APP.setDrawingManager();
     drawingManager.setMap(map);
     */
-    //MAP_APP.set_map_layer(1);
-    MAP_APP.set_geojson_layer(1);
+    //MAP_APP.set_ft_map_layer(1);
+    MAP_APP.set_geojson_map_layer(1);
 }
