@@ -32,6 +32,8 @@
     $.getJSON( 'static/json/statics.json', function( data ) {
         statics = data;
     });
+    //var featureGeoJSON = 'static/geojson/test.geojson' ;
+    var featureGeoJSON = 'static/geojson/Mason_2001.geojson' ;
     google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
     //google.load('visualization', '1', {'packages':['corechart', 'table', 'geomap']});
     google.charts.setOnLoadCallback(initialize_map);

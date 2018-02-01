@@ -72,8 +72,8 @@ MAP_APP = {
         var bounds =  new google.maps.LatLngBounds(),
             data = query.getDataTable(),
             num_rows = data.getNumberOfRows(),
-            row_idx, LatLons, latLonList, count, ll_str,
-            kml, geoXml;
+            row_idx, lon_bounds, lat_bounds,
+            ll_NE, ll_SW, kml, geoXml;
 
         for (row_idx = 0; row_idx < num_rows; row_idx++) {
             kml = query.getDataTable().getValue(row_idx, 0);
@@ -218,6 +218,49 @@ MAP_APP = {
             window.layers[idx - 1].setMap(null);
             window.layers[idx - 1] = null;
         }
+    },
+    set_geojson_layer: function(idx){
+        function processPoints(geometry, callback, thisArg) {
+            if (geometry instanceof google.maps.LatLng) {
+                callback.call(thisArg, geometry);
+            } else if (geometry instanceof google.maps.Data.Point) {
+                callback.call(thisArg, geometry.get());
+            } else {
+                geometry.getArray().forEach(function(g) {
+                    processPoints(g, callback, thisArg);
+                });
+            }
+        }
+        //Get the map layer
+        var region = $('#region').val(), 
+            field_year = null;
+
+        if (region == 'fields'){
+            field_year = $('#field_year').val();
+        }
+        var featureStyle = {
+            fillColor: '#ADFF2F',
+            fillOpacity: 0.1,
+            strokeColor: '#ADFF2F',
+            strokeWeight: 0.5
+        };
+        // zoom to show all the features
+        var bounds = new google.maps.LatLngBounds();
+        window.map.data.addListener('addfeature', function(e) {
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            map.fitBounds(bounds);
+        });
+
+        // zoom to the clicked feature
+        window.map.data.addListener('click', function(e) {
+            var bounds = new google.maps.LatLngBounds();
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            map.fitBounds(bounds);
+        });
+        //Load mapdata via geoJson
+        //var featureGeoJSON = 'static/geojson/Mason_' + field_year + '.geojson' ;
+        //featureGeoJSON defined in templates/scripts.html
+        window.map.data.loadGeoJson(featureGeoJSON);
     }
 }
 
@@ -236,5 +279,6 @@ var initialize_map = function() {
     var drawingManager = MAP_APP.setDrawingManager();
     drawingManager.setMap(map);
     */
-    MAP_APP.set_map_layer(1);
+    //MAP_APP.set_map_layer(1);
+    MAP_APP.set_geojson_layer(1);
 }
