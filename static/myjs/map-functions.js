@@ -273,18 +273,22 @@ MAP_APP = {
             }
         }
         var region = $('#region').val(), field_year = null, 
-            featureStyle, bounds
-            data = new google.maps.Data();
+            featureStyle, bounds,
+            data = new google.maps.Data(), 
+            featureGeoJSON;
 
-        //Load the geojson
-        data.loadGeoJson(featureGeoJSON);
+        featureGeoJSON = 'static/geojson/test.geojson';
         if (region == 'fields'){
             field_year = $('#field_year').val();
+            featureGeoJSON = 'static/geojson/Mason_' + field_year + '.geojson';
         }
+        //Load the geojson
+        data.loadGeoJson(featureGeoJSON);
         featureStyle = {
             fillColor: '#ADFF2F',
             fillOpacity: 0.1,
             strokeColor: '#ADFF2F',
+            stokeOpacity: 0.5,
             strokeWeight: 0.5
         };
         // zoom to show all the features
