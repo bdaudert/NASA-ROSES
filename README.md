@@ -1,7 +1,6 @@
-# Open-ET-1
+# NASA ROSES
 
-Code repository for the Open-ET prototype web interface and tool under development by the Desert Research Institute, NASA, Environmental Defense Fund (EDF) and Google.
-
+Code repository for the NASA ROSES prototype web interface and tool under development by the Desert Research Institute, NASA for NOAA
 ### Links & Resources
 
 You can find the most up-to-date deployments [here](http://open-et-1.appspot.com/).
@@ -75,7 +74,7 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 - statics
     statics.py (predefined static objects)
     - css
-    - myjs (custom, open-et-1 specific javascript files)
+    - myjs (custom, project specific specific javascript files)
     - js (general javascript files downloaded from the internet)
     - json (json files)
 - media
