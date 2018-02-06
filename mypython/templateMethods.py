@@ -13,10 +13,10 @@ def set_form_options(variables):
             form_options[var_key] = statics['all_' + var_key]
     # Override default form options if needed
     var = variables['variable']
-    # Set field year form option
+    # Set field years form option
     if var == 'fields':
         years = statics['Fusiontables'].fields.keys()
-        form_options['field_year'] = years
+        form_options['field_years'] = years
     # Set datasets
     form_ds = {}
     for ds in statics['dataset_by_var'][var]:
