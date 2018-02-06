@@ -287,10 +287,11 @@ MAP_APP = {
         featureStyle = {
             fillColor: '#ADFF2F',
             fillOpacity: 0.1,
-            strokeColor: '#ADFF2F',
+            strokeColor: '#002800',
             stokeOpacity: 0.5,
             strokeWeight: 0.5
         };
+        data.setStyle(featureStyle);
         // zoom to show all the features
         bounds = new google.maps.LatLngBounds();
 
@@ -347,7 +348,7 @@ var initialize_map = function() {
     // Map
     window.map = new google.maps.Map(document.getElementById('main-map'), {
         center: {lat: 39.23, lng:-116.94},
-        zoom: 6,
+        zoom: 7,
         mapTypeId: 'satellite'
     });
     //Need to set global vars for zooming and listeners
