@@ -13,50 +13,59 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 - [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
 - [Google Maps Javascript API v3](https://developers.google.com/maps/documentation/javascript/)
 
-### General Git Instructions:
-- Working with the centralized repo:
-    - `git clone https://github.com/bdaudert/Open-ET-1 directory_name`
-    - `git remote rename original-name new-name`
-    - Make symbolic links to Anaconda environment packages:
-         - `pip install -r requirements.txt -t lib`
-        - `ln -s $HOME/anaconda/envs/ee-python/lib/python2.7/site-packages/ee ee`
-        - `ln -s $HOME/anaconda/envs/ee-python/lib/python2.7/site-packages/oauth2client/ oauth2client`
-        - `ln -s $HOME/anaconda/envs/ee-python/lib/python2.7/site-packages/six.py six.py`
-        - `ln -s $HOME/anaconda/envs/ee-python/lib/python2.7/site-packages/httplib2 httplib2`
-    - Make symbolic link to private key:
-        - `ln -s ~/.keys/privatekey.pem`
-    - Set Developer information:
-        - `app-id` in app.yaml
-        - `x@developer.gserviceaccount.com` in config.py
-    - `git branch` to look at branches.
-    - `git branch -b branch-name` to create and switch to new local branch for working on feature.
-    - `git add` to stage files and `git commit` to commit to feature branch.
-    - `git checkout development` to switch back to development branch.
-    - `git merge branch-name` to merge `branch-name` into the current branch.
-    - `git push remote-name development`
-
-
 ### Installing & Running Google Earth Engine Python API
 - Links:
     - https://docs.google.com/document/d/1tvkSGb-49YlSqW3AGknr7T_xoRB1KngCD3f2uiwOS3Q/edit
-- Installation:
-    - Download Anaconda with Python 2.7 and install.
-    - To remove environment: `conda remove -n myenv --all` where `myenv` is environment name.
-    - To create environment: `conda create -n ee-python python=2.7`
-    - Activate environment: `source activate ee-python`
-    - Install packages:
-        - `conda install pycrypto`
-        - `conda install pip`
-        - `conda install numpy`
-        - `pip install oauth2client`
-        - `pip install --no-deps earthengine-api`
-    - To test installation and authentication:
-        - `python -c "import ee; print ee.__version__"`
-        - `python -c "import os; import ee; MY_SERVICE_ACCOUNT = os.environ.get('MY_SERVICE_ACCOUNT'); MY_PRIVATE_KEY_FILE = os.environ.get('MY_PRIVATE_KEY_FILE'); ee.Initialize(ee.ServiceAccountCredentials(MY_SERVICE_ACCOUNT, MY_PRIVATE_KEY_FILE)); print(ee.Image('srtm90_v4').getThumbUrl())"`
-- Configuring App Engine to use conda Environment:
-    - Install Google App Engine for Python and clone Earth Engine API repository.
-    - `~/Development/google_appengine/dev_appserver.py .
+- Installation
+    To create the "ee-python" conda environment, execute the following:
+    ```
+    conda remove --name ee-python --all
+    conda create --name ee-python python=2.7
+    ```
 
+    To activate the "ee-python" environement on MacOS:
+    ```
+    source activate ee-python
+    ```
+    To activate the "ee-python" environment on Windows:
+    ```
+    activate ee-python
+    ```
+
+    To install the necessary external Python modules:
+    ```
+    conda install numpy=1.6.2=py27_4 oauth2client httplib2 cryptography pyOpenSSL cffi
+    pip install earthengine-api
+    ```
+
+    The following command will install the the external Python modules listed in the requirements.txt file into the lib folder for upload to AppEngine.
+    ```
+    pip install -r requirements.txt -t lib
+    ```
+    You will need to tell app engine to add the lib folder to the third party libraries as follows:
+    ```
+    # appengine_config.py
+    from google.appengine.ext import vendor
+
+    # Add any libraries install in the "lib" folder.
+    vendor.add('lib')
+    ```
+
+
+    Make symbolic link to private key:
+        - `ln -s ~/.keys/privatekey.pem`
+    Set Developer information:
+        - `x@developer.gserviceaccount.com` in config.py
+
+- Testing installation and authentication:
+
+    `python -c "import ee; print ee.__version__"`
+
+    `python -c "import os; import ee; MY_SERVICE_ACCOUNT = os.environ.get('MY_SERVICE_ACCOUNT'); MY_PRIVATE_KEY_FILE = os.environ.get('MY_PRIVATE_KEY_FILE'); ee.Initialize(ee.ServiceAccountCredentials(MY_SERVICE_ACCOUNT, MY_PRIVATE_KEY_FILE)); print(ee.Image('srtm90_v4').getThumbUrl())"`
+
+- Configuring App Engine to use the conda Environment:
+    Install Google App Engine for Python and clone Earth Engine API repository.
+    `~/Development/google_appengine/dev_appserver.py .`
 
 ### Repository Organization:
 - open-et-1.html (index html, main html file for open-et-1 project)
@@ -73,41 +82,6 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
     -img (Images)
 - templates
     - all html files
-
-#### Conda Environment
-To create the "ee-python" conda environment, execute the following:
-```
-conda remove --name ee-python --all
-conda create --name ee-python python=2
-```
-
-To activate the "ee-python" environement on MacOS:
-```
-source activate ee-python
-```
-To activate the "ee-python" environment on Windows:
-```
-activate ee-python
-```
-
-To install the necessary external Python modules:
-```
-conda install numpy=1.6.2=py27_4 oauth2client httplib2 cryptography pyOpenSSL cffi
-pip install earthengine-api
-```
-
-The following command will install the the external Python modules listed in the requirements.txt file into the lib folder for upload to AppEngine.
-```
-pip install -r requirements.txt -t lib
-```
-You will need to tell app engine to add the lib folder to the third party libraries as follows:
-```
-# appengine_config.py
-from google.appengine.ext import vendor
-
-# Add any libraries install in the "lib" folder.
-vendor.add('lib')
-```
 
 #### GCloud
 
