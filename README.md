@@ -67,7 +67,6 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
     `~/Development/google_appengine/dev_appserver.py .`
 
 ### Repository Organization:
-- open-et-1.html (index html, main html file for open-et-1 project)
 - app.yaml (configuration file for webapp2 templating)
 - main.py (python script that sets up the framework environment and defines classes for handling URL requests)
 - myphyton (custom python scripts)
@@ -80,7 +79,8 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 - media
     -img (Images)
 - templates
-    - all html files
+    - open-et-1.html (index html, main html file for open-et-1 project)
+    - all other html files
 
 #### GCloud
 
