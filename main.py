@@ -9,18 +9,14 @@
 # instructions on how to set up authentication.
 
 import config
-
-import datetime
 import httplib2
 import json
 import logging
 import os
-import time
-from copy import deepcopy as deepcopy
 
 import ee
 from google.appengine.api import urlfetch
-from google.appengine.ext import ndb
+# from google.appengine.ext import ndb
 import jinja2
 import webapp2
 

@@ -1,18 +1,32 @@
 {
     "form_option_keys": [
-        "tool_action", "region", "field_year",
+        "tool_action", "region", "field_years", "aggregation_area",
         "variable", "dataset", "et_model",
         "temporal_resolution", "time_period"
     ],
+    "variable_defaults":  {
+        "tool_action": "None",
+        "region": "fields",
+        "aggregation_area": "",
+        "field_years": "2001",
+        "variable": "ET",
+        "dataset": "MODIS",
+        "et_model": "METRIC",
+        "temporal_resolution": "monthly",
+        "time_period": "lastANN"
+    },
     "all_region":  {
         "fields": "Fields",
-        "ee_map": "Map",
+        "ee_map": "Map"
+    },
+    "all_aggregation_area": {
+        "": "None",
         "huc6": "HUC 6",
         "huc8": "HUC 8",
-        "state": "States",
-        "county": "Counties"
+        "county": "Counties",
+        "state": "States"
     },
-    "all_field_year": {
+    "all_field_years": {
         "2001": "2001",
         "2002": "2002", 
         "2003": "2003",
@@ -37,12 +51,7 @@
     },
     "all_et_model":  {
         "METRIC": "METRIC",
-        "ALEXI": "ALEXI",
-        "Dis-ALEXI": "Dis-ALEXI",
-        "SEBAL": "SEBAL",
         "SIMS": "SIMS",
-        "SSEBop": "SSEBop",
-        "JPL-PT": "JPL-PT",
         "ensemble": "Ensemble"
     },
     "all_temporal_resolution":  {
@@ -76,16 +85,6 @@
         "get_ts": "Get Time Series",
         "get_value": "Get Value"
     },
-    "variable_defaults":  {
-        "tool_action": "None",
-        "region": "fields",
-        "field_year": "",
-        "variable": "ET",
-        "dataset": "MODIS",
-        "et_model": "METRIC",
-        "temporal_resolution": "monthly",
-        "time_period": "lastANN"
-    },
     "dataset_by_var":  {
         "ET": ["MODIS", "Landsat"],
         "ETRF": ["MODIS", "Landsat"],
@@ -114,7 +113,7 @@
             "lastSGS": "Last Southern Growing Season (Nov - Mar)",
             "todateNWY": "Northern Water Year To Date",
             "todateSWY": "Southern Water Year To Date",
-            "todateCY": "Calendar Year Year To Date",
+            "todateCY": "Calendar Year To Date",
             "lastAnn": "Last Year",
             "custom": "Custom"
         },
@@ -132,7 +131,7 @@
             "lastSGS": "Last Southern Growing Season (Nov - Mar)",
             "todateNWY": "Northern Water Year To Date",
             "todateSWY": "Southern Water Year To Date",
-            "todateCY": "Calendar Year Year To Date",
+            "todateCY": "Calendar Year To Date",
             "lastAnn": "Last Year",
             "custom": "Custom"
         },
@@ -218,5 +217,17 @@
             "styleId": 2,
             "templateId": 2
         }
+    }, 
+    "featureStyleByYear": {
+        "2001": ["#696969", "#000000"],
+        "2002": ["#b2b2ff", "#0000ff"], 
+        "2003": ["#696969", "#000000"],
+        "2004": ["#696969", "#000000"], 
+        "2005": ["#696969", "#000000"],
+        "2006": ["#696969", "#000000"],
+        "2007": ["#696969", "#000000"],
+        "2008": ["#696969", "#000000"],
+        "2009": ["#696969", "#000000"],
+        "2010": ["#696969", "#000000"]
     }
 }

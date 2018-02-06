@@ -12,17 +12,25 @@
                         {% for x,y in form_options.region.items() %}
                         <option value="{{ x }}" 
                         {% if x == variables.region  %} selected {% endif %}
-                        {% if x != "fields"  %} disabled {% endif %}
                         >{{ y }}</option>
                         {% endfor %} 
                    </select><br>
                 </div>
-                <div id='form-field_year' 
+                <div id='form-aggregation_area' 
                 {% if variables.region != "fields" %}style="display:none;"{%endif%}>
-                    <b>Year (only for fields): </b><br>
-                    <select class="year" id="field_year" name="field_year">
-                        {% for x in form_options.field_year %}
-                        <option value="{{ x }}" {% if x == variables.field_year  %} selected {% endif %}>{{ x }}</option>
+                    <b>Aggregate field data over: </b><br>
+                    <select class="aggregation" id="aggregation_area" name="aggregation_area">
+                        {% for x, y in form_options.aggregation_area.items() %}
+                        <option value="{{ x }}" {% if x == variables.aggregation_area  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
+                <div id='form-field_years' 
+                {% if variables.region != "fields" %}style="display:none;"{%endif%}>
+                    <b>Year(s): </b><br>
+                    <select multiple class="years" id="field_years" name="field_years">
+                        {% for x in form_options.field_years %}
+                        <option value="{{ x }}" {% if x == variables.field_years  %} selected {% endif %}>{{ x }}</option>
                         {% endfor %}
                     </select> 
                 </div>
