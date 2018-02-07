@@ -15,8 +15,7 @@ def set_form_options(variables):
     var = variables['variable']
     # Set field years form option
     if var == 'fields':
-        years = statics['Fusiontables'].fields.keys()
-        form_options['field_years'] = years
+        form_options['field_years'] = statics['all_field_years']
     # Set datasets
     form_ds = {}
     for ds in statics['dataset_by_var'][var]:

@@ -53,7 +53,7 @@ $(document).ready(function () {
     $('#field_years').on('change', function(){
     	//Delete old layer
         var years = $(this).val(), year_idx, year, 
-            year_list = Object.keys(statics.all_field_years);
+            year_list = statics.all_field_years;
         for (year_idx = 0; year_idx < year_list.length; year_idx++){
             year = year_list[year_idx];
             if (year.is_in(years)){
