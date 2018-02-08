@@ -14,8 +14,8 @@ MAP_APP = {
     },
     set_featureStyle: function(year){
         var featureStyle,
-            fillColor = statics.featureStyleByYear[year][0],
-            strokeColor = statics.featureStyleByYear[year][1];
+            fillColor = js_statics.featureStyleByYear[year][0],
+            strokeColor = js_statics.featureStyleByYear[year][1];
         featureStyle = {
             fillColor: fillColor,
             fillOpacity: 0.3,
@@ -147,8 +147,8 @@ MAP_APP = {
         t_res = $('#temporal_resolution').val();
         html = '';
         //Title
-        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
-            col_name = statics.title_columns[c_idx];
+        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
+            col_name = statics.title_cols[c_idx];
             html += '<b>' + col_name + '</b>'+ ': ';
             html += e.row[col_name].value + '<br>';
         }
@@ -159,7 +159,7 @@ MAP_APP = {
         $('#dataModal_title').append(html);
         html = '';
         //Populate the columnnames
-        col_names = statics.ft_cols[v][t_res];
+        col_names = statics.cols_by_var_res[v][t_res];
         //populate html with data
         for (c_idx = 0; c_idx < col_names.length; c_idx++){
             col_name = col_names[c_idx];
@@ -181,8 +181,8 @@ MAP_APP = {
         t_res = $('#temporal_resolution').val();
         html = '';
         //Title
-        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
-            prop_name = statics.title_columns[c_idx];
+        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
+            prop_name = statics.title_cols[c_idx];
             html += '<b>' + prop_name + '</b>'+ ': ';
             html += e.feature.getProperty(prop_name) + '<br>';
         }
@@ -207,7 +207,7 @@ MAP_APP = {
                 html = '';
                 html = 'Year: ' + year + '<br>';
                 //Populate the columnnames
-                prop_names = statics.ft_cols[v][t_res];
+                prop_names = statics.cols_by_var_res[v][t_res];
                 //populate html with data
                 for (c_idx = 0; c_idx < prop_names.length; c_idx++){
                     prop_name = prop_names[c_idx];
@@ -227,8 +227,8 @@ MAP_APP = {
         //Clear out old modal content
         $('#layerInfoModal_data').html('');
         //Title
-        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
-            prop_name = statics.title_columns[c_idx];
+        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
+            prop_name = statics.title_cols[c_idx];
             html += '<b>' + prop_name + '</b>'+ ': ';
             html += e.feature.getProperty(prop_name) + '<br>';
         }
@@ -240,7 +240,7 @@ MAP_APP = {
                 select: 'geometry',
                 from: ft_id
             },
-            options: statics.ft_styles[region],
+            options: js_statics.ft_styles[region],
             suppressInfoWindows: true
         });
         google.maps.event.addListener(layer, 'click', function(e) {

@@ -28,10 +28,16 @@
 <!--Run Time Scripts-->
 <script>
     //Set the statics
-    var statics;
+    var statics, js_statics;
+    //Statics for bboth python and js
     $.getJSON( 'static/json/statics.json', function( data ) {
         statics = data;
     });
+    //javascript specific statics
+    $.getJSON( 'static/json/js_statics.json', function( data ) {
+        js_statics = data;
+    });
+
     google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
     //google.load('visualization', '1', {'packages':['corechart', 'table', 'geomap']});
     google.charts.setOnLoadCallback(initialize_map);
