@@ -43,7 +43,10 @@
                     <b>Variable: </b><br>
                     <select class="variable" id="variable" name="variable">
                         {% for x,y in form_options.variable.items() %}
-                        <option value="{{ x }}" {% if x == variables.variable  %} selected {% endif %}>{{ y }}</option>
+                        <option value="{{ x }}" 
+                        {% if x == variables.variable  %} selected {% endif %}
+                        {% if x != 'ET' %} disbaled {% endif %}
+                        >{{ y }}</option>
                         {% endfor %}
                     </select><br>
                 </div>
@@ -63,7 +66,10 @@
                     <b>ET Model: </b>
                     <select class="et_model" id="et_model" name="et_model">
                         {% for x,y in form_options.et_model.items() %}
-                        <option value="{{ x }}" {% if x == variables.et_model  %} selected {% endif %}>{{ y }}</option>
+                        <option value="{{ x }}" 
+                        {% if x == variables.et_model  %} selected {% endif %}
+                        {% if x != 'SSEBop' %} disabled {% endif %}
+                        >{{ y }}</option>
                         {% endfor %}
                     </select><br>
                 </div>
@@ -78,7 +84,7 @@
                         {% for x,y in form_options.temporal_resolution.items() %}
                         <option value="{{ x }}" 
                         {% if x == variables.temporal_resolution  %} selected {% endif %}
-                        {% if x == "DLY"%} disabled {% endif %}
+                        {% if x|is_in('DLY,SEASON') %} disabled {% endif %}
                         >{{ y }}</option>
                         {% endfor %}
                     </select><br>
