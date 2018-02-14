@@ -2,16 +2,21 @@ function change_inRegion(region){
 	//Delete old layer
 	 MAP_APP.delete_layers();
 	if (region == 'fields'){
-		//Field data
+		var field_year, y_idx;
+        //Field data
 		$('#form-field_years').css('display', 'inline');
-		$('#form-aggregation_area').css('display', 'inline');
+		$('#form-field_year').css('display', 'inline')
+        $('#form-aggregation_area').css('display', 'inline');
         //Set new layer
         //MAP_APP.set_ft_map_layer(1);
-        MAP_APP.set_geojson_map_layers();
+        field_year = $('#field_year').val();
+        y_idx = $.inArray(field_year, statics.all_field_years);
+        MAP_APP.set_geojson_map_layer(y_idx);
 	}
 	if (region == 'ee_map'){
 		//Maps
 		$('#form-field_years').css('display', 'none');
+        $('#form-field_year').css('display', 'none');
 		$('#form-aggregation_area').css('display', 'none');
 		//Get the map from db
 	}

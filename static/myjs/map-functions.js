@@ -18,7 +18,7 @@ MAP_APP = {
             strokeColor = js_statics.featureStyleByYear[year][1];
         featureStyle = {
             fillColor: fillColor,
-            fillOpacity: 0.3,
+            fillOpacity: 0.1,
             strokeColor: strokeColor,
             stokeOpacity: 0.5,
             strokeWeight: 0.5
@@ -173,7 +173,10 @@ MAP_APP = {
         var prop_name, prop_names = [],
             v, t_res, m_idx, m_str, c_idx, data_val,
             html, data_div = $('#modal_data'), 
-            year_idx, years = $('#field_years').val(), year;
+            year_idx,year;
+        //NOTE: currently we only allow one field for fields
+        //var years = $('#field_years').val();
+        var years = [$('#field_year').val()];
         //Clear out old modal content
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
@@ -192,14 +195,21 @@ MAP_APP = {
     },
     add_dataToModal: function(e){
         var feat_ID= e.feature.getProperty('OBJECTID'),
-            years = $('#field_years').val(), year, year_idx, 
+            year, year_idx, 
             data, prop_names, prop_name, c_idx, html,
             v = $('#variable').val(),
             t_res = $('#temporal_resolution').val();
 
+        //NOTE: currently we only allow one field for fields
+        //var years = $('#field_years').val();
+        var years = [$('#field_year').val()];
         for (year_idx = 0; year_idx < years.length; year_idx++){
-            year = years[year_idx];
-            data = window.layers[year_idx];
+            y = years[year_idx];
+            y_idx = $.inArray(y, statics.all_field_years);
+            console.log(y);
+            console.log(y_idx);
+            console.log(window.layers);
+            data = window.layers[y_idx];
             data.forEach(function(feat) {
                 if (feat.getProperty('OBJECTID') != feat_ID){
                     return;
@@ -350,14 +360,18 @@ MAP_APP = {
     },
     set_geojson_map_layers: function(){
         var region = $('#region').val(),
-            field_years, field_year,
+            field_years, field_year, y_idx,
             featureStyle, bounds, data,
             //data = new google.maps.Data(),
             featureGeoJSON, idx;
 
-        field_years = $('#field_years').val();
+        //NOTE: currently we only allow single years for fields
+        field_years = [$('#field_year').val()];
+        //field_years = $('#field_years').val();
         for (idx = 0; idx < field_years.length; idx++){
-            MAP_APP.set_geojson_map_layer(idx);
+            field_year = field_years[idx]
+            y_idx = $.inArray(field_year, statics.all_field_years);
+            MAP_APP.set_geojson_map_layer(y_idx);
         }
     },
     delete_layer: function(idx){
@@ -389,6 +403,9 @@ var initialize_map = function() {
     });
     //Need to set global vars for zooming and listeners
     window.layers = [];
+    for (var i = 0; i < statics.all_field_years.length; i++){
+        window.layers.push(null);
+    }
     if (mapZoom >=8){
         //MAP_APP.set_ft_map_layer(1);
         MAP_APP.set_geojson_map_layers();

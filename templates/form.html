@@ -25,6 +25,16 @@
                         {% endfor %}
                     </select><br>
                 </div>
+                <div id='form-field_year' 
+                {% if variables.region != "fields" %}style="display:none;"{%endif%}>
+                    <b>Year: </b><br>
+                    <select class="years" id="field_year" name="field_year">
+                        {% for x in form_options.field_year %}
+                        <option value="{{ x }}" {% if x == variables.field_year  %} selected {% endif %}>{{ x }}</option>
+                        {% endfor %}
+                    </select> 
+                </div> 
+                <!--
                 <div id='form-field_years' 
                 {% if variables.region != "fields" %}style="display:none;"{%endif%}>
                     <b>Year(s): </b><br>
@@ -34,6 +44,7 @@
                         {% endfor %}
                     </select> 
                 </div>
+                -->
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
         <div class="panel panel-default">

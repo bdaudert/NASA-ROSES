@@ -16,6 +16,7 @@ def set_form_options(variables):
     # Set field years form option
     if var == 'fields':
         form_options['field_years'] = statics['all_field_years']
+        form_options['field_year'] = statics['all_field_year']
     # Set datasets
     form_ds = {}
     for ds in statics['dataset_by_var'][var]:
