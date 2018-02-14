@@ -1,7 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 import logging
 
+
 from google.appengine.ext import ndb
+
 
 import eeMethods
 
@@ -10,9 +12,11 @@ class DATA(ndb.Model):
     data = ndb.JsonProperty(compressed=True)
     date_added = ndb.DateTimeProperty(auto_now_add=True)
 
+
 class METADATA(ndb.Model):
     times_requested = ndb.IntegerProperty('r')
     # years = ndb.StringProperty('n')  # comma separated list of years
+
 
 class Datatstore_Util(object):
     '''
@@ -38,6 +42,7 @@ class Datatstore_Util(object):
         ET_helper = eeMethods.ET_Util(
             self.geojson, self.dataset, self.et_model, self.year)
         ee_stats = ET_helper.get_et_stats()
+        return ee_stats
 
     def add_to_db(self):
     	pass

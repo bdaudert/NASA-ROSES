@@ -25,7 +25,6 @@ class ET_Util(object):
         :param dataset: MODIS or LANDSAT
         :param model: et model: SSEBop, SIMS, METRIC etc
         :param t_res: temporal resolution
-            "DEKADAL": "DEKADAL",
             "M": "Monthly",
             "SEASON": "Seasonal (Apr - Oct)",
             "ANNUAL": "Annual"
@@ -161,4 +160,5 @@ class ET_Util(object):
             geo_props = geo_feat['properties']
             feat['properties'] = self.compute_et_stats(geom, geo_props)
             json_data['features'].append(feat)
+        return json_data
 
