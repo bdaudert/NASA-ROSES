@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="header-container">
+    {% include 'header.html' %}
+</div>
+<div id="main-container">
+    <input type="hidden" class="app_name" id="app_name" name="app_name" value="{{ app_name }}">
+    <div id="db_data">
+        {% for key, val in ee_stats.items() %}
+            <b>{{key}}</b> : {{val}} <br> 
+        {% endfor %}
+    </div>
+</div>
+
+<div id="footer-container">
+   {% include 'footer.html'%}
+</div>
+{% endblock %}

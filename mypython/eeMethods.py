@@ -30,7 +30,10 @@ class ET_Util(object):
             "ANNUAL": "Annual"
         :return: ee.ImageCollection
         '''
-        coll_name = p_statics[self.dataset][self.et_model][self.t_res]
+        ds = self.dataset
+        m = self.et_model
+        r = self.t_res
+        coll_name = p_statics['ee_coll_name'][ds][m][r]
         logging.debug('EE CALL: ee.ImageCollection({})'.format(coll_name))
         coll = ee.ImageCollection(coll_name)
         return coll
@@ -52,8 +55,6 @@ class ET_Util(object):
         '''
         dS_obj = ee.Date(dS_str, 'GMT')
         dE_obj = ee.Date(dE_str, 'GMT')
-        coll_name = p_statics[self.dataset][self.et_model][self.t_res]
-        logging.debug('EE CALL: ee.ImageCollection({})'.format(coll_name))
         logging.debug('EE CALL: collection.select({})'.format(variable))
         f_coll = coll.select([0], [variable]) \
             .map(lambda x: x.double())\
@@ -98,7 +99,7 @@ class ET_Util(object):
                 crsTransform=None,
                 bestEffort=True
             )
-            val = reduced_image_data.get(variable.lower())
+            val = reduced_image_data.get(variable.lower()).getInfo()
         except:
             val = self.missing_value
         return val
@@ -129,20 +130,19 @@ class ET_Util(object):
         for prop in statics['meta_cols']:
             if prop in geo_props.keys():
                 props[prop] = geo_props[prop]
+        coll = self.get_collection()
         var_list = statics['cols_by_var_res'].keys()
         for v in var_list:
-            for t_res in statics['cols_by_var_res'][v].keys():
-                coll = self.get_collection(
-                    self.dataset, self.et_model, self.t_res)
-                stat_names = statics['cols_by_var_res'][v][self.t_res]
-                for stat_name in stat_names:
-                    variable = stat_name.split('_')[0]
-                    props[stat_name] = self.compute_et_stat(
-                        coll, geom, variable, stat_name, self.year)
+            stat_names = statics['cols_by_var_res'][v][self.t_res]
+            for stat_name in stat_names:
+                variable = stat_name.split('_')[0]
+                props[stat_name] = self.compute_et_stat(
+                    coll, geom, variable, stat_name, self.year)
         return props
 
-    def get_ee_stats(self):
-        geo_data = json.loads(self.geojson)
+    def get_et_stats(self):
+        with open(self.geojson, 'r') as geo_infile:
+            geo_data = json.load(geo_infile)
         json_data = {
             'type': 'FeatureCollection',
             'features': []
