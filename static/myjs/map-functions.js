@@ -206,9 +206,6 @@ MAP_APP = {
         for (year_idx = 0; year_idx < years.length; year_idx++){
             y = years[year_idx];
             y_idx = $.inArray(y, statics.all_field_years);
-            console.log(y);
-            console.log(y_idx);
-            console.log(window.layers);
             data = window.layers[y_idx];
             data.forEach(function(feat) {
                 if (feat.getProperty('OBJECTID') != feat_ID){
@@ -383,13 +380,16 @@ MAP_APP = {
     delete_layers: function(){
         var idx;
         for (idx = 0; idx < window.layers.length; idx++){
-            MAP_APP.delete_layer(idx)
+            MAP_APP.delete_layer(idx);
         }
     }
 }
 
 // Initialize the Google Map and add our custom layer overlay.
 var initialize_map = function() {
+    if ($('#app_name').val() == 'databaseTask'){
+        return;
+    }
     //Set the map zoom dependent on region
     var mapZoom = 10;
     if ($('#region').val() != 'fields'){

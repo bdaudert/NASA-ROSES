@@ -11,6 +11,7 @@ $(document).ready(function () {
     //-------------------------
     // Date Picker
     //-------------------------
+    /*
     $( "#start_date" ).datepicker({
         showOn: "button",
         buttonImage: "media/img/calendar_logo.gif",
@@ -44,7 +45,7 @@ $(document).ready(function () {
             $( "#start_date" ).datepicker( "option", "maxDate", selectedDate);
         }
     });
-
+    */
     
     $('#region').on('change', function(){
         change_inRegion($(this).val());

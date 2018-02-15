@@ -50,6 +50,17 @@ def set_initial_template_values(RequestHandler, app_name, method):
     Returns:
     tv: a dictionary of template variables
     '''
+    '''
+    #Database tasks are treated separately
+    if app_name == 'databaseTask':
+        tv = {
+            'GMAP_API_KEY': GMAP_API_KEY,
+            'app_name': app_name
+        }
+        return tv
+    '''
+    
+    # All other apps
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
         'app_name': app_name,

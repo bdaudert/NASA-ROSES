@@ -13,6 +13,7 @@ import httplib2
 import json
 import logging
 import os
+import glob
 
 import ee
 from google.appengine.api import urlfetch
@@ -21,8 +22,11 @@ import jinja2
 import webapp2
 
 from config import statics
+from config import p_statics
 import JinjaFilters
 import templateMethods
+import databaseMethods
+
 
 
 # SET STATICS
@@ -153,8 +157,42 @@ class OpenET(defaultApplication):
     appHTML = 'open-et-1.html'
 
 
+class databaseTasks(webapp2.RequestHandler):
+    ee.Initialize(config.EE_CREDENTIALS)
+    ee.data.setDeadline(180000)
+
+    def get(self):
+        tv = templateMethods.set_initial_template_values(
+            self, 'databaseTask', 'GET')
+        geo_dir = '/Users/bdaudert/EE/NASA-ROSES/static/geojson/'
+        geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
+        tv['ee_stats'] = {}
+        for geojson in geo_files[0:1]:
+            year = os.path.basename(geojson).split('_')[1].split('.')[0]
+            for ds in ['MODIS']:
+                for et_model in ['SSEBop']:
+                        for t_res in ['ANNUAL']:
+                            DU = databaseMethods.Datatstore_Util(
+                                ds, et_model, t_res, geojson, year)
+                            ee_stats = DU.write_et_json()
+                            logging.info(ee_stats)
+                            tv_name = ('_').join([ds, et_model, t_res, year])
+                            tv['ee_stats'][tv_name] = ee_stats
+                            # DU.add_to_db()
+
+        template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
+        self.response.out.write(template.render(tv))
+
+    def post(self):
+        tv = templateMethods.set_initial_template_values(
+            self, 'databaseTask', 'POST')
+        template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
+        self.response.out.write(template.render(tv))
+
+
 app = webapp2.WSGIApplication([
-    ('/', OpenET)
+    ('/', OpenET),
+    ('/dbTasks', databaseTasks)
 ],
     debug=True
 )

@@ -37,10 +37,9 @@
     $.getJSON( 'static/json/js_statics.json', function( data ) {
         js_statics = data;
     });
-
     google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
-    //google.load('visualization', '1', {'packages':['corechart', 'table', 'geomap']});
     google.charts.setOnLoadCallback(initialize_map);
+    
     // Make selected divs draggable, e.g. the form
     $(function(){
         $( ".draggable" ).draggable();

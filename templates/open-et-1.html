@@ -6,9 +6,10 @@
     {% include 'header.html' %}
 </div>
 <div id="main-container">
+    <input type="hidden" class="app_name" id="app_name" name="app_name" value="{{ app_name }}">
     <div id="map-container">{% include 'map.html'%}</div>
-    <div id="form-container" class="draggable ui-widget-content">
-        <div id="form-container-header">You can move me!</div>
+    <div class="form-container draggable ui-widget-content">
+        <div class="form-container-header">You can move me!</div>
         {% include 'form.html'%}
     </div>
     <!-- MODAL WINDOWS -->
