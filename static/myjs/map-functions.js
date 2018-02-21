@@ -217,7 +217,7 @@ MAP_APP = {
                 prop_names = statics.cols_by_var_res[v][t_res];
                 //populate html with data
                 for (c_idx = 0; c_idx < prop_names.length; c_idx++){
-                    prop_name = prop_names[c_idx];
+                    prop_name = prop_names[c_idx].toUpperCase();
                     data_val = feat.getProperty(prop_name);
                     html += prop_name + ': ' + data_val + '<br>'
                 }
@@ -235,7 +235,7 @@ MAP_APP = {
         $('#layerInfoModal_data').html('');
         //Title
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
-            prop_name = statics.title_cols[c_idx];
+            prop_name = statics.title_cols[c_idx].toUpperCase();
             html += '<b>' + prop_name + '</b>'+ ': ';
             html += e.feature.getProperty(prop_name) + '<br>';
         }

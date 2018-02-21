@@ -10,7 +10,7 @@
         "aggregation_area": "",
         "field_years": "2001",
         "field_year": "2001",
-        "variable": "ET",
+        "variable": "et",
         "dataset": "MODIS",
         "et_model": "METRIC",
         "temporal_resolution": "monthly",
@@ -41,10 +41,10 @@
         "gridMET": "UI METDATA/gridMET"
     },
     "all_variable":  {
-        "ET": "Actual ET",
-        "ETRF": "Fractional ET",
-        "ETR": "Reference ET",
-        "PPT": "Precipitation"
+        "et": "Actual ET",
+        "etrf": "Fractional ET",
+        "etr": "Reference ET",
+        "pr": "Precipitation"
     },
     "all_et_model":  {
         "SSEBop": "SSEBop",
@@ -53,8 +53,8 @@
         "ensemble": "Ensemble"
     },
     "all_temporal_resolution":  {
-            "M": "Monthly",
-            "ANNUAL": "Annual"
+            "monthly": "Monthly",
+            "annual": "Annual"
     },
     "all_time_period":  {
         "last15days": "Last 15 days",
@@ -82,10 +82,10 @@
         "get_value": "Get Value"
     },
     "dataset_by_var":  {
-        "ET": ["MODIS", "Landsat"],
-        "ETRF": ["MODIS", "Landsat"],
-        "ETR": [],
-        "PPT": ["gridMET"]
+        "et": ["MODIS", "Landsat"],
+        "etrf": ["MODIS", "Landsat"],
+        "etr": [],
+        "pr": ["gridMET"]
     },
     "response_vars": {
         "None": [],
@@ -94,7 +94,7 @@
         "get_value": ["point_value"]
     },
     "time_period_by_res":{
-        "DLY": {
+        "daily": {
             "last15days": "Last 15 days",
             "last30days": "Last 30 days",
             "last60days": "Last 60 days",
@@ -113,7 +113,7 @@
             "lastAnn": "Last Year",
             "custom": "Custom"
         },
-        "M": {
+        "monthly": {
             "lastDJF": "Last DJF (Dec-Feb)",
             "lastMAM": "Last MAM (Mar-May)",
             "lastJJA": "Last JJA (Jun - Aug)",
@@ -123,11 +123,11 @@
             "lastNGS": "Last Northern Growing Season (Apr - Oct)",
             "lastSGS": "Last Southern Growing Season (Nov - Mar)"
         },
-        "SEASON": {
+        "seasonal": {
             "lastNGS": "Last Northern Growing Season (Apr - Oct)",
             "lastSGS": "Last Southern Growing Season (Nov - Mar)"
         },
-        "ANNUAL": {
+        "annual": {
             "lastAnn": "Last Year"
         }
     },
@@ -151,48 +151,48 @@
             "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
             "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
             "PIXELCOUNT", "YEAR", "AREA",
-            "ETR_ANNUAL", "ET_ANNUAL", "ETRF_ANNUL", "PPT_ANNUAL", "NET_ANNUAL",
-            "ETR_SEASON", "ET_SEASON", "ETRF_SEASN", "PPT_SEASON", "NET_SEASON",
-            "START_MON", "END_MON",
-            "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
-            "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12",
-            "ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
-            "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12",
-            "ETRF_M01"
+            "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
+            "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
+            "start_mon", "end_mon",
+            "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
+            "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12",
+            "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
+            "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
+            "etrf_m01"
         ]
     },
     "meta_cols": ["OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
             "PIXELCOUNT", "YEAR", "AREA"],
     "title_cols": ["BASIN", "STATE","HUC8", "HUC8_NAME"],
     "cols_by_var_res":{
-        "ET": {
-            "ANNUAL": ["ET_ANNUAL"],
-            "M": ["ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
-                "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12"
+        "et": {
+            "annual": ["et_annual"],
+            "monthly": ["et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
+                "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12"
             ],
-            "SEASON": ["ET_SEASON", "NET_SEASON"]
+            "seasonal": ["et_seasonal", "net_seasonal"]
         },
-        "ETR": {
-            "ANNUAL": ["ETR_ANNUAL", "ET_ANNUAL", "ETRF_ANNUL", "PPT_ANNUAL", "NET_ANNUAL"],
-            "M": [ "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
-                "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12"
+        "etr": {
+            "annual": ["etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual"],
+            "monthly": [ "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
+                "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12"
             ],
-            "SEASON": ["ETR_SEASON", "NET_SEASON"]
+            "seasonal": ["etr_seasonal", "net_seasonal"]
         },
-        "ETRF": {
-            "ANNUAL": ["ETRF_ANNUL"],
-            "M": ["ETRF_M01"],
-            "SEASON": ["ETRF_SEASN", "NET_SEASON"]
+        "etrf": {
+            "annual": ["etrf_annual"],
+            "monthly": ["etrf_m01"],
+            "seasonal": ["etrf_seasonal", "net_seasonal"]
         },
-        "PPT": {
-            "ANNUAL": ["PPT_ANNUAL"],
-            "M": [ "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
-                "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12",
-                "ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
-                "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12",
-                "ETRF_M01"
+        "pr": {
+            "annual": ["pr_annual"],
+            "monthly": [ "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
+                "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12",
+                "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
+                "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
+                "etrf_m01"
             ],
-            "SEASON": [ "PPT_SEASON", "NET_SEASON"]
+            "seasonal": [ "pr_seasonal", "net_seasonal"]
         }
     }
 }
