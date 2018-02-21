@@ -24,20 +24,31 @@ class Datatstore_Util(object):
     google DATASTORE
     Method:
         - The base query is defined from relevant template values
+    Args:
+        :geoID Unique ID of geojson obbject, e.g. USFields
+        :geoFName geojson file name
+        :year year of geojson dataset, might be ALL if not USFields
+            USField geojsons change every year
+        :dataset MODSI, Landsat or gridMET
+        :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
+        :t_res temporal resolution, e.g. annual, seasonal, monthly
+
     '''
-    def __init__(self, dataset, et_model, t_res, geojson, year):
+    def __init__(self, geoID, geoFName, year, dataset, et_model, t_res):
+        self.geoID = geoID
+        self.geoFName = geoFName
+        self.year = year
         self.dataset = dataset
         self.et_model = et_model
         self.t_res = t_res  # temporal resolution
-        self.geojson = geojson
-        self.year = year
 
     def set_db_key(self):
+        ID = self.geojsonID
+        y = self.year
         ds = self.dataset
         m = self.et_model
         r = self.t_res
-        y = self.year
-        db_key = ('_').join(ds, m, r, y)
+        db_key = ('_').join(ID, ds, m, r, y)
         return db_key
 
     def add_to_db(self, key, json_data):
@@ -56,8 +67,7 @@ class Datatstore_Util(object):
             msg = 'Datatstore_Util ERROR when adding to database ' + str(e)
             logging.error(msg)
 
-
-    def write_et_json(self):
+    def get_et_json_data(self):
         '''
         Stores geojson info and et data a json object and
         writes data to out_file
@@ -65,7 +75,8 @@ class Datatstore_Util(object):
         :return
         '''
         ET_helper = eeMethods.ET_Util(
-            self.dataset, self.et_model, self.t_res, self.geojson, self.year)
+            self.geoFName, self.year,
+            self.dataset, self.et_model, self.t_res
+        )
         ee_stats = ET_helper.get_et_stats()
         return ee_stats
-

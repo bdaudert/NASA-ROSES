@@ -167,14 +167,15 @@ class databaseTasks(webapp2.RequestHandler):
         geo_dir = '/Users/bdaudert/EE/NASA-ROSES/static/geojson/'
         geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
         tv['ee_stats'] = {}
-        for geojson in geo_files[0:1]:
-            year = os.path.basename(geojson).split('_')[1].split('.')[0]
+        for geoFName in geo_files[0:1]:
+            year = os.path.basename(geoFName).split('_')[1].split('.')[0]
+            geoID = os.path.basename(geoFName).split('_')[0]
             for ds in ['MODIS']:
                 for et_model in ['SSEBop']:
                         for t_res in ['ANNUAL']:
                             DU = databaseMethods.Datatstore_Util(
-                                ds, et_model, t_res, geojson, year)
-                            ee_stats = DU.write_et_json()
+                                geoID, geoFName, year, ds, et_model, t_res)
+                            ee_stats = DU.get_et_json_data()
                             logging.info(ee_stats)
                             tv_name = ('_').join([ds, et_model, t_res, year])
                             tv['ee_stats'][tv_name] = ee_stats
@@ -192,7 +193,7 @@ class databaseTasks(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
     ('/', OpenET),
-    ('/dbTasks', databaseTasks)
+    ('/databaseTasks', databaseTasks)
 ],
     debug=True
 )
