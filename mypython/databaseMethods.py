@@ -88,6 +88,7 @@ class Datatstore_Util(object):
         if not data_obj or not data_obj.data:
             return {}
         logging.info('READING FROM DB: ' + db_key)
-        json_data = json.loads(data_obj.data)
+        json_data = data_obj.data
+        # json_data = json.loads(data_obj.data)
         return json_data
 

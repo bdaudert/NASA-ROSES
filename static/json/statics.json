@@ -2,7 +2,7 @@
     "form_option_keys": [
         "tool_action", "region", "field_year", "field_years", "aggregation_area",
         "variable", "dataset", "et_model",
-        "temporal_resolution", "time_period"
+        "t_res", "time_period"
     ],
     "variable_defaults":  {
         "tool_action": "None",
@@ -12,8 +12,8 @@
         "field_year": "2003",
         "variable": "et",
         "dataset": "MODIS",
-        "et_model": "METRIC",
-        "temporal_resolution": "annual",
+        "et_model": "SSEBop",
+        "t_res": "annual",
         "time_period": "lastANN"
     },
     "all_region":  {
@@ -53,7 +53,7 @@
         "SIMS": "SIMS",
         "ensemble": "Ensemble"
     },
-    "all_temporal_resolution":  {
+    "all_t_res":  {
             "monthly": "Monthly",
             "annual": "Annual"
     },

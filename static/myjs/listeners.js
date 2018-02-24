@@ -82,7 +82,7 @@ $(document).ready(function () {
     $('#variable').on('change', function(){
         change_inVariable($(this).val());
     });
-    $('#temporal_resolution').on('change', function(){
+    $('#t_res').on('change', function(){
         change_inResolution($(this).val());
     });
     
