@@ -209,6 +209,7 @@ MAP_APP = {
             data = window.layers[y_idx];
             data.forEach(function(feat) {
                 if (feat.getProperty('OBJECTID') != feat_ID){
+                    //Continue to next feature
                     return;
                 }
                 html = '';
@@ -262,7 +263,7 @@ MAP_APP = {
         //Get the map layer
         var region = $('#region').val(),
             field_year = null;
-        if (region == 'fields'){
+        if (region.is_in(['US_fields', 'Mason'])) {
             field_year = $('#field_year').val();
         }
         var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
@@ -392,7 +393,7 @@ var initialize_map = function() {
     }
     //Set the map zoom dependent on region
     var mapZoom = 10;
-    if ($('#region').val() != 'fields'){
+    if ($('#region').val().not_in(['US_fields', 'Mason'])){
         mapZoom = 4;
     }
     // Map

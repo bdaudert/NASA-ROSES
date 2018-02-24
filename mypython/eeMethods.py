@@ -6,6 +6,7 @@ import ee
 from config import p_statics
 from config import statics
 
+import Utils
 
 class ET_Util(object):
     '''
@@ -84,14 +85,14 @@ class ET_Util(object):
         :return: ee.ImageCollection filtered by variable
         '''
         logging.debug('EE CALL: collection.select({})'.format(variable))
-        return coll.select([0], [variable])
+        return coll.select([variable], [variable])
 
     def reduce_collection_to_img(self, coll, stat):
     	'''
-        Reduces the ee.imageCollection to a single ee image by applying
+        Reduces the ee.ImageCollection to a single ee image by applying
         the statistic stat
 
-        :param coll ee.imageCollection
+        :param coll ee.ImageCollection
         :param stat statistic: max, min, mean, median
         :return: ee.Image
         '''
@@ -110,42 +111,6 @@ class ET_Util(object):
             img = coll.mean()
         return img
 
-    def reduce_img_over_region(self, img, geom, scale, variable):
-    	'''
-        Averages the ee.Image over all pixels of ee.Geometry
-        '''
-        try:
-            reduced_image_data = img.reduceRegion(
-                ee.Reducer.mean(),
-                geometry=geom,
-                scale=scale,
-                tileScale=1,
-                crs='EPSG:4326',
-                crsTransform=None,
-                bestEffort=True
-            )
-            val = reduced_image_data.get(variable.lower())
-        except:
-            val = self.missing_value
-        return ee.Feature(geom, {'Data': [img.get('system:time_start'), val]})
-        return val
-
-    def compute_et_stat(self, coll, geom, variable, stat_name):
-    	'''
-        Computes ET stat from collection for geometry,
-        given variable and temporal resolution
-        :param coll ee.imageCollection
-        :param geom ee.Geometry
-        :param var variable (et, etr, etrf, pr, etc.)
-        :param t_res temporal resolution (annual, monthly etc.)
-        :return:
-        '''
-        # Reduce ImageCollection
-        img = self.reduce_collection_to_img(coll, 'sum')
-        # Reduce over geometry
-        et_data = self.reduce_img_over_region(img, geom, 1000, variable)
-        return et_data
-
     def compute_et_stats(self, coll, geom, geo_props):
         def average_over_region(img):
             '''
@@ -161,35 +126,42 @@ class ET_Util(object):
                     crsTransform=None,
                     bestEffort=True
                 )
-                val = reduced_image_data.get(variable.lower())
+                val = reduced_image_data.get(variable)
             except:
                 val = self.missing_value
-            return ee.Feature(geom, {'Data': [val]})
+            return ee.Feature(geom, {'Data': val})
+
+
 
         props = {}
         for prop in statics['meta_cols']:
             if prop in geo_props.keys():
                 props[prop] = geo_props[prop]
-        var_list = statics['cols_by_var_res'].keys()
         imgs = []
         count = 0
         stat_names_list = []
-        for v in var_list:
+        # FIX ME: add more vars as data comes online
+        # for v in var_list:
+        # MODIS SSEBop only has et right now
+        # var_list = statics['cols_by_var_res'].keys()
+        for v in ['et']:
             logging.info('PROCESSING VARIABLE ' + str(v))
             stat_names = statics['cols_by_var_res'][v][self.t_res]
             for stat_name in stat_names:
                 stat_names_list.append(stat_name)
                 logging.info('PROCESSING STATISTIC ' + str(stat_name))
                 variable = stat_name.split('_')[0].lower()
-                coll = self.filter_coll_by_var(coll, variable)
-                imgs.append(self.reduce_collection_to_img(coll, 'sum'))
-                count+=1
+                temporal_stat = p_statics['t_stat_by_var']
+                # coll = self.filter_coll_by_var(coll, variable)
+                imgs.append(self.reduce_collection_to_img(coll, temporal_stat))
+                count += 1
 
-        # Make image collection
-        ee_imgs = ee.imageCollection(imgs)
+        ee_imgs = ee.ImageCollection(imgs)
         feats = ee.FeatureCollection(ee_imgs.map(average_over_region))
-        f_data = feats.aggregate_array('Data').getInfo()
-
+        try:
+            f_data = feats.aggregate_array('Data').getInfo()
+        except Exception as e:
+            raise Exception(e)
 
         for c_idx in range(count):
             stat_name = stat_names_list[c_idx]
@@ -209,6 +181,10 @@ class ET_Util(object):
             'type': 'FeatureCollection',
             'features': []
         }
+        # FIX ME
+        # Right now we get error for feat 25 in Mason_2003
+        # Image.reduceRegion: Inverted hole cannot be transformed
+        # for f_idx, geo_feat in enumerate(geo_data['features'][0:1]):
         for f_idx, geo_feat in enumerate(geo_data['features']):
             logging.info('PROCESSING FEATURE ' + str(f_idx + 1))
             feat = {
@@ -218,10 +194,10 @@ class ET_Util(object):
                 }
             }
             geom_coords = geo_feat['geometry']['coordinates']
+            geom_coords = [Utils.orient_poly_ccw(c) for c in geom_coords]
             feat['geometry']['coordinates'] = geom_coords
             geom = ee.Geometry.Polygon(geom_coords)
             geo_props = geo_feat['properties']
             feat['properties'] = self.compute_et_stats(coll, geom, geo_props)
             json_data['features'].append(feat)
         return json_data
-

@@ -1,6 +1,10 @@
 {
     "ft_styles": {
-        "fields": {
+        "US_fields": {
+            "styleId": 2,
+            "templateId": 2
+        }, 
+        "Mason": {
             "styleId": 2,
             "templateId": 2
         }

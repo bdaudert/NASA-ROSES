@@ -13,8 +13,9 @@ def set_form_options(variables):
             form_options[var_key] = statics['all_' + var_key]
     # Override default form options if needed
     var = variables['variable']
+    region = variables['region']
     # Set field years form option
-    if var == 'fields':
+    if region in ['US_fields', 'Mason']:
         form_options['field_years'] = statics['all_field_years']
         form_options['field_year'] = statics['all_field_year']
     # Set datasets
@@ -59,7 +60,6 @@ def set_initial_template_values(RequestHandler, app_name, method):
         }
         return tv
     '''
-    
     # All other apps
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,

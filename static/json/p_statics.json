@@ -1,5 +1,5 @@
 {
-    "ee_coll_name":{
+    "ee_coll_name": {
         "MODIS": {
             "SSEBop":{
                 "decadel": "projects/usgs-ssebop/modis_et_dekadal",
@@ -8,8 +8,8 @@
             }
         }
     },
-    "start_end_mon_days_by_res":{
-    	"annual": ["-01-01", "-12-31"],
+    "start_end_mon_days_by_res": {
+    	"annual": ["01-01", "12-31"],
     	"seasonal": ["04-01", "10-30"],
     	"m01": ["01-01", "01-31"],
     	"m02": ["02-01", "02-28"],
@@ -23,5 +23,12 @@
     	"m10": ["10-01", "10-31"],
     	"m11": ["11-01", "11-30"],
     	"m12": ["12-01", "12-31"]
+    },
+    "t_stat_by_var": {
+        "et": "sum",
+        "etr": "sum",
+        "etrf": "sum",
+        "pr": "sum"
     }
 }
+

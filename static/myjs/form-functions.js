@@ -1,7 +1,7 @@
 function change_inRegion(region){
 	//Delete old layer
 	 MAP_APP.delete_layers();
-	if (region == 'fields'){
+	if (region.is_in(['US_fields', 'Mason'])){
 		var field_year, y_idx;
         //Field data
 		$('#form-field_years').css('display', 'inline');
@@ -23,7 +23,7 @@ function change_inRegion(region){
 }
 
 function change_inVariable(variable){
-    if ($('#region').val() == 'fields'){
+    if ($('#region').is_in(['US_fields', 'Mason'])){
     	//Set new dataModal
 
     }
@@ -67,7 +67,7 @@ function change_inResolution(resolution){
         option+='</option>';
         $('#time_period').append(option);
 	}
-    if ($('#region').val() == 'fields'){
+    if ($('#region').is_in(['US_fields', 'Mason'])){
     	//Set new dataModals
 
     }
