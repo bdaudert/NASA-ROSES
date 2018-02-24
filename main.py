@@ -28,7 +28,6 @@ import templateMethods
 import databaseMethods
 
 
-
 # SET STATICS
 '''
 # Load the statics file
@@ -69,7 +68,6 @@ def runApp(self, app_name, method):
         # This will trigger a hard 500 error
         # We can't set error and load the default page
         raise
-    # Load the data from the database
     return tv
 
 
@@ -166,13 +164,14 @@ class databaseTasks(webapp2.RequestHandler):
     def get(self):
         tv = templateMethods.set_initial_template_values(
             self, 'databaseTask', 'GET')
-        geo_dir = '/Users/bdaudert/EE/NASA-ROSES/static/geojson/'
-        geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
+        geo_dir = tv['GEO_DIR']
         tv['ee_stats'] = {}
         # for geoFName in geo_files:
         # FIX ME: only do 2003 for testing
+        # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
         # for geoFName in geo_files
-        for geoFName in geo_files[2:3]:
+        # for geoFName in geo_files[2:3]:
+        for geoFName in [geo_dir + 'Mason_2003.geojson']:
             logging.info('PROCESSING FILE ' + geoFName)
             year = os.path.basename(geoFName).split('_')[1].split('.')[0]
             geoID = os.path.basename(geoFName).split('_')[0]
@@ -190,12 +189,13 @@ class databaseTasks(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
         self.response.out.write(template.render(tv))
 
+    '''
     def post(self):
         tv = templateMethods.set_initial_template_values(
             self, 'databaseTask', 'POST')
         template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
         self.response.out.write(template.render(tv))
-
+    '''
 
 app = webapp2.WSGIApplication([
     ('/', OpenET),

@@ -89,12 +89,12 @@
         <div class="panel panel-default">
             <div class="panel-body panel-forms">
                 <b><span style="color:blue;font-size:medium">Processing:</span></b><br>
-                <div id="form-temporal_resolution">
+                <div id="form-t_res">
                     <b>Resolution (Depends on most above): </b>
-                    <select class="temporal_resolution" id="temporal_resolution" name="temporal_resolution">
-                        {% for x,y in form_options.temporal_resolution.items() %}
+                    <select class="t_res" id="t_res" name="t_res">
+                        {% for x,y in form_options.t_res.items() %}
                         <option value="{{ x }}" 
-                        {% if x == variables.temporal_resolution  %} selected {% endif %}
+                        {% if x == variables.t_res  %} selected {% endif %}
                         {% if x|is_in('daily,seasonal') %} disabled {% endif %}
                         >{{ y }}</option>
                         {% endfor %}

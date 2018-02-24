@@ -144,7 +144,7 @@ MAP_APP = {
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
         v = $('#variable').val();
-        t_res = $('#temporal_resolution').val();
+        t_res = $('#t_res').val();
         html = '';
         //Title
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
@@ -181,7 +181,7 @@ MAP_APP = {
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
         v = $('#variable').val();
-        t_res = $('#temporal_resolution').val();
+        t_res = $('#t_res').val();
         html = '';
         //Title
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
@@ -198,7 +198,7 @@ MAP_APP = {
             year, year_idx, 
             data, prop_names, prop_name, c_idx, html,
             v = $('#variable').val(),
-            t_res = $('#temporal_resolution').val();
+            t_res = $('#t_res').val();
 
         //NOTE: currently we only allow one field for fields
         //var years = $('#field_years').val();

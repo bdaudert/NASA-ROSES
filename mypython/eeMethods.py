@@ -111,6 +111,17 @@ class ET_Util(object):
             img = coll.mean()
         return img
 
+    def set_geo_properties(self, geo_props):
+        '''
+        Populates metadata from the geo properties
+        Defined in the geojson data file
+        '''
+        props = {}
+        for prop in statics['meta_cols']:
+            if prop in geo_props.keys():
+                props[prop] = geo_props[prop]
+        return props
+
     def compute_et_stats(self, coll, geom, geo_props):
         def average_over_region(img):
             '''
@@ -133,10 +144,7 @@ class ET_Util(object):
 
 
 
-        props = {}
-        for prop in statics['meta_cols']:
-            if prop in geo_props.keys():
-                props[prop] = geo_props[prop]
+        et_data = {}
         imgs = []
         count = 0
         stat_names_list = []
@@ -165,8 +173,8 @@ class ET_Util(object):
 
         for c_idx in range(count):
             stat_name = stat_names_list[c_idx]
-            props[stat_name] = f_data
-        return props
+            et_data[stat_name] = f_data
+        return et_data
 
     def get_et_stats(self):
         coll = self.get_collection()
@@ -198,6 +206,7 @@ class ET_Util(object):
             feat['geometry']['coordinates'] = geom_coords
             geom = ee.Geometry.Polygon(geom_coords)
             geo_props = geo_feat['properties']
-            feat['properties'] = self.compute_et_stats(coll, geom, geo_props)
+            feat['properties'] = self.set_geo_properties(geo_props)
+            feat['properties']['et_data'] = self.compute_et_stats(coll, geom, geo_props)
             json_data['features'].append(feat)
         return json_data
