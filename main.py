@@ -69,6 +69,7 @@ def runApp(self, app_name, method):
         # This will trigger a hard 500 error
         # We can't set error and load the default page
         raise
+    # Load the data from the database
     return tv
 
 
@@ -100,6 +101,7 @@ class defaultApplication(webapp2.RequestHandler):
 
         self.tv_logging(tv, 'GET')
         template = JINJA_ENVIRONMENT.get_template(self.appHTML)
+
         self.response.out.write(template.render(tv))
 
     def post(self):
@@ -167,20 +169,24 @@ class databaseTasks(webapp2.RequestHandler):
         geo_dir = '/Users/bdaudert/EE/NASA-ROSES/static/geojson/'
         geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
         tv['ee_stats'] = {}
-        for geoFName in geo_files[0:1]:
+        # for geoFName in geo_files:
+        # FIX ME: only do 2003 for testing
+        # for geoFName in geo_files
+        for geoFName in geo_files[2:3]:
+            logging.info('PROCESSING FILE ' + geoFName)
             year = os.path.basename(geoFName).split('_')[1].split('.')[0]
             geoID = os.path.basename(geoFName).split('_')[0]
             for ds in ['MODIS']:
                 for et_model in ['SSEBop']:
-                        for t_res in ['ANNUAL']:
+                        for t_res in ['annual']:
                             DU = databaseMethods.Datatstore_Util(
                                 geoID, geoFName, year, ds, et_model, t_res)
                             ee_stats = DU.get_et_json_data()
-                            logging.info(ee_stats)
-                            tv_name = ('_').join([ds, et_model, t_res, year])
+                            # logging.info(ee_stats)
+                            tv_name = ('_').join([geoID, year, ds, et_model, t_res])
                             tv['ee_stats'][tv_name] = ee_stats
-                            # DU.add_to_db()
-
+                            DU.add_to_db(ee_stats)
+            logging.info(geoFName + ' PROCESSED!')
         template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
         self.response.out.write(template.render(tv))
 

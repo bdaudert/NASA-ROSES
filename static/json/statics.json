@@ -6,18 +6,19 @@
     ],
     "variable_defaults":  {
         "tool_action": "None",
-        "region": "fields",
+        "region": "Mason",
         "aggregation_area": "",
-        "field_years": "2001",
-        "field_year": "2001",
+        "field_years": "2003",
+        "field_year": "2003",
         "variable": "et",
         "dataset": "MODIS",
         "et_model": "METRIC",
-        "temporal_resolution": "monthly",
+        "temporal_resolution": "annual",
         "time_period": "lastANN"
     },
     "all_region":  {
-        "fields": "Fields",
+        "US_fields": "US Fields",
+        "Mason": "Mason Valley",
         "ee_map": "Map"
     },
     "all_aggregation_area": {
@@ -28,11 +29,11 @@
         "state": "States"
     },
     "all_field_years": [
-        "2001", "2002", "2003", "2004", "2005",
+        "2003", "2004", "2005",
         "2006", "2007", "2008", "2009", "2010"
     ],
     "all_field_year": [
-        "2001", "2002", "2003", "2004", "2005",
+        "2003", "2004", "2005",
         "2006", "2007", "2008", "2009", "2010"
     ],
     "all_dataset":  {
@@ -132,7 +133,20 @@
         }
     },
     "fusiontables":  {
-        "fields": {
+        "US_fields": {
+            "2001": "1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk",
+            "2002": "1ii2Z1UOoLYDaHHO72TBtt6LlJJ_4p-gZVEmJ-o4V",
+            "2003": "12tHBgFbDkogHUazB-Mxn-NOpW7gT_PZlGLorD6rY",
+            "2004": "15wHWbDct1jZUlgw3rOAfTT2ngdwCDPyUAfmK4F3q",
+            "2005": "1RGzGnR3v2eZ47_jzl5e8-4425DI_n7nJL8A38GEZ",
+            "2006": "1J6AKBJvTcL92Zi3VsUTPv6OmIxDrJl5-2nVcLkQ_",
+            "2007": "1p2VMpL2h_GxpwYW3hcUHmoLzrlB_l1jM7XxShSgG",
+            "2008": "1F6dmw2kkUE3KPFWmd4RMWDKSt-xPxOHtu__Jaqia",
+            "2009": "1gXcGPzZH4-b-nh8haKYlGy3DPCv8lWDi7yBqP2y5",
+            "2010": "1y3PrbGJ8rMtlh-O7MB9VZD8MqslFnaafnnSdE-je",
+            "2011": "1Tp068fF_M5PJV2f_tHa_l7QK9JkEhU2LHndmKY2t"
+        }, 
+        "Mason": {
             "2001": "1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk",
             "2002": "1ii2Z1UOoLYDaHHO72TBtt6LlJJ_4p-gZVEmJ-o4V",
             "2003": "12tHBgFbDkogHUazB-Mxn-NOpW7gT_PZlGLorD6rY",
@@ -145,9 +159,23 @@
             "2010": "1y3PrbGJ8rMtlh-O7MB9VZD8MqslFnaafnnSdE-je",
             "2011": "1Tp068fF_M5PJV2f_tHa_l7QK9JkEhU2LHndmKY2t"
         }
+
     },
     "all_data_cols": {
-        "fields": [
+        "US_fields": [
+            "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
+            "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
+            "PIXELCOUNT", "YEAR", "AREA",
+            "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
+            "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
+            "start_mon", "end_mon",
+            "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
+            "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12",
+            "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
+            "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
+            "etrf_m01"
+        ],
+        "Mason": [
             "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
             "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
             "PIXELCOUNT", "YEAR", "AREA",
