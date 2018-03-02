@@ -17,7 +17,7 @@
                    </select><br>
                 </div>
                 <div id='form-aggregation_area' 
-                {% if variables.region |is_in('Mason, US_fields') %}style="display:none;"{%endif%}>
+                {% if variables.region |not_in('Mason, US_fields') %}style="display:none;"{%endif%}>
                     <b>Aggregate field data over: </b><br>
                     <select class="aggregation" id="aggregation_area" name="aggregation_area">
                         {% for x, y in form_options.aggregation_area.items() %}
@@ -26,7 +26,7 @@
                     </select><br>
                 </div>
                 <div id='form-field_year' 
-                {% if variables.region |is_in('Mason, US_fields') %}style="display:none;"{%endif%}>
+                {% if variables.region |not_in('Mason, US_fields') %}style="display:none;"{%endif%}>
                     <b>Year: </b><br>
                     <select class="years" id="field_year" name="field_year">
                         {% for x in form_options.field_year %}
