@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import logging
-import json
 
 
 from google.appengine.ext import ndb
@@ -91,4 +90,6 @@ class Datatstore_Util(object):
         json_data = data_obj.data
         # json_data = json.loads(data_obj.data)
         return json_data
+
+
 

@@ -159,7 +159,7 @@ MAP_APP = {
         $('#dataModal_title').append(html);
         html = '';
         //Populate the columnnames
-        col_names = statics.cols_by_var_res[v][t_res];
+        col_names = statics.stats_by_var_res[v][t_res];
         //populate html with data
         for (c_idx = 0; c_idx < col_names.length; c_idx++){
             col_name = col_names[c_idx];
@@ -215,7 +215,7 @@ MAP_APP = {
                 html = '';
                 html = 'Year: ' + year + '<br>';
                 //Populate the columnnames
-                prop_names = statics.cols_by_var_res[v][t_res];
+                prop_names = statics.stats_by_var_res[v][t_res];
                 //populate html with data
                 for (c_idx = 0; c_idx < prop_names.length; c_idx++){
                     prop_name = prop_names[c_idx].toUpperCase();

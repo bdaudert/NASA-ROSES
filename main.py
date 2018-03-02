@@ -54,6 +54,7 @@ JINJA_ENVIRONMENT.filters['make_string_range'] = JinjaFilters.make_string_range
 JINJA_ENVIRONMENT.filters['make_int_range'] = JinjaFilters.make_int_range
 JINJA_ENVIRONMENT.filters['divisibleby'] = JinjaFilters.divisibleby
 
+
 #####################################################
 #   RUN APP - RUNS THE APPLICATION AND SETS WEBPAGE
 ####################################################
@@ -158,26 +159,25 @@ class OpenET(defaultApplication):
 
 
 class databaseTasks(webapp2.RequestHandler):
-    ee.Initialize(config.EE_CREDENTIALS)
-    ee.data.setDeadline(180000)
-
     def get(self):
+        ee.Initialize(config.EE_CREDENTIALS)
+        ee.data.setDeadline(180000)
         tv = templateMethods.set_initial_template_values(
             self, 'databaseTask', 'GET')
-        geo_dir = tv['GEO_DIR']
         tv['ee_stats'] = {}
         # for geoFName in geo_files:
         # FIX ME: only do 2003 for testing
         # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
         # for geoFName in geo_files
         # for geoFName in geo_files[2:3]:
-        for geoFName in [geo_dir + 'Mason_2003.geojson']:
+        f_names = ['Mason_2003.geojson']
+        for geoFName in f_names:
             logging.info('PROCESSING FILE ' + geoFName)
             year = os.path.basename(geoFName).split('_')[1].split('.')[0]
             geoID = os.path.basename(geoFName).split('_')[0]
             for ds in ['MODIS']:
                 for et_model in ['SSEBop']:
-                        for t_res in ['annual']:
+                        for t_res in ['monthly', 'annual']:
                             DU = databaseMethods.Datatstore_Util(
                                 geoID, geoFName, year, ds, et_model, t_res)
                             ee_stats = DU.get_et_json_data()

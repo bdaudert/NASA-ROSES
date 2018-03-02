@@ -192,33 +192,36 @@
     "meta_cols": ["OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
             "PIXELCOUNT", "YEAR", "AREA"],
     "title_cols": ["BASIN", "STATE","HUC8", "HUC8_NAME"],
-    "cols_by_var_res":{
+    "stats_by_var_res":{
         "et": {
             "annual": ["et_annual"],
-            "monthly": ["et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
-                "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12"
+            "monthly": ["et_m01", "et_m02" , "et_m03" , "et_m04",
+                "et_m05", "et_m06", "et_m07", "et_m08",
+                "et_m09", "et_m10", "et_m11", "et_m12"
             ],
             "seasonal": ["et_seasonal", "net_seasonal"]
         },
         "etr": {
-            "annual": ["etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual"],
-            "monthly": [ "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
-                "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12"
+            "annual": ["etr_annual"],
+            "monthly": [ "etr_m01", "etr_m02", "etr_m03", "etr_m04",
+                "etr_m05", "etr_m06", "etr_m07", "etr_m08",
+                "etr_m09", "etr_m10", "etr_m11", "etr_m12"
             ],
             "seasonal": ["etr_seasonal", "net_seasonal"]
         },
         "etrf": {
             "annual": ["etrf_annual"],
-            "monthly": ["etrf_m01"],
+            "monthly": ["etrf_m01", "etrf_m02", "etrf_m03", "etrf_m04",
+                "etrf_m05", "etrf_m06", "etrf_m07", "etrf_m08",
+                "etrf_m09", "etrf_m10", "etrf_m11", "etrf_m12"
+            ],
             "seasonal": ["etrf_seasonal", "net_seasonal"]
         },
         "pr": {
             "annual": ["pr_annual"],
-            "monthly": [ "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
-                "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12",
-                "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
-                "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
-                "etrf_m01"
+            "monthly": [ "pr_m01", "pr_m02", "pr_m03", "pr_m04",
+                "pr_m05", "pr_m06", "pr_m07", "pr_m08", 
+                "pr_m09", "pr_m10", "pr_m11", "pr_m12"
             ],
             "seasonal": [ "pr_seasonal", "net_seasonal"]
         }
