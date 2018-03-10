@@ -1,39 +1,29 @@
 /* MAP Utils*/
 var MAP_APP = MAP_APP || {};
 MAP_APP = {
-    setMarkerOptions: function(){
-        var mkrOptions = {
-            draggable: true
-        };
-        return mkrOptions;
-    },
-    setMarkerListeners: function(marker, shape_idx){
-        google.maps.event.addListener(marker, 'dragend', function (event) {
-            var new_lat = precise_round(event.latLng.lat(),2).toString();
-            var new_lon = precise_round(event.latLng.lng(),2).toString();
-            var loc = new_lon + ',' + new_lat
-            //Update formfield
-            $('#point_' + String(shape_idx)).val(loc);
-            //var myLatlng = new google.maps.LatLng(parseFloat(new_lat),parseFloat(new_lon));
-            //map.panTo(myLatlng);
-        });
-    },
-    setPolyOptions: function(){
-        var opacity = 0.45;
-        /*
-        if (window.map.overlayMapTypes && window.map.overlayMapTypes.length >= 1){
-            opacity = 0;
-        }
-        */
+    set_polyStyle: function(){
         var polyOptions = {
             strokeWeight: 0,
-            fillOpacity: opacity,
+            fillOpacity: 0.45,
             editable: true,
             draggable:true,
             fillColor: "#1E90FF",
             strokeColor: "#0c3966"
         };
         return polyOptions;
+    },
+    set_featureStyle: function(year){
+        var featureStyle,
+            fillColor = js_statics.featureStyleByYear[year][0],
+            strokeColor = js_statics.featureStyleByYear[year][1];
+        featureStyle = {
+            fillColor: fillColor,
+            fillOpacity: 0.1,
+            strokeColor: strokeColor,
+            stokeOpacity: 0.5,
+            strokeWeight: 0.5
+        };
+        return featureStyle;
     },
     setDrawingManager: function(){
         var mkrOptions = MAP_APP.setMarkerOptions();
@@ -88,9 +78,9 @@ MAP_APP = {
         }
         window.map.fitBounds(bounds);
         /*
-        WEIRD: on sharelink request the zoom 
+        WEIRD: on sharelink request the zoom
         somehow is 0 after the fitBounds call
-        so we need to save the zoom beforehand and reset 
+        so we need to save the zoom beforehand and reset
         it after
         */
         /*
@@ -147,18 +137,18 @@ MAP_APP = {
     },
     populate_dataModalFromFT: function(e){
         // e is the click event
-        var col_name, col_names = [], 
+        var col_name, col_names = [],
             v, t_res, m_idx, m_str, c_idx, data_val,
             html, data_div = $('#modal_data');
         //Clear out old modal content
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
         v = $('#variable').val();
-        t_res = $('#temporal_resolution').val();
+        t_res = $('#t_res').val();
         html = '';
         //Title
-        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
-            col_name = statics.title_columns[c_idx];
+        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
+            col_name = statics.title_cols[c_idx];
             html += '<b>' + col_name + '</b>'+ ': ';
             html += e.row[col_name].value + '<br>';
         }
@@ -169,7 +159,7 @@ MAP_APP = {
         $('#dataModal_title').append(html);
         html = '';
         //Populate the columnnames
-        col_names = statics.ft_cols[v][t_res];
+        col_names = statics.stats_by_var_res[v][t_res];
         //populate html with data
         for (c_idx = 0; c_idx < col_names.length; c_idx++){
             col_name = col_names[c_idx];
@@ -178,38 +168,64 @@ MAP_APP = {
         }
         $('#dataModal_data').append(html);
     },
-    populate_dataModalFromGeojson: function(e){
+    initialize_dataModal: function(e){
         // e is the click event
-        var prop_name, prop_names = [], 
+        var prop_name, prop_names = [],
             v, t_res, m_idx, m_str, c_idx, data_val,
-            html, data_div = $('#modal_data');
+            html, data_div = $('#modal_data'), 
+            year_idx,year;
+        //NOTE: currently we only allow one field for fields
+        //var years = $('#field_years').val();
+        var years = [$('#field_year').val()];
         //Clear out old modal content
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
         v = $('#variable').val();
-        t_res = $('#temporal_resolution').val();
+        t_res = $('#t_res').val();
         html = '';
         //Title
-        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
-            prop_name = statics.title_columns[c_idx];
+        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
+            prop_name = statics.title_cols[c_idx];
             html += '<b>' + prop_name + '</b>'+ ': ';
             html += e.feature.getProperty(prop_name) + '<br>';
         }
-        html += '<b>' + v + '</b>';
-        if ($('#form-field_year').css('display') != 'none'){
-            html += '<b>Year ' + $('#field_year').val() + '</b>:';
-        }
+        html += '<b>Variable</b>: ' + v + '<br>';
+        html += '<b>Years</b>: ' + years + '<br>';
         $('#dataModal_title').append(html);
-        html = '';
-        //Populate the columnnames
-        prop_names = statics.ft_cols[v][t_res];
-        //populate html with data
-        for (c_idx = 0; c_idx < prop_names.length; c_idx++){
-            prop_name = prop_names[c_idx];
-            data_val = e.feature.getProperty(prop_name);
-            html += prop_name + ': ' + data_val + '<br>'
+    },
+    add_dataToModal: function(e){
+        var feat_ID= e.feature.getProperty('OBJECTID'),
+            year, year_idx, 
+            data, prop_names, prop_name, c_idx, html,
+            v = $('#variable').val(),
+            t_res = $('#t_res').val();
+
+        //NOTE: currently we only allow one field for fields
+        //var years = $('#field_years').val();
+        var years = [$('#field_year').val()];
+        for (year_idx = 0; year_idx < years.length; year_idx++){
+            y = years[year_idx];
+            y_idx = $.inArray(y, statics.all_field_years);
+            data = window.layers[y_idx];
+            data.forEach(function(feat) {
+                if (feat.getProperty('OBJECTID') != feat_ID){
+                    //Continue to next feature
+                    return;
+                }
+                html = '';
+                html = 'Year: ' + year + '<br>';
+                //Populate the columnnames
+                prop_names = statics.stats_by_var_res[v][t_res];
+                //populate html with data
+                for (c_idx = 0; c_idx < prop_names.length; c_idx++){
+                    prop_name = prop_names[c_idx].toUpperCase();
+                    data_val = feat.getProperty(prop_name);
+                    html += prop_name + ': ' + data_val + '<br>'
+                }
+                html += '<br>';
+            });
+            $('#dataModal_data').append(html);
         }
-        $('#dataModal_data').append(html);
     },
     populate_layerInfoModalFromGeojson: function(e){
         // used on mouseover of a layer
@@ -219,8 +235,8 @@ MAP_APP = {
         //Clear out old modal content
         $('#layerInfoModal_data').html('');
         //Title
-        for (c_idx = 0; c_idx < statics.title_columns.length; c_idx++){
-            prop_name = statics.title_columns[c_idx];
+        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
+            prop_name = statics.title_cols[c_idx].toUpperCase();
             html += '<b>' + prop_name + '</b>'+ ': ';
             html += e.feature.getProperty(prop_name) + '<br>';
         }
@@ -232,7 +248,7 @@ MAP_APP = {
                 select: 'geometry',
                 from: ft_id
             },
-            options: statics.ft_styles[region],
+            options: js_statics.ft_styles[region],
             suppressInfoWindows: true
         });
         google.maps.event.addListener(layer, 'click', function(e) {
@@ -245,9 +261,9 @@ MAP_APP = {
     },
     set_ft_map_layer: function(idx){
         //Get the map layer
-        var region = $('#region').val(), 
+        var region = $('#region').val(),
             field_year = null;
-        if (region == 'fields'){
+        if (region.is_in(['US_fields', 'Mason'])) {
             field_year = $('#field_year').val();
         }
         var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
@@ -260,8 +276,8 @@ MAP_APP = {
         queryText = MAP_APP.get_fusiontableQueryText(ft_id, null, null, null);
         MAP_APP.zoomToFusiontable(queryText);
     },
-    set_geojson_map_layer: function(idx){
-        function processPoints(geometry, callback, thisArg) {
+    set_geojson_map_layer: function(year_idx){
+         function processPoints(geometry, callback, thisArg) {
             if (geometry instanceof google.maps.LatLng) {
                 callback.call(thisArg, geometry);
             } else if (geometry instanceof google.maps.Data.Point) {
@@ -272,36 +288,43 @@ MAP_APP = {
                 });
             }
         }
-        var region = $('#region').val(), field_year = null, 
-            featureStyle, bounds,
-            data = new google.maps.Data(), 
-            featureGeoJSON;
 
-        featureGeoJSON = 'static/geojson/test.geojson';
-        if (region == 'fields'){
-            field_year = $('#field_year').val();
-            featureGeoJSON = 'static/geojson/Mason_' + field_year + '.geojson';
-        }
-        //Load the geojson
+        var year_list = statics.all_field_years,
+            field_year = year_list[year_idx],
+            featureStyle, data, bounds;
+
+        featureGeoJSON = 'static/geojson/Mason_' + field_year + '.geojson';
+        //Load the geojson and store in data object
+        data = new google.maps.Data();
         data.loadGeoJson(featureGeoJSON);
-        featureStyle = {
-            fillColor: '#ADFF2F',
-            fillOpacity: 0.1,
-            strokeColor: '#002800',
-            stokeOpacity: 0.5,
-            strokeWeight: 0.5
-        };
+        //Only show data that are in current map bound
+        setTimeout(function() {
+            data.forEach(function(feature) {
+                var feat_bounds = new google.maps.LatLngBounds();
+                processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
+                var sw = feat_bounds.getSouthWest();
+                var ne = feat_bounds.getNorthEast();
+                if(!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
+                    data.remove(feature);
+                }
+            });
+        }, 500);
+        
+
+        featureStyle = MAP_APP.set_featureStyle(field_year);
         data.setStyle(featureStyle);
+
+        /*
         // zoom to show all the features
         bounds = new google.maps.LatLngBounds();
-
-        //window.map.data.addListener('addfeature', function(e) {
         data.addListener('addfeature', function(e) {
             processPoints(e.feature.getGeometry(), bounds.extend, bounds);
             window.map.fitBounds(bounds);
         });
+        */
+
         data.setMap(window.map);
-        window.layers[idx -1] = data;
+        window.layers[year_idx] = data;
         /*
         FIX ME: not working right
         //onmouseover show layer info
@@ -327,37 +350,78 @@ MAP_APP = {
             */
             //Hide old data modal
             $('#dataModal').modal('hide');
-            MAP_APP.populate_dataModalFromGeojson(e);
+            //MAP_APP.populate_dataModalFromGeojson(e, year_idx);
+            MAP_APP.initialize_dataModal(e);
+            MAP_APP.add_dataToModal(e);
             $('#dataModal').modal('toggle');
         });
-        //Load mapdata via geoJson
-        //var featureGeoJSON = 'static/geojson/Mason_' + field_year + '.geojson' ;
-        //featureGeoJSON defined in templates/scripts.html
-        //window.map.data.loadGeoJson(featureGeoJSON);
     },
-    delete_layer: function(idx){
-        if (window.layers.length && window.layers[idx - 1] != null){
-            window.layers[idx - 1].setMap(null);
-            window.layers[idx - 1] = null;
+    set_geojson_map_layers: function(){
+        var region = $('#region').val(),
+            field_years, field_year, y_idx,
+            featureStyle, bounds, data,
+            //data = new google.maps.Data(),
+            featureGeoJSON, idx;
+
+        //NOTE: currently we only allow single years for fields
+        field_years = [$('#field_year').val()];
+        //field_years = $('#field_years').val();
+        for (idx = 0; idx < field_years.length; idx++){
+            field_year = field_years[idx]
+            y_idx = $.inArray(field_year, statics.all_field_years);
+            MAP_APP.set_geojson_map_layer(y_idx);
         }
     },
+    delete_layer: function(idx){
+        if (window.layers.length && window.layers[idx] != null){
+            window.layers[idx].setMap(null);
+            window.layers[idx] = null;
+        }
+    },
+    delete_layers: function(){
+        var idx;
+        for (idx = 0; idx < window.layers.length; idx++){
+            MAP_APP.delete_layer(idx);
+        }
+    }
 }
 
 // Initialize the Google Map and add our custom layer overlay.
 var initialize_map = function() {
+    if ($('#app_name').val() == 'databaseTask'){
+        return;
+    }
+    //Set the map zoom dependent on region
+    var mapZoom = 10;
+    if ($('#region').val().not_in(['US_fields', 'Mason'])){
+        mapZoom = 4;
+    }
     // Map
     window.map = new google.maps.Map(document.getElementById('main-map'), {
-        center: {lat: 39.23, lng:-116.94},
-        zoom: 7,
+        center: {lat: 38.96, lng:-119.16},
+        zoom: mapZoom,
         mapTypeId: 'satellite'
     });
     //Need to set global vars for zooming and listeners
-    window.layers = [null];
-    // Drawing Manager
-    /*
-    var drawingManager = MAP_APP.setDrawingManager();
-    drawingManager.setMap(map);
-    */
-    //MAP_APP.set_ft_map_layer(1);
-    MAP_APP.set_geojson_map_layer(1);
+    window.layers = [];
+    for (var i = 0; i < statics.all_field_years.length; i++){
+        window.layers.push(null);
+    }
+    if (mapZoom >=8){
+        //MAP_APP.set_ft_map_layer(1);
+        MAP_APP.set_geojson_map_layers();
+    }
+
+
+    /* Only show fields at certain zoom level */
+    google.maps.event.addListener(window.map, 'zoom_changed', function() {
+        var zoom = window.map.getZoom();
+        if (zoom >=8){
+            //MAP_APP.set_ft_map_layer(1);
+            MAP_APP.set_geojson_map_layers();
+        }
+        else{
+            MAP_APP.delete_layers();
+        }
+    });
 }

@@ -1,0 +1,34 @@
+{
+    "ee_coll_name": {
+        "MODIS": {
+            "SSEBop":{
+                "decadel": "projects/usgs-ssebop/modis_et_dekadal",
+                "monthly": "projects/usgs-ssebop/modis_et_monthly",
+                "annual": "projects/usgs-ssebop/modis_et_annual" 
+            }
+        }
+    },
+    "start_end_mon_days_by_res": {
+    	"annual": ["01-01", "12-31"],
+    	"seasonal": ["04-01", "10-30"],
+    	"m01": ["01-01", "01-31"],
+    	"m02": ["02-01", "02-28"],
+    	"m03": ["03-01", "03-31"],
+    	"m04": ["04-01", "04-30"],
+    	"m05": ["05-01", "05-31"],
+    	"m06": ["06-01", "06-30"],
+    	"m07": ["07-01", "07-31"],
+    	"m08": ["08-01", "08-31"],
+    	"m09": ["09-01", "09-30"],
+    	"m10": ["10-01", "10-31"],
+    	"m11": ["11-01", "11-30"],
+    	"m12": ["12-01", "12-31"]
+    },
+    "t_stat_by_var": {
+        "et": "sum",
+        "etr": "sum",
+        "etrf": "sum",
+        "pr": "sum"
+    }
+}
+

@@ -4,7 +4,9 @@ import json
 
 from config import statics
 from config import GMAP_API_KEY as GMAP_API_KEY
+from config import GEO_DIR as GEO_DIR
 
+import databaseMethods
 
 def set_form_options(variables):
     form_options = {}
@@ -13,10 +15,11 @@ def set_form_options(variables):
             form_options[var_key] = statics['all_' + var_key]
     # Override default form options if needed
     var = variables['variable']
-    # Set field year form option
-    if var == 'fields':
-        years = statics['Fusiontables'].fields.keys()
-        form_options['field_year'] = years
+    region = variables['region']
+    # Set field years form option
+    if region in ['US_fields', 'Mason']:
+        form_options['field_years'] = statics['all_field_years']
+        form_options['field_year'] = statics['all_field_year']
     # Set datasets
     form_ds = {}
     for ds in statics['dataset_by_var'][var]:
@@ -37,6 +40,21 @@ def set_dates():
     return dates
 
 
+def get_et_data_from_db(tv):
+    rgn = tv['variables']['region']
+    if rgn in ['ee_map']:
+        return {}
+    # Load the data from the database
+    yr = tv['variables']['field_year']
+    ds = tv['variables']['dataset']
+    m = tv['variables']['et_model']
+    tr = tv['variables']['t_res']
+    geoFName = tv['GEO_DIR'] + rgn + '_' + yr + '.geojson'
+    DU = databaseMethods.Datatstore_Util(rgn, geoFName, yr, ds, m, tr)
+    db_key = DU.set_db_key()
+    return DU.read_from_db(db_key)
+
+
 def set_initial_template_values(RequestHandler, app_name, method):
     '''
     Args:
@@ -50,8 +68,19 @@ def set_initial_template_values(RequestHandler, app_name, method):
     Returns:
     tv: a dictionary of template variables
     '''
+    '''
+    #Database tasks are treated separately
+    if app_name == 'databaseTask':
+        tv = {
+            'GMAP_API_KEY': GMAP_API_KEY,
+            'app_name': app_name
+        }
+        return tv
+    '''
+    # All other apps
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
+        'GEO_DIR': GEO_DIR,
         'app_name': app_name,
         'variables': statics['variable_defaults'],
         'form_options': {},
@@ -69,4 +98,6 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv['variables'].update(dates)
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
+    # Get the et_data from the geo database
+    tv['et_data'] = get_et_data_from_db(tv)
     return tv

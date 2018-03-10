@@ -1,13 +1,36 @@
 function change_inRegion(region){
-	if (region == 'fields'){
-		$('#form-field_year').css('display', 'inline');
+	//Delete old layer
+	 MAP_APP.delete_layers();
+	if (region.is_in(['US_fields', 'Mason'])){
+		var field_year, y_idx;
+        //Field data
+		$('#form-field_years').css('display', 'inline');
+		$('#form-field_year').css('display', 'inline')
+        $('#form-aggregation_area').css('display', 'inline');
+        //Set new layer
+        //MAP_APP.set_ft_map_layer(1);
+        field_year = $('#field_year').val();
+        y_idx = $.inArray(field_year, statics.all_field_years);
+        MAP_APP.set_geojson_map_layer(y_idx);
 	}
-	else{
-		$('#form-field_year').css('display', 'none');
+	if (region == 'ee_map'){
+		//Maps
+		$('#form-field_years').css('display', 'none');
+        $('#form-field_year').css('display', 'none');
+		$('#form-aggregation_area').css('display', 'none');
+		//Get the map from db
 	}
 }
 
 function change_inVariable(variable){
+    if ($('#region').is_in(['US_fields', 'Mason'])){
+    	//Set new dataModal
+
+    }
+    if ($('#region').val() == 'ee_map'){
+    	//Get the map from db
+    }
+
 	//Set dataset
 	var datasets = statics.dataset_by_var[variable], 
 		ds, option;
@@ -36,7 +59,6 @@ function change_inVariable(variable){
 function change_inResolution(resolution){
 	var tps = statics.time_period_by_res[resolution], 
 		tp, tp_name, option;
-
 	$('#time_period > option').remove();
 	for (key in tps){
 		tp =  key;
@@ -45,4 +67,11 @@ function change_inResolution(resolution){
         option+='</option>';
         $('#time_period').append(option);
 	}
+    if ($('#region').is_in(['US_fields', 'Mason'])){
+    	//Set new dataModals
+
+    }
+    if ($('#region').val() == 'ee_map'){
+    	//Get the map from db
+    }
 }

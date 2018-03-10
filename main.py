@@ -9,24 +9,23 @@
 # instructions on how to set up authentication.
 
 import config
-
-import datetime
 import httplib2
 import json
 import logging
 import os
-import time
-from copy import deepcopy as deepcopy
+import glob
 
 import ee
 from google.appengine.api import urlfetch
-from google.appengine.ext import ndb
+# from google.appengine.ext import ndb
 import jinja2
 import webapp2
 
 from config import statics
+from config import p_statics
 import JinjaFilters
 import templateMethods
+import databaseMethods
 
 
 # SET STATICS
@@ -54,6 +53,7 @@ JINJA_ENVIRONMENT.filters['not_in'] = JinjaFilters.not_in
 JINJA_ENVIRONMENT.filters['make_string_range'] = JinjaFilters.make_string_range
 JINJA_ENVIRONMENT.filters['make_int_range'] = JinjaFilters.make_int_range
 JINJA_ENVIRONMENT.filters['divisibleby'] = JinjaFilters.divisibleby
+
 
 #####################################################
 #   RUN APP - RUNS THE APPLICATION AND SETS WEBPAGE
@@ -100,6 +100,7 @@ class defaultApplication(webapp2.RequestHandler):
 
         self.tv_logging(tv, 'GET')
         template = JINJA_ENVIRONMENT.get_template(self.appHTML)
+
         self.response.out.write(template.render(tv))
 
     def post(self):
@@ -157,8 +158,48 @@ class OpenET(defaultApplication):
     appHTML = 'open-et-1.html'
 
 
+class databaseTasks(webapp2.RequestHandler):
+    def get(self):
+        ee.Initialize(config.EE_CREDENTIALS)
+        ee.data.setDeadline(180000)
+        tv = templateMethods.set_initial_template_values(
+            self, 'databaseTask', 'GET')
+        tv['ee_stats'] = {}
+        # for geoFName in geo_files:
+        # FIX ME: only do 2003 for testing
+        # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
+        # for geoFName in geo_files
+        # for geoFName in geo_files[2:3]:
+        f_names = ['Mason_2003.geojson']
+        for geoFName in f_names:
+            logging.info('PROCESSING FILE ' + geoFName)
+            year = os.path.basename(geoFName).split('_')[1].split('.')[0]
+            geoID = os.path.basename(geoFName).split('_')[0]
+            for ds in ['MODIS']:
+                for et_model in ['SSEBop']:
+                        for t_res in ['monthly', 'annual']:
+                            DU = databaseMethods.Datatstore_Util(
+                                geoID, geoFName, year, ds, et_model, t_res)
+                            ee_stats = DU.get_et_json_data()
+                            # logging.info(ee_stats)
+                            tv_name = ('_').join([geoID, year, ds, et_model, t_res])
+                            tv['ee_stats'][tv_name] = ee_stats
+                            DU.add_to_db(ee_stats)
+            logging.info(geoFName + ' PROCESSED!')
+        template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
+        self.response.out.write(template.render(tv))
+
+    '''
+    def post(self):
+        tv = templateMethods.set_initial_template_values(
+            self, 'databaseTask', 'POST')
+        template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
+        self.response.out.write(template.render(tv))
+    '''
+
 app = webapp2.WSGIApplication([
-    ('/', OpenET)
+    ('/', OpenET),
+    ('/databaseTasks', databaseTasks)
 ],
     debug=True
 )

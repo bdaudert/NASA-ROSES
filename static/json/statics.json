@@ -1,55 +1,61 @@
 {
     "form_option_keys": [
-        "tool_action", "region", "field_year",
+        "tool_action", "region", "field_year", "field_years", "aggregation_area",
         "variable", "dataset", "et_model",
-        "temporal_resolution", "time_period"
+        "t_res", "time_period"
     ],
+    "variable_defaults":  {
+        "tool_action": "None",
+        "region": "Mason",
+        "aggregation_area": "",
+        "field_years": "2003",
+        "field_year": "2003",
+        "variable": "et",
+        "dataset": "MODIS",
+        "et_model": "SSEBop",
+        "t_res": "annual",
+        "time_period": "lastANN"
+    },
     "all_region":  {
-        "fields": "Fields",
-        "ee_map": "Map",
+        "US_fields": "US Fields",
+        "Mason": "Mason Valley",
+        "ee_map": "Map"
+    },
+    "all_aggregation_area": {
+        "": "None",
         "huc6": "HUC 6",
         "huc8": "HUC 8",
-        "state": "States",
-        "county": "Counties"
+        "county": "Counties",
+        "state": "States"
     },
-    "all_field_year": {
-        "2001": "2001",
-        "2002": "2002", 
-        "2003": "2003",
-        "2004": "2004", 
-        "2005": "2005",
-        "2006": "2006",
-        "2007": "2007",
-        "2008": "2008",
-        "2009": "2009",
-        "2010": "2010"
-    },
+    "all_field_years": [
+        "2003", "2004", "2005",
+        "2006", "2007", "2008", "2009", "2010"
+    ],
+    "all_field_year": [
+        "2003", "2004", "2005",
+        "2006", "2007", "2008", "2009", "2010"
+    ],
     "all_dataset":  {
         "MODIS": "MODIS",
         "Landsat": "Landsat",
         "gridMET": "UI METDATA/gridMET"
     },
     "all_variable":  {
-        "ET": "Actual ET",
-        "ETRF": "Fractional ET",
-        "ETR": "Reference ET",
-        "PPT": "Precipitation"
+        "et": "Actual ET",
+        "etrf": "Fractional ET",
+        "etr": "Reference ET",
+        "pr": "Precipitation"
     },
     "all_et_model":  {
-        "METRIC": "METRIC",
-        "ALEXI": "ALEXI",
-        "Dis-ALEXI": "Dis-ALEXI",
-        "SEBAL": "SEBAL",
-        "SIMS": "SIMS",
         "SSEBop": "SSEBop",
-        "JPL-PT": "JPL-PT",
+        "METRIC": "METRIC",
+        "SIMS": "SIMS",
         "ensemble": "Ensemble"
     },
-    "all_temporal_resolution":  {
-        "DLY": "Daily",
-        "M": "Monthly",
-        "SEASON": "Seasonal (Apr - Oct)",
-        "ANNUAL": "Annual"
+    "all_t_res":  {
+            "monthly": "Monthly",
+            "annual": "Annual"
     },
     "all_time_period":  {
         "last15days": "Last 15 days",
@@ -76,21 +82,11 @@
         "get_ts": "Get Time Series",
         "get_value": "Get Value"
     },
-    "variable_defaults":  {
-        "tool_action": "None",
-        "region": "fields",
-        "field_year": "",
-        "variable": "ET",
-        "dataset": "MODIS",
-        "et_model": "METRIC",
-        "temporal_resolution": "monthly",
-        "time_period": "lastANN"
-    },
     "dataset_by_var":  {
-        "ET": ["MODIS", "Landsat"],
-        "ETRF": ["MODIS", "Landsat"],
-        "ETR": [],
-        "PPT": ["gridMET"]
+        "et": ["MODIS", "Landsat"],
+        "etrf": ["MODIS", "Landsat"],
+        "etr": [],
+        "pr": ["gridMET"]
     },
     "response_vars": {
         "None": [],
@@ -99,7 +95,7 @@
         "get_value": ["point_value"]
     },
     "time_period_by_res":{
-        "DLY": {
+        "daily": {
             "last15days": "Last 15 days",
             "last30days": "Last 30 days",
             "last60days": "Last 60 days",
@@ -114,14 +110,11 @@
             "lastSGS": "Last Southern Growing Season (Nov - Mar)",
             "todateNWY": "Northern Water Year To Date",
             "todateSWY": "Southern Water Year To Date",
-            "todateCY": "Calendar Year Year To Date",
+            "todateCY": "Calendar Year To Date",
             "lastAnn": "Last Year",
             "custom": "Custom"
         },
-        "M": {
-            "last30days": "Last 30 days",
-            "last60days": "Last 60 days",
-            "last90days": "Last 90 days",
+        "monthly": {
             "lastDJF": "Last DJF (Dec-Feb)",
             "lastMAM": "Last MAM (Mar-May)",
             "lastJJA": "Last JJA (Jun - Aug)",
@@ -129,26 +122,31 @@
             "lastNWY": "Last Northern Water Year",
             "lastSWY": "Last Southern Water Year",
             "lastNGS": "Last Northern Growing Season (Apr - Oct)",
-            "lastSGS": "Last Southern Growing Season (Nov - Mar)",
-            "todateNWY": "Northern Water Year To Date",
-            "todateSWY": "Southern Water Year To Date",
-            "todateCY": "Calendar Year Year To Date",
-            "lastAnn": "Last Year",
-            "custom": "Custom"
+            "lastSGS": "Last Southern Growing Season (Nov - Mar)"
         },
-        "SEASON": {
+        "seasonal": {
             "lastNGS": "Last Northern Growing Season (Apr - Oct)",
-            "lastSGS": "Last Southern Growing Season (Nov - Mar)",
-            "custom": "Custom"
+            "lastSGS": "Last Southern Growing Season (Nov - Mar)"
         },
-        "ANNUAL": {
-            "todateCY": "Calendar Year Year To Date",
-            "lastAnn": "Last Year",
-            "custom": "Custom"
+        "annual": {
+            "lastAnn": "Last Year"
         }
     },
     "fusiontables":  {
-        "fields": {
+        "US_fields": {
+            "2001": "1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk",
+            "2002": "1ii2Z1UOoLYDaHHO72TBtt6LlJJ_4p-gZVEmJ-o4V",
+            "2003": "12tHBgFbDkogHUazB-Mxn-NOpW7gT_PZlGLorD6rY",
+            "2004": "15wHWbDct1jZUlgw3rOAfTT2ngdwCDPyUAfmK4F3q",
+            "2005": "1RGzGnR3v2eZ47_jzl5e8-4425DI_n7nJL8A38GEZ",
+            "2006": "1J6AKBJvTcL92Zi3VsUTPv6OmIxDrJl5-2nVcLkQ_",
+            "2007": "1p2VMpL2h_GxpwYW3hcUHmoLzrlB_l1jM7XxShSgG",
+            "2008": "1F6dmw2kkUE3KPFWmd4RMWDKSt-xPxOHtu__Jaqia",
+            "2009": "1gXcGPzZH4-b-nh8haKYlGy3DPCv8lWDi7yBqP2y5",
+            "2010": "1y3PrbGJ8rMtlh-O7MB9VZD8MqslFnaafnnSdE-je",
+            "2011": "1Tp068fF_M5PJV2f_tHa_l7QK9JkEhU2LHndmKY2t"
+        }, 
+        "Mason": {
             "2001": "1uwx9g-iylRjxXDFIDb0tra8kK75KItMz9cbOy1Kk",
             "2002": "1ii2Z1UOoLYDaHHO72TBtt6LlJJ_4p-gZVEmJ-o4V",
             "2003": "12tHBgFbDkogHUazB-Mxn-NOpW7gT_PZlGLorD6rY",
@@ -161,62 +159,71 @@
             "2010": "1y3PrbGJ8rMtlh-O7MB9VZD8MqslFnaafnnSdE-je",
             "2011": "1Tp068fF_M5PJV2f_tHa_l7QK9JkEhU2LHndmKY2t"
         }
+
     },
-    "ft_all_columnnames": {
-        "fields": [
+    "all_data_cols": {
+        "US_fields": [
             "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
             "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
             "PIXELCOUNT", "YEAR", "AREA",
-            "ETR_ANNUAL", "ET_ANNUAL", "ETRF_ANNUL", "PPT_ANNUAL", "NET_ANNUAL",
-            "ETR_SEASON", "ET_SEASON", "ETRF_SEASN", "PPT_SEASON", "NET_SEASON",
-            "START_MON", "END_MON",
-            "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
-            "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12",
-            "ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
-            "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12",
-            "ETRF_M01"
+            "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
+            "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
+            "start_mon", "end_mon",
+            "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
+            "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12",
+            "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
+            "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
+            "etrf_m01"
+        ],
+        "Mason": [
+            "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
+            "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
+            "PIXELCOUNT", "YEAR", "AREA",
+            "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
+            "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
+            "start_mon", "end_mon",
+            "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
+            "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12",
+            "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
+            "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
+            "etrf_m01"
         ]
     },
-    "title_columns": ["BASIN", "STATE","HUC8", "HUC8_NAME"],
-    "ft_cols":{
-        "ET": {
-            "DLY": [],
-            "ANNUAL": ["ET_ANNUAL"],
-            "M": ["ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
-                "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12"
+    "meta_cols": ["OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
+            "PIXELCOUNT", "YEAR", "AREA"],
+    "title_cols": ["BASIN", "STATE","HUC8", "HUC8_NAME"],
+    "stats_by_var_res":{
+        "et": {
+            "annual": ["et_annual"],
+            "monthly": ["et_m01", "et_m02" , "et_m03" , "et_m04",
+                "et_m05", "et_m06", "et_m07", "et_m08",
+                "et_m09", "et_m10", "et_m11", "et_m12"
             ],
-            "SEASON": ["ET_SEASON", "NET_SEASON"]
+            "seasonal": ["et_seasonal", "net_seasonal"]
         },
-        "ETR": {
-            "DLY": [],
-            "ANNUAL": ["ETR_ANNUAL", "ET_ANNUAL", "ETRF_ANNUL", "PPT_ANNUAL", "NET_ANNUAL"],
-            "M": [ "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
-                "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12"
+        "etr": {
+            "annual": ["etr_annual"],
+            "monthly": [ "etr_m01", "etr_m02", "etr_m03", "etr_m04",
+                "etr_m05", "etr_m06", "etr_m07", "etr_m08",
+                "etr_m09", "etr_m10", "etr_m11", "etr_m12"
             ],
-            "SEASON": ["ETR_SEASON", "NET_SEASON"]
+            "seasonal": ["etr_seasonal", "net_seasonal"]
         },
-        "ETRF": {
-            "DLY": [],
-            "ANNUAL": ["ETRF_ANNUL"],
-            "M": ["ETRF_M01"],
-            "SEASON": ["ETRF_SEASN", "NET_SEASON"]
-        },
-        "PPT": {
-            "DLY": [],
-            "ANNUAL": ["PPT_ANNUAL"],
-            "M": [ "ETR_M01", "ETR_M02", "ETR_M03", "ETR_M04", "ETR_M05",
-                "ETR_M06", "ETR_M07", "ETR_M08", "ETR_M09", "ETR_M10", "ETR_M11", "ETR_M12",
-                "ET_M01", "ET_M02" , "ET_M03" , "ET_M04", "ET_M05",
-                "ET_M06", "ET_M07", "ET_M08", "ET_M09", "ET_M10", "ET_M11", "ET_M12",
-                "ETRF_M01"
+        "etrf": {
+            "annual": ["etrf_annual"],
+            "monthly": ["etrf_m01", "etrf_m02", "etrf_m03", "etrf_m04",
+                "etrf_m05", "etrf_m06", "etrf_m07", "etrf_m08",
+                "etrf_m09", "etrf_m10", "etrf_m11", "etrf_m12"
             ],
-            "SEASON": [ "PPT_SEASON", "NET_SEASON"]
-        }
-    },
-     "ft_styles": {
-        "fields": {
-            "styleId": 2,
-            "templateId": 2
+            "seasonal": ["etrf_seasonal", "net_seasonal"]
+        },
+        "pr": {
+            "annual": ["pr_annual"],
+            "monthly": [ "pr_m01", "pr_m02", "pr_m03", "pr_m04",
+                "pr_m05", "pr_m06", "pr_m07", "pr_m08", 
+                "pr_m09", "pr_m10", "pr_m11", "pr_m12"
+            ],
+            "seasonal": [ "pr_seasonal", "net_seasonal"]
         }
     }
 }

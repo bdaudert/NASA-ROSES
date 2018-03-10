@@ -11,6 +11,7 @@ $(document).ready(function () {
     //-------------------------
     // Date Picker
     //-------------------------
+    /*
     $( "#start_date" ).datepicker({
         showOn: "button",
         buttonImage: "media/img/calendar_logo.gif",
@@ -44,40 +45,44 @@ $(document).ready(function () {
             $( "#start_date" ).datepicker( "option", "maxDate", selectedDate);
         }
     });
-
+    */
     
     $('#region').on('change', function(){
-    	//Delete old layer
-        MAP_APP.delete_layer(1);
-        //Set new layer
-        //MAP_APP.set_ft_map_layer(1);
-        MAP_APP.set_geojson_map_layer(1);
         change_inRegion($(this).val());
 
     });
-    $('#field_year').on('change', function(){
+    $('#field_years').on('change', function(){
     	//Delete old layer
-        MAP_APP.delete_layer(1);
-        //Set new layer
-        //MAP_APP.set_ft_map_layer(1);
-        MAP_APP.set_geojson_map_layer(1);
+        var years = $(this).val(), year_idx, year, 
+            year_list = statics.all_field_years;
+        for (year_idx = 0; year_idx < year_list.length; year_idx++){
+            year = year_list[year_idx];
+            if (year.is_in(years)){
+                MAP_APP.set_geojson_map_layer(year_idx);
+            }
+            else{
+                MAP_APP.delete_layer(year_idx);
+            }
+        }
+    });
+    $('#field_year').on('change', function(){
+        //Delete old layer
+        var field_year = $(this).val(), year_idx, year, 
+            year_list = statics.all_field_years;
+        for (year_idx = 0; year_idx < year_list.length; year_idx++){
+            year = year_list[year_idx];
+            if (field_year === year){
+                MAP_APP.set_geojson_map_layer(year_idx);
+            }
+            else{
+                MAP_APP.delete_layer(year_idx);
+            }
+        }
     });
     $('#variable').on('change', function(){
-    	//Delete old layer
-        MAP_APP.delete_layer(1);
-        //Set new layer
-        //MAP_APP.set_ft_map_layer(1);
-        MAP_APP.set_geojson_map_layer(1);
-        //Set the dataset options
         change_inVariable($(this).val());
     });
-    $('#temporal_resolution').on('change', function(){
-    	//Delete old layer
-        MAP_APP.delete_layer(1);
-        //Set new layer
-        //MAP_APP.set_ft_map_layer(1);
-        MAP_APP.set_geojson_map_layer(1);
-    	//Set time_period
+    $('#t_res').on('change', function(){
         change_inResolution($(this).val());
     });
     
