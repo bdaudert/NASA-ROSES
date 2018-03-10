@@ -177,7 +177,7 @@ class databaseTasks(webapp2.RequestHandler):
             geoID = os.path.basename(geoFName).split('_')[0]
             for ds in ['MODIS']:
                 for et_model in ['SSEBop']:
-                        for t_res in ['monthly', 'annual']:
+                        for t_res in ['annual']:
                             DU = databaseMethods.Datatstore_Util(
                                 geoID, geoFName, year, ds, et_model, t_res)
                             ee_stats = DU.get_et_json_data()
