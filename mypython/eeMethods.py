@@ -228,8 +228,6 @@ class ET_Util(object):
         return et_data
 
     def get_et_stats(self):
-        coll = self.get_collection()
-        geo_data = self.read_data_from_bucket()
         '''
         with open(self.geoFName, 'r') as geo_infile:
             geo_data = json.load(geo_infile)
@@ -238,11 +236,18 @@ class ET_Util(object):
             'type': 'FeatureCollection',
             'features': []
         }
-        # FIX ME
-        # Right now we get error for feat 25 in Mason_2003
-        # Image.reduceRegion: Inverted hole cannot be transformed
+
+        geo_data = self.read_data_from_bucket()
+        if 'features' not in geo_data.keys():
+            logging.error('NO DATA FOUND IN BUCKET, FILE: ' + self.geoFName)
+            return json_data
+        coll = self.get_collection()
+        feats = geo_data['features']
+        num_feats = len(geo_data['features'])
+        print('LOOOKK')
+        print num_feats
         # for f_idx, geo_feat in enumerate(geo_data['features'][0:1]):
-        for f_idx, geo_feat in enumerate(geo_data['features']):
+        for f_idx, geo_feat in enumerate(feats[0:num_feats]):
             logging.info('PROCESSING FEATURE ' + str(f_idx + 1))
             feat = {
                 'type': 'Feature',
