@@ -178,11 +178,14 @@ class databaseTasks(webapp2.RequestHandler):
             for ds in ['MODIS']:
                 for et_model in ['SSEBop']:
                         for t_res in ['annual']:
+                            msg = (', ').join([ds, et_model, t_res])
+                            logging.info('PROCESSING ' + msg)
                             DU = databaseMethods.Datatstore_Util(
                                 geoID, geoFName, year, ds, et_model, t_res)
                             ee_stats = DU.get_et_json_data()
                             # logging.info(ee_stats)
-                            tv_name = ('_').join([geoID, year, ds, et_model, t_res])
+                            name_l = [geoID, year, ds, et_model, t_res]
+                            tv_name = ('_').join(name_l)
                             tv['ee_stats'][tv_name] = ee_stats
                             DU.add_to_db(ee_stats)
             logging.info(geoFName + ' PROCESSED!')

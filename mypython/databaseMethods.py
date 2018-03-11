@@ -10,7 +10,12 @@ import eeMethods
 
 class DATA(ndb.Model):
     data = ndb.JsonProperty(compressed=True)
-    date_added = ndb.DateTimeProperty(auto_now_add=True)
+    geoID = ndb.StringProperty()
+    year = ndb.IntegerProperty()
+    dataset = ndb.StringProperty()
+    et_model = ndb.StringProperty()
+    t_res = ndb.StringProperty()
+    # date_added = ndb.DateTimeProperty(auto_now_add=True)
 
 
 class METADATA(ndb.Model):
@@ -73,7 +78,13 @@ class Datatstore_Util(object):
             return
         logging.info('ADDING DATA ' + db_key)
         # Define an instance of DATA
-        data_obj = DATA(id=db_key, data=json_data)
+        data_obj = DATA(id=db_key,
+                        data=json_data,
+                        geoID=self.geoID,
+                        year=int(self.year),
+                        dataset=self.dataset,
+                        et_model=self.et_model,
+                        t_res=self.t_res)
 
         # Put the data into data store
         try:
@@ -81,7 +92,7 @@ class Datatstore_Util(object):
         except Exception as e:
             msg = 'Datatstore_Util ERROR when adding to database ' + str(e)
             logging.error(msg)
-
+    '''
     def read_from_db(self, db_key):
         data_obj = ndb.Key('DATA', db_key).get()
         if not data_obj or not data_obj.data:
@@ -90,6 +101,14 @@ class Datatstore_Util(object):
         json_data = data_obj.data
         # json_data = json.loads(data_obj.data)
         return json_data
+    '''
 
-
-
+    def read_from_db(self):
+        qry = DATA.query(DATA.geoID == self.geoID,
+                         DATA.year == int(self.year),
+                         DATA.dataset == self.dataset,
+                         DATA.et_model == self.et_model,
+                         DATA.t_res == self.t_res)
+        json_data = qry.fetch()[0].data
+        logging.info('READ DATA FROM DB')
+        return json_data

@@ -100,8 +100,8 @@ class ET_Util(object):
         '''
         dS_obj = ee.Date(dS_str, 'GMT')
         dE_obj = ee.Date(dE_str, 'GMT')
-        logging.debug('EE CALL: collection.filterDate({}, {})'
-                      .format(dS_str, dE_str))
+        # logging.debug('EE CALL: collection.filterDate({}, {})'
+        #              .format(dS_str, dE_str))
         f_coll = coll.map(lambda x: x.double())\
             .filterDate(dS_obj, dE_obj.advance(1, 'day'))
         return f_coll
@@ -119,7 +119,7 @@ class ET_Util(object):
             "pr": "Precipitation"
         :return: ee.ImageCollection filtered by variable
         '''
-        logging.debug('EE CALL: collection.select({})'.format(variable))
+        # logging.debug('EE CALL: collection.select({})'.format(variable))
         return coll.select([variable], [variable])
 
     def reduce_collection_to_img(self, coll, stat):
@@ -182,10 +182,10 @@ class ET_Util(object):
         for v in var_list:
             # Filter collection by variable
             c_var = self.filter_coll_by_var(coll, v)
-            logging.info('PROCESSING VARIABLE ' + str(v))
+            # logging.info('PROCESSING VARIABLE ' + str(v))
             stat_names = statics['stats_by_var_res'][v][self.t_res]
             for stat_name in stat_names:
-                logging.info('PROCESSING STATISTIC ' + str(stat_name))
+                # logging.info('PROCESSING STATISTIC ' + str(stat_name))
                 res = stat_name.split('_')[1]
                 # Filer collection by date
                 dS_str = str(self.year) + '-' +\
@@ -244,11 +244,9 @@ class ET_Util(object):
         coll = self.get_collection()
         feats = geo_data['features']
         num_feats = len(geo_data['features'])
-        print('LOOOKK')
-        print num_feats
         # for f_idx, geo_feat in enumerate(geo_data['features'][0:1]):
         for f_idx, geo_feat in enumerate(feats[0:num_feats]):
-            logging.info('PROCESSING FEATURE ' + str(f_idx + 1))
+            # logging.info('PROCESSING FEATURE ' + str(f_idx + 1))
             feat = {
                 'type': 'Feature',
                 'geometry': {

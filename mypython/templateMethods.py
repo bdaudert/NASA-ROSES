@@ -8,6 +8,7 @@ from config import GEO_DIR as GEO_DIR
 
 import databaseMethods
 
+
 def set_form_options(variables):
     form_options = {}
     for var_key, dflt in variables.iteritems():
@@ -51,8 +52,10 @@ def get_et_data_from_db(tv):
     tr = tv['variables']['t_res']
     geoFName = tv['GEO_DIR'] + rgn + '_' + yr + '.geojson'
     DU = databaseMethods.Datatstore_Util(rgn, geoFName, yr, ds, m, tr)
-    db_key = DU.set_db_key()
-    return DU.read_from_db(db_key)
+    # db_key = DU.set_db_key()
+    # return DU.read_from_db(db_key)
+    json_data = DU.read_from_db()
+    return json_data
 
 
 def set_initial_template_values(RequestHandler, app_name, method):
@@ -99,5 +102,9 @@ def set_initial_template_values(RequestHandler, app_name, method):
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
     # Get the et_data from the geo database
-    tv['et_data'] = get_et_data_from_db(tv)
+    try:
+        tv['et_data'] = get_et_data_from_db(tv)
+    except:
+        tv['et_data'] = {}
+    # tv['et_data'] = get_et_data_from_db(tv)
     return tv

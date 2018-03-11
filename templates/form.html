@@ -74,7 +74,7 @@
                 </div>
                 <div id='form-model' 
                 {% if variables.variable|not_in('et,etrf') %}style="display:none;"{%endif%}>
-                    <b>ET Model: </b>
+                    <b>ET Model: </b><br>
                     <select class="et_model" id="et_model" name="et_model">
                         {% for x,y in form_options.et_model.items() %}
                         <option value="{{ x }}" 
