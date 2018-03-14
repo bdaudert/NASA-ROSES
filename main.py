@@ -147,7 +147,9 @@ class defaultApplication(webapp2.RequestHandler):
 
         # Skip form values and maxDates
         log_values = {
-            k: v for k, v in tv.items() if not k.startswith('form')
+            k: v for k, v in tv.items()
+            if not k.startswith('form') and
+            not k.startswith('et_data')
         }
         # Log all values at once
         logging.info('{}'.format(log_values))
@@ -177,7 +179,7 @@ class databaseTasks(webapp2.RequestHandler):
             geoID = os.path.basename(geoFName).split('_')[0]
             for ds in ['MODIS']:
                 for et_model in ['SSEBop']:
-                        for t_res in ['annual']:
+                        for t_res in ['annual', 'monthly']:
                             msg = (', ').join([ds, et_model, t_res])
                             logging.info('PROCESSING ' + msg)
                             DU = databaseMethods.Datatstore_Util(

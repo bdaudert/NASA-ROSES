@@ -102,9 +102,13 @@ def set_initial_template_values(RequestHandler, app_name, method):
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
     # Get the et_data from the geo database
+
+    '''
     try:
         tv['et_data'] = get_et_data_from_db(tv)
     except:
         tv['et_data'] = {}
-    # tv['et_data'] = get_et_data_from_db(tv)
+    '''
+    tv['et_data'] = get_et_data_from_db(tv)
+    
     return tv
