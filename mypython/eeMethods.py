@@ -61,7 +61,6 @@ class ET_Util(object):
         '''
         f = self.geo_bucket_url + self.geoFName
         contents = json.load(urllib2.urlopen(f))
-        # print(contents)
         return contents
 
     def get_collection(self):

@@ -104,11 +104,23 @@ class Datatstore_Util(object):
     '''
 
     def read_from_db(self):
+        json_data = {}
         qry = DATA.query(DATA.geoID == self.geoID,
                          DATA.year == int(self.year),
                          DATA.dataset == self.dataset,
                          DATA.et_model == self.et_model,
                          DATA.t_res == self.t_res)
-        json_data = qry.fetch()[0].data
+
+        # Spits out a list of query results
+        query_data = qry.fetch()
+        if len(query_data) > 0:
+            try:
+                json_data = query_data[0].data
+            except Exception as e:
+                logging.error('ERROR in et_data retrieval!')
+                logging.error('Query has no attribute data!')
+                return {}
+        else:
+            return {}
         logging.info('READ DATA FROM DB')
         return json_data
