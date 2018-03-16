@@ -229,7 +229,7 @@ MAP_APP = {
     },
     populate_layerInfoModalFromGeojson: function(e){
         // used on mouseover of a layer
-        // e is the click event
+        // e is the mouseover event
         var html, c_idx, prop_name;
         html = '';
         //Clear out old modal content
@@ -293,10 +293,27 @@ MAP_APP = {
             field_year = year_list[year_idx],
             featureStyle, data, bounds;
 
-        featureGeoJSON = 'static/geojson/Mason_' + field_year + '.geojson';
-        //Load the geojson and store in data object
         data = new google.maps.Data();
-        data.loadGeoJson(featureGeoJSON);
+
+        /*
+        LOAD THE DATA FROM THE TEMPLATE VARIABLE
+        json_data global var that hold et data and 
+        geometry info,  defined in scripts.html
+        */
+        if (Object.keys(json_data).length != 0){
+            data.addGeoJson(json_data);
+            
+        }
+        else{
+            /*
+            No data could be pulled from the db, read data from 
+            statics dir for now
+            FIX ME: we should always have data from the db
+            stored in tv var json_data
+            */
+            f_name = 'static/geojson/Mason_' + field_year + '.geojson';
+            data.loadGeoJson(f_name);
+        }
         //Only show data that are in current map bound
         setTimeout(function() {
             data.forEach(function(feature) {

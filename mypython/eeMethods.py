@@ -6,11 +6,11 @@ import urllib2
 
 import ee
 import cloudstorage as gcs
-from google.appengine.api import app_identity
+# from google.appengine.api import app_identity
 
 from config import p_statics
 from config import statics
-from config import GEO_BUCKET_NAME
+# from config import GEO_BUCKET_NAME
 from config import GEO_BUCKET_URL
 import Utils
 
@@ -27,23 +27,21 @@ gcs.set_default_retry_params(my_default_retry_params)
 
 class ET_Util(object):
     '''
-    Computes ET statistics
+    Computes ET statistics for all temporal resolutions
     Args:
-        :geoID Unique ID of geojson obbject, e.g. USFields
+        :region Unique ID of geojson obbject, e.g. USFields
         :geoFName geojson file name
         :year year of geojson dataset, might be ALL if not USFields
             USField geojsons change every year
         :dataset MODSI, Landsat or gridMET
         :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
-        :t_res temporal resolution, e.g. annual, seasonal, monthly
     '''
-    def __init__(self, geoID, geoFName, year, dataset, et_model, t_res):
-        self.geoID = geoID
-        self.geoFName = geoFName
+    def __init__(self, region, year, dataset, et_model):
+        self.region = region
+        self.geoFName = region + '_' + year + '.geojson'
         self.year = year
         self.dataset = dataset
         self.et_model = et_model
-        self.t_res = t_res  # temporal resolution
         self.missing_value = -9999
         self.geo_bucket_url = GEO_BUCKET_URL
 
@@ -63,21 +61,16 @@ class ET_Util(object):
         contents = json.load(urllib2.urlopen(f))
         return contents
 
-    def get_collection(self):
+    def get_collection(self, t_res):
         '''
-        Gets the ee collection (by nameand tem_res)
+        Gets the ee collection (by name)
         :param dataset: MODIS or LANDSAT
         :param model: et model: SSEBop, SIMS, METRIC etc
-        :param t_res: temporal resolution
-            "monthly": "Monthly",
-            "seasonal": "Seasonal (Apr - Oct)",
-            "annual": "Annual"
         :return: ee.ImageCollection
         '''
         ds = self.dataset
         m = self.et_model
-        r = self.t_res
-        coll_name = p_statics['ee_coll_name'][ds][m][r]
+        coll_name = p_statics['ee_coll_name'][ds][m][t_res]
         logging.debug('EE CALL: ee.ImageCollection({})'.format(coll_name))
         coll = ee.ImageCollection(coll_name)
         return coll
@@ -156,7 +149,7 @@ class ET_Util(object):
                 props[prop] = geo_props[prop]
         return props
 
-    def compute_et_stats(self, coll, geom, geo_props):
+    def compute_et_stats(self, coll, var, geom, t_res):
         def average_over_region(img):
             '''
             Averages the ee.Image over all pixels of ee.Geometry
@@ -174,63 +167,72 @@ class ET_Util(object):
 
         et_data = {}
         imgs = []
+        # logging.info('PROCESSING VARIABLE ' + str(v))
+        stat_names = statics['stats_by_var_res'][var][t_res]
+        for stat_name in stat_names:
+            # logging.info('PROCESSING STATISTIC ' + str(stat_name))
+            res = stat_name.split('_')[1]
+            # Filer collection by date
+            dS_str = str(self.year) + '-' +\
+                p_statics['start_end_mon_days_by_res'][res][0]
+            dE_str = str(self.year) + '-' +\
+                p_statics['start_end_mon_days_by_res'][res][1]
+            coll_t = self.filter_coll_by_dates(coll, dS_str, dE_str)
+            temporal_stat = p_statics['t_stat_by_var']
+            img = self.reduce_collection_to_img(coll_t, temporal_stat)
+            # feats = ee.FeatureCollection(average_over_region(img))
+            imgs.append(img)
+        ee_imgs = ee.ImageCollection(imgs)
+        feats = ee.FeatureCollection(ee_imgs.map(average_over_region))
+
+        try:
+            f_data = feats.getInfo()
+        except Exception as e:
+            f_data = {'features': []}
+            logging.error(e)
+
+        for stat_idx, stat in enumerate(stat_names):
+            if 'features' not in f_data.keys() or not f_data['features']:
+                et_data[stat] = -9999
+                continue
+            try:
+                feat = f_data['features'][stat_idx]
+            except:
+                et_data[stat] = -9999
+                continue
+
+            if 'properties' not in feat.keys():
+                et_data[stat] = -9999
+                continue
+            try:
+                val = feat['properties'][var]
+                et_data[stat] = round(val, 4)
+            except:
+                et_data[stat] = -9999
+                continue
+        return et_data
+
+    def get_features_geo_and_et_data(self):
+        '''
+        Gets geo features from geojson file
+        and computes the et stats for all variables
+        and temporal resolutions
+        '''
         # FIX ME: add more vars as data comes online
         # MODIS SSEBop only has et right now
         # var_list = statics['stats_by_var_res'].keys()
+        t_res_list = statics['all_t_res'].keys()
         var_list = ['et']
-        for v in var_list:
-            # Filter collection by variable
-            c_var = self.filter_coll_by_var(coll, v)
-            # logging.info('PROCESSING VARIABLE ' + str(v))
-            stat_names = statics['stats_by_var_res'][v][self.t_res]
-            for stat_name in stat_names:
-                # logging.info('PROCESSING STATISTIC ' + str(stat_name))
-                res = stat_name.split('_')[1]
-                # Filer collection by date
-                dS_str = str(self.year) + '-' +\
-                    p_statics['start_end_mon_days_by_res'][res][0]
-                dE_str = str(self.year) + '-' +\
-                    p_statics['start_end_mon_days_by_res'][res][1]
-                c_t = self.filter_coll_by_dates(c_var, dS_str, dE_str)
-                temporal_stat = p_statics['t_stat_by_var']
-                img = self.reduce_collection_to_img(c_t, temporal_stat)
-                # feats = ee.FeatureCollection(average_over_region(img))
-                imgs.append(img)
-            ee_imgs = ee.ImageCollection(imgs)
-            feats = ee.FeatureCollection(ee_imgs.map(average_over_region))
 
-            try:
-                f_data = feats.getInfo()
-            except Exception as e:
-                f_data = {'features': []}
-                logging.error(e)
+        # Get the colllections so we don't have to do it for each feature
+        colls = {}
+        for t_res in t_res_list:
+            coll = self.get_collection(t_res)
+            for var in var_list:
+                coll = self.filter_coll_by_var(coll, var)
+                colls[t_res + '_' + var] = coll
 
-            for stat_idx, stat in enumerate(stat_names):
-                if 'features' not in f_data.keys() or not f_data['features']:
-                    et_data[stat] = -9999
-                    continue
-                try:
-                    feat = f_data['features'][stat_idx]
-                except:
-                    et_data[stat] = -9999
-                    continue
-
-                if 'properties' not in feat.keys():
-                    et_data[stat] = -9999
-                    continue
-                try:
-                    val = feat['properties'][v]
-                    et_data[stat] = round(val, 4)
-                except:
-                    et_data[stat] = -9999
-                    continue
-        return et_data
-
-    def get_et_stats(self):
-        '''
-        with open(self.geoFName, 'r') as geo_infile:
-            geo_data = json.load(geo_infile)
-        '''
+        # Initialize data output
         json_data = {
             'type': 'FeatureCollection',
             'features': []
@@ -240,11 +242,9 @@ class ET_Util(object):
         if 'features' not in geo_data.keys():
             logging.error('NO DATA FOUND IN BUCKET, FILE: ' + self.geoFName)
             return json_data
-        coll = self.get_collection()
-        feats = geo_data['features']
-        num_feats = len(geo_data['features'])
+
         # for f_idx, geo_feat in enumerate(geo_data['features'][0:1]):
-        for f_idx, geo_feat in enumerate(feats[0:num_feats]):
+        for f_idx, geo_feat in enumerate(geo_data['features']):
             # logging.info('PROCESSING FEATURE ' + str(f_idx + 1))
             feat = {
                 'type': 'Feature',
@@ -254,10 +254,15 @@ class ET_Util(object):
             }
             geom_coords = geo_feat['geometry']['coordinates']
             geom_coords = [Utils.orient_poly_ccw(c) for c in geom_coords]
-            feat['geometry']['coordinates'] = geom_coords
             geom = ee.Geometry.Polygon(geom_coords)
+            feat['geometry']['coordinates'] = geom_coords
             geo_props = geo_feat['properties']
             feat['properties'] = self.set_geo_properties(geo_props)
-            feat['properties']['et_data'] = self.compute_et_stats(coll, geom, geo_props)
+            feat['properties']['et_data'] = {}
+            for t_res in t_res_list:
+                for var in var_list:
+                    coll = colls[t_res + '_' + var]
+                    et_data = self.compute_et_stats(coll, var, geom, t_res)
+                    feat['properties']['et_data'].update(et_data)
             json_data['features'].append(feat)
         return json_data

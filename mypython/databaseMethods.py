@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import logging
-
+import json
 
 from google.appengine.ext import ndb
 
@@ -10,11 +10,10 @@ import eeMethods
 
 class DATA(ndb.Model):
     data = ndb.JsonProperty(compressed=True)
-    geoID = ndb.StringProperty()
+    region = ndb.StringProperty()
     year = ndb.IntegerProperty()
     dataset = ndb.StringProperty()
     et_model = ndb.StringProperty()
-    t_res = ndb.StringProperty()
     # date_added = ndb.DateTimeProperty(auto_now_add=True)
 
 
@@ -30,22 +29,17 @@ class Datatstore_Util(object):
     Method:
         - The base query is defined from relevant template values
     Args:
-        :geoID Unique ID of geojson obbject, e.g. USFields
-        :geoFName geojson file name
+        :region Unique ID of geojson obbject, e.g. USFields
         :year year of geojson dataset, might be ALL if not USFields
             USField geojsons change every year
         :dataset MODSI, Landsat or gridMET
         :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
-        :t_res temporal resolution, e.g. annual, seasonal, monthly
-
     '''
-    def __init__(self, geoID, geoFName, year, dataset, et_model, t_res):
-        self.geoID = geoID
-        self.geoFName = geoFName
+    def __init__(self, region, year, dataset, et_model):
+        self.region = region
         self.year = year
         self.dataset = dataset
         self.et_model = et_model
-        self.t_res = t_res  # temporal resolution
 
     def get_et_json_data(self):
         '''
@@ -55,19 +49,18 @@ class Datatstore_Util(object):
         :return
         '''
         ET_helper = eeMethods.ET_Util(
-            self.geoID, self.geoFName, self.year,
-            self.dataset, self.et_model, self.t_res
+            self.region, self.year,
+            self.dataset, self.et_model
         )
-        ee_stats = ET_helper.get_et_stats()
-        return ee_stats
+        json_data = ET_helper.get_features_geo_and_et_data()
+        return json_data
 
     def set_db_key(self):
-        ID = self.geoID
+        ID = self.region
         y = self.year
         ds = self.dataset
         m = self.et_model
-        r = self.t_res
-        db_key = ('_').join([ID, ds, m, r, y])
+        db_key = ('_').join([ID, ds, m, y])
         return db_key
 
     def add_to_db(self, json_data):
@@ -80,11 +73,10 @@ class Datatstore_Util(object):
         # Define an instance of DATA
         data_obj = DATA(id=db_key,
                         data=json_data,
-                        geoID=self.geoID,
+                        region=self.region,
                         year=int(self.year),
                         dataset=self.dataset,
-                        et_model=self.et_model,
-                        t_res=self.t_res)
+                        et_model=self.et_model)
 
         # Put the data into data store
         try:
@@ -105,20 +97,20 @@ class Datatstore_Util(object):
 
     def read_from_db(self):
         json_data = {}
-        qry = DATA.query(DATA.geoID == self.geoID,
+        qry = DATA.query(DATA.region == self.region,
                          DATA.year == int(self.year),
                          DATA.dataset == self.dataset,
-                         DATA.et_model == self.et_model,
-                         DATA.t_res == self.t_res)
+                         DATA.et_model == self.et_model)
 
         # Spits out a list of query results
         query_data = qry.fetch()
         if len(query_data) > 0:
             try:
-                json_data = query_data[0].data
+                json_data = json.dumps(query_data[0].data)
             except Exception as e:
                 logging.error('ERROR in et_data retrieval!')
                 logging.error('Query has no attribute data!')
+                logging.error(str(e))
                 return {}
         else:
             return {}
