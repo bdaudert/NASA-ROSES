@@ -149,7 +149,7 @@ class defaultApplication(webapp2.RequestHandler):
         log_values = {
             k: v for k, v in tv.items()
             if not k.startswith('form') and
-            not k.startswith('et_data')
+            not k.startswith('json_data')
         }
         # Log all values at once
         logging.info('{}'.format(log_values))
@@ -166,41 +166,29 @@ class databaseTasks(webapp2.RequestHandler):
         ee.data.setDeadline(180000)
         tv = templateMethods.set_initial_template_values(
             self, 'databaseTask', 'GET')
-        tv['ee_stats'] = {}
+        tv['json_data'] = {}
         # for geoFName in geo_files:
         # FIX ME: only do 2003 for testing
         # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
         # for geoFName in geo_files
         # for geoFName in geo_files[2:3]:
-        f_names = ['Mason_2003.geojson']
-        for geoFName in f_names:
-            logging.info('PROCESSING FILE ' + geoFName)
-            year = os.path.basename(geoFName).split('_')[1].split('.')[0]
-            geoID = os.path.basename(geoFName).split('_')[0]
-            for ds in ['MODIS']:
-                for et_model in ['SSEBop']:
-                        for t_res in ['annual', 'monthly']:
-                            msg = (', ').join([ds, et_model, t_res])
-                            logging.info('PROCESSING ' + msg)
-                            DU = databaseMethods.Datatstore_Util(
-                                geoID, geoFName, year, ds, et_model, t_res)
-                            ee_stats = DU.get_et_json_data()
-                            # logging.info(ee_stats)
-                            name_l = [geoID, year, ds, et_model, t_res]
-                            tv_name = ('_').join(name_l)
-                            tv['ee_stats'][tv_name] = ee_stats
-                            DU.add_to_db(ee_stats)
-            logging.info(geoFName + ' PROCESSED!')
+        for region in ['Mason']:
+            for year in ['2003']:
+                logging.info('PROCESSING Region/Year ' + region + '/' + year)
+                for ds in ['MODIS']:
+                    for et_model in ['SSEBop']:
+                        DU = databaseMethods.Datatstore_Util(
+                            region, year, ds, et_model)
+                        name_l = [region, year, ds, et_model]
+                        tv_name = ('_').join(name_l)
+                        logging.info('PROCESSING ' + tv_name)
+                        json_data = DU.get_et_json_data()
+                        tv['json_data'][tv_name] = json_data
+                        DU.add_to_db(json_data)
+                logging.info(region + '/' + year + ' PROCESSED!')
         template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
         self.response.out.write(template.render(tv))
 
-    '''
-    def post(self):
-        tv = templateMethods.set_initial_template_values(
-            self, 'databaseTask', 'POST')
-        template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
-        self.response.out.write(template.render(tv))
-    '''
 
 app = webapp2.WSGIApplication([
     ('/', OpenET),

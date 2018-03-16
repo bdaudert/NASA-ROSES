@@ -23,7 +23,7 @@ function change_inRegion(region){
 }
 
 function change_inVariable(variable){
-    if ($('#region').is_in(['US_fields', 'Mason'])){
+    if ($('#region').val().is_in(['US_fields', 'Mason'])){
     	//Set new dataModal
 
     }
@@ -67,7 +67,7 @@ function change_inResolution(resolution){
         option+='</option>';
         $('#time_period').append(option);
 	}
-    if ($('#region').is_in(['US_fields', 'Mason'])){
+    if ($('#region').val().is_in(['US_fields', 'Mason'])){
     	//Set new dataModals
 
     }

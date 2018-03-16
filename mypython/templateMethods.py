@@ -49,9 +49,7 @@ def get_et_data_from_db(tv):
     yr = tv['variables']['field_year']
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
-    tr = tv['variables']['t_res']
-    geoFName = tv['GEO_DIR'] + rgn + '_' + yr + '.geojson'
-    DU = databaseMethods.Datatstore_Util(rgn, geoFName, yr, ds, m, tr)
+    DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
     # db_key = DU.set_db_key()
     # return DU.read_from_db(db_key)
     json_data = DU.read_from_db()
@@ -71,16 +69,7 @@ def set_initial_template_values(RequestHandler, app_name, method):
     Returns:
     tv: a dictionary of template variables
     '''
-    '''
-    #Database tasks are treated separately
-    if app_name == 'databaseTask':
-        tv = {
-            'GMAP_API_KEY': GMAP_API_KEY,
-            'app_name': app_name
-        }
-        return tv
-    '''
-    # All other apps
+
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
         'GEO_DIR': GEO_DIR,
@@ -102,13 +91,8 @@ def set_initial_template_values(RequestHandler, app_name, method):
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
     # Get the et_data from the geo database
-
-    '''
-    try:
-        tv['et_data'] = get_et_data_from_db(tv)
-    except:
-        tv['et_data'] = {}
-    '''
-    tv['et_data'] = get_et_data_from_db(tv)
-    
+    if app_name != 'dataBaseTasks':
+        tv['json_data'] = get_et_data_from_db(tv)
+    else:
+        tv['json_data'] = {}
     return tv
