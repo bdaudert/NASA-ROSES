@@ -115,7 +115,7 @@ class ET_Util(object):
         return coll.select([variable], [variable])
 
     def reduce_collection_to_img(self, coll, stat):
-    	'''
+        '''
         Reduces the ee.ImageCollection to a single ee image by applying
         the statistic stat
 
@@ -266,3 +266,4 @@ class ET_Util(object):
                     feat['properties']['et_data'].update(et_data)
             json_data['features'].append(feat)
         return json_data
+

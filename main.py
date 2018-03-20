@@ -167,11 +167,9 @@ class databaseTasks(webapp2.RequestHandler):
         tv = templateMethods.set_initial_template_values(
             self, 'databaseTask', 'GET')
         tv['json_data'] = {}
-        # for geoFName in geo_files:
         # FIX ME: only do 2003 for testing
         # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
-        # for geoFName in geo_files
-        # for geoFName in geo_files[2:3]:
+        # for geoFName in geo_files:
         for region in ['Mason']:
             for year in ['2003']:
                 logging.info('PROCESSING Region/Year ' + region + '/' + year)

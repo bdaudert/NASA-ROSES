@@ -96,3 +96,4 @@ def set_initial_template_values(RequestHandler, app_name, method):
     else:
         tv['json_data'] = {}
     return tv
+

@@ -302,6 +302,7 @@ MAP_APP = {
         */
         if (Object.keys(json_data).length != 0){
             data.addGeoJson(json_data);
+            console.log(data);
             
         }
         else{
@@ -316,7 +317,10 @@ MAP_APP = {
         }
         //Only show data that are in current map bound
         setTimeout(function() {
+            count = 0;
             data.forEach(function(feature) {
+                count+=1;
+                console.log(count)
                 var feat_bounds = new google.maps.LatLngBounds();
                 processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
                 var sw = feat_bounds.getSouthWest();
