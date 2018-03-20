@@ -2,8 +2,8 @@
 import logging
 import json
 
+# Needed to read data from datastore within app engine
 from google.appengine.ext import ndb
-
 
 import eeMethods
 
@@ -64,6 +64,10 @@ class Datatstore_Util(object):
         return db_key
 
     def add_to_db(self, json_data):
+        '''
+        Adds data to datastore via the ndb client
+        NOTE: can not be run outside of app engine
+        '''
         db_key = self.set_db_key()
         # Check if this dataset is already in the database
         if ndb.Key('DATA', db_key).get():
@@ -84,6 +88,7 @@ class Datatstore_Util(object):
         except Exception as e:
             msg = 'Datatstore_Util ERROR when adding to database ' + str(e)
             logging.error(msg)
+
     '''
     def read_from_db(self, db_key):
         data_obj = ndb.Key('DATA', db_key).get()
