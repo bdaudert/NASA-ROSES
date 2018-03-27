@@ -5,8 +5,6 @@ import os
 import urllib2
 
 import ee
-import cloudstorage as gcs
-# from google.appengine.api import app_identity
 
 from config import p_statics
 from config import statics
@@ -14,7 +12,10 @@ from config import statics
 from config import GEO_BUCKET_URL
 import Utils
 
-
+'''
+# Cloudstorage
+import cloudstorage as gcs
+# from google.appengine.api import app_identity
 # Set cloud storage params
 my_default_retry_params = gcs.RetryParams(
     initial_delay=0.2,
@@ -23,8 +24,10 @@ my_default_retry_params = gcs.RetryParams(
     max_retry_period=15
 )
 gcs.set_default_retry_params(my_default_retry_params)
+'''
 
 
+# FIX ME: delete? all this stuff is done in cron job outside of app engine
 class ET_Util(object):
     '''
     Computes ET statistics for all temporal resolutions
@@ -45,7 +48,7 @@ class ET_Util(object):
         self.missing_value = -9999
         self.geo_bucket_url = GEO_BUCKET_URL
 
-    def read_data_from_bucket(self):
+    def read_metadata_from_bucket(self):
         '''
         # FIX ME: this is not working
         # path_to_file = '/' + GEO_BUCKET_NAME + '/' + self.geoFName
@@ -165,7 +168,7 @@ class ET_Util(object):
             )
             return ee.Feature(None, reduced_image_data)
 
-        et_data = {}
+        etdata = {}
         imgs = []
         # logging.info('PROCESSING VARIABLE ' + str(v))
         stat_names = statics['stats_by_var_res'][var][t_res]
@@ -193,26 +196,26 @@ class ET_Util(object):
 
         for stat_idx, stat in enumerate(stat_names):
             if 'features' not in f_data.keys() or not f_data['features']:
-                et_data[stat] = -9999
+                etdata[stat] = -9999
                 continue
             try:
                 feat = f_data['features'][stat_idx]
             except:
-                et_data[stat] = -9999
+                etdata[stat] = -9999
                 continue
 
             if 'properties' not in feat.keys():
-                et_data[stat] = -9999
+                etdata[stat] = -9999
                 continue
             try:
                 val = feat['properties'][var]
-                et_data[stat] = round(val, 4)
+                etdata[stat] = round(val, 4)
             except:
-                et_data[stat] = -9999
+                etdata[stat] = -9999
                 continue
-        return et_data
+        return etdata
 
-    def get_features_geo_and_et_data(self):
+    def get_features_geo_and_etdata(self):
         '''
         Gets geo features from geojson file
         and computes the et stats for all variables
@@ -238,7 +241,7 @@ class ET_Util(object):
             'features': []
         }
 
-        geo_data = self.read_data_from_bucket()
+        geo_data = self.read_metadata_from_bucket()
         if 'features' not in geo_data.keys():
             logging.error('NO DATA FOUND IN BUCKET, FILE: ' + self.geoFName)
             return json_data
@@ -258,12 +261,12 @@ class ET_Util(object):
             feat['geometry']['coordinates'] = geom_coords
             geo_props = geo_feat['properties']
             feat['properties'] = self.set_geo_properties(geo_props)
-            feat['properties']['et_data'] = {}
+            feat['properties']['etdata'] = {}
             for t_res in t_res_list:
                 for var in var_list:
                     coll = colls[t_res + '_' + var]
-                    et_data = self.compute_et_stats(coll, var, geom, t_res)
-                    feat['properties']['et_data'].update(et_data)
+                    etdata = self.compute_et_stats(coll, var, geom, t_res)
+                    feat['properties']['etdata'].update(etdata)
             json_data['features'].append(feat)
         return json_data
 

@@ -165,7 +165,7 @@
         "US_fields": [
             "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
             "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
-            "PIXELCOUNT", "YEAR", "AREA",
+            "PIXELCOUNT", "AREA",
             "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
             "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
             "start_mon", "end_mon",
@@ -178,7 +178,7 @@
         "Mason": [
             "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
             "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
-            "PIXELCOUNT", "YEAR", "AREA",
+            "PIXELCOUNT", "AREA",
             "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
             "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
             "start_mon", "end_mon",
@@ -189,8 +189,9 @@
             "etrf_m01"
         ]
     },
-    "meta_cols": ["OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
-            "PIXELCOUNT", "YEAR", "AREA"],
+    "geo_meta_cols": ["OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME",
+            "PIXELCOUNT", "AREA"],
+    "geo_meta_cols_type": ["int", "str", "str", "str", "str", "str", "str", "int", "float"],
     "title_cols": ["BASIN", "STATE","HUC8", "HUC8_NAME"],
     "stats_by_var_res":{
         "et": {

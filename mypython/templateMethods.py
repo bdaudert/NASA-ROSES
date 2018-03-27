@@ -41,7 +41,7 @@ def set_dates():
     return dates
 
 
-def get_et_data_from_db(tv):
+def get_etdata_from_db(tv):
     rgn = tv['variables']['region']
     if rgn in ['ee_map']:
         return {}
@@ -50,10 +50,9 @@ def get_et_data_from_db(tv):
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
     DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
-    # db_key = DU.set_db_key()
-    # return DU.read_from_db(db_key)
-    json_data = DU.read_from_db()
-    return json_data
+    metadata = DU.read_meta_from_db()
+    etdata = DU.read_data_from_db()
+    return metadata, etdata
 
 
 def set_initial_template_values(RequestHandler, app_name, method):
@@ -90,9 +89,9 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv['variables'].update(dates)
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
-    # Get the et_data from the geo database
+    # Get the etdata from the geo database
     if app_name != 'dataBaseTasks':
-        tv['json_data'] = get_et_data_from_db(tv)
+        tv['json_data'] = get_etdata_from_db(tv)
     else:
         tv['json_data'] = {}
     return tv
