@@ -1,25 +1,29 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import logging
 import json
+import hashlib
 
 # Needed to read data from datastore within app engine
 from google.appengine.ext import ndb
 
-import eeMethods
+from config import statics
 
 
 class DATA(ndb.Model):
-    data = ndb.JsonProperty(compressed=True)
+    feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
     year = ndb.IntegerProperty()
     dataset = ndb.StringProperty()
     et_model = ndb.StringProperty()
-    # date_added = ndb.DateTimeProperty(auto_now_add=True)
 
 
 class METADATA(ndb.Model):
-    times_requested = ndb.IntegerProperty('r')
-    # years = ndb.StringProperty('n')  # comma separated list of years
+    # times_requested = ndb.IntegerProperty('r')
+    feat_idx = ndb.IntegerProperty()
+    region = ndb.StringProperty()
+    year = ndb.IntegerProperty()
+    dataset = ndb.StringProperty()
+    et_model = ndb.StringProperty()
 
 
 class Datatstore_Util(object):
@@ -41,66 +45,67 @@ class Datatstore_Util(object):
         self.dataset = dataset
         self.et_model = et_model
 
-    def get_et_json_data(self):
-        '''
-        Stores geojson info and et data a json object and
-        writes data to out_file
-        :param out_fil
-        :return
-        '''
-        ET_helper = eeMethods.ET_Util(
-            self.region, self.year,
-            self.dataset, self.et_model
-        )
-        json_data = ET_helper.get_features_geo_and_et_data()
-        return json_data
 
-    def set_db_key(self):
-        ID = self.region
-        y = self.year
-        ds = self.dataset
-        m = self.et_model
-        db_key = ('_').join([ID, ds, m, y])
-        return db_key
-
-    def add_to_db(self, json_data):
+    def read_feat_meta_from_db(self, feat_idx):
         '''
-        Adds data to datastore via the ndb client
-        NOTE: can not be run outside of app engine
+        Reads one feature's metadata from db
+        :param feat_idx: feature index (db property)
+        :return: dict of metadata for the feature
         '''
-        db_key = self.set_db_key()
-        # Check if this dataset is already in the database
-        if ndb.Key('DATA', db_key).get():
-            logging.info('DATA IS ALREADY IN DB: ' + db_key)
-            return
-        logging.info('ADDING DATA ' + db_key)
-        # Define an instance of DATA
-        data_obj = DATA(id=db_key,
-                        data=json_data,
-                        region=self.region,
-                        year=int(self.year),
-                        dataset=self.dataset,
-                        et_model=self.et_model)
-
-        # Put the data into data store
-        try:
-            data_obj.put()
-        except Exception as e:
-            msg = 'Datatstore_Util ERROR when adding to database ' + str(e)
-            logging.error(msg)
-
-    '''
-    def read_from_db(self, db_key):
-        data_obj = ndb.Key('DATA', db_key).get()
-        if not data_obj or not data_obj.data:
+        unique_str = ('-').join([self.region, self.dataset, self.et_model, self.year, str(feat_idx)])
+        UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
+        data_obj = ndb.Key('METADATA', UNIQUE_ID).get()
+        if not data_obj:
             return {}
-        logging.info('READING FROM DB: ' + db_key)
-        json_data = data_obj.data
-        # json_data = json.loads(data_obj.data)
-        return json_data
-    '''
+        logging.info('READING FROM DB: ' + UNIQUE_ID)
+        metadata = json.loads(data_obj)
+        return metadata
 
-    def read_from_db(self):
+    def read_feat_data_from_db(self, feat_idx):
+        '''
+        Reads one feature's data from db
+        :param feat_idx: feature index (db property)
+        :return: dict of data for the feature
+        '''
+        unique_str = ('-').join([self.region, self.dataset, self.et_model, self.year, str(feat_idx)])
+        UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
+        data_obj = ndb.Key('DATA', UNIQUE_ID).get()
+        if not data_obj:
+            return {}
+        logging.info('READING FROM DB: ' + UNIQUE_ID)
+        et_data = json.loads(data_obj)
+        return et_data
+
+    def read_meta_from_db(self):
+        '''
+        Reads metadata for all features defined by
+        region, dataset, et_model and year
+        region, dataset, et_model and year
+        :return: dict of data for the features
+        '''
+        json_data = {}
+        qry = METADATA.query(METADATA.region == self.region,
+                         METADATA.year == int(self.year),
+                         METADATA.dataset == self.dataset,
+                         METADATA.et_model == self.et_model)
+
+        # Spits out a list of query results
+        query_data = qry.fetch()
+        print query_data
+        if len(query_data) > 0:
+            meta_data = json.loads(query_data)
+        else:
+            logging.info('NO DATA FOUND IN DB')
+            return {}
+        logging.info('READ DATA FROM DB')
+        return meta_data
+
+    def read_data_from_db(self):
+        '''
+        Reads data for all feaqtures defined by
+
+        :return:
+        '''
         json_data = {}
         qry = DATA.query(DATA.region == self.region,
                          DATA.year == int(self.year),
@@ -110,14 +115,9 @@ class Datatstore_Util(object):
         # Spits out a list of query results
         query_data = qry.fetch()
         if len(query_data) > 0:
-            try:
-                json_data = json.dumps(query_data[0].data)
-            except Exception as e:
-                logging.error('ERROR in et_data retrieval!')
-                logging.error('Query has no attribute data!')
-                logging.error(str(e))
-                return {}
+            json_data = json.loads(query_data)
         else:
+            logging.info('NO DATA FOUND IN DB')
             return {}
         logging.info('READ DATA FROM DB')
         return json_data

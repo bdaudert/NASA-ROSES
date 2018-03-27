@@ -160,37 +160,6 @@ class OpenET(defaultApplication):
     appHTML = 'open-et-1.html'
 
 
-class databaseTasks(webapp2.RequestHandler):
-    def get(self):
-        ee.Initialize(config.EE_CREDENTIALS)
-        ee.data.setDeadline(180000)
-        tv = templateMethods.set_initial_template_values(
-            self, 'databaseTask', 'GET')
-        tv['json_data'] = {}
-        # FIX ME: only do 2003 for testing
-        # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
-        # for geoFName in geo_files:
-        for region in ['Mason']:
-            for year in ['2003']:
-                logging.info('PROCESSING Region/Year ' + region + '/' + year)
-                for ds in ['MODIS']:
-                    for et_model in ['SSEBop']:
-                        DU = databaseMethods.Datatstore_Util(
-                            region, year, ds, et_model)
-                        name_l = [region, year, ds, et_model]
-                        tv_name = ('_').join(name_l)
-                        logging.info('PROCESSING ' + tv_name)
-                        json_data = DU.get_et_json_data()
-                        tv['json_data'][tv_name] = json_data
-                        DU.add_to_db(json_data)
-                logging.info(region + '/' + year + ' PROCESSED!')
-        template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
-        self.response.out.write(template.render(tv))
-
-
 app = webapp2.WSGIApplication([
-    ('/', OpenET),
-    ('/databaseTasks', databaseTasks)
-],
-    debug=True
-)
+    ('/', OpenET)
+], debug=True)
