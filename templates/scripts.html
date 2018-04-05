@@ -28,8 +28,14 @@
 <!--Run Time Scripts-->
 <script>
     //Set etdata
-    var metadata = JSON.parse('{{ metadata|safe }}');
-    var etdata = JSON.parse('{{ etdata|safe }}');
+    try{
+        var metadata = JSON.parse('{{ metadata|safe }}');
+        var etdata = JSON.parse('{{ etdata|safe }}');
+    }
+    catch(e){
+        var metadata = [];
+        var etdata = [];
+    }
     //Set the statics
     var statics, js_statics;
     //Statics for bboth python and js
