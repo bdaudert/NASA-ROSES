@@ -5,10 +5,26 @@ import hashlib
 
 # Needed to read data from datastore within app engine
 from google.appengine.ext import ndb
+from google.appengine.ext.remote_api import remote_api_stub
 
 from config import statics
 
+'''
+try:
+    import dev_appserver
+    dev_appserver.fix_sys_path()
+except ImportError:
+    print('Please make sure the App Engine SDK is in your PYTHONPATH.')
+    raise
 
+
+remote_api_stub.ConfigureRemoteApiForOAuth(
+        '{}.appspot.com'.format('open-et-1'),
+        '/_ah/remote_api')
+
+'''
+
+'''
 class DATA(ndb.Model):
     feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
@@ -24,6 +40,8 @@ class METADATA(ndb.Model):
     year = ndb.IntegerProperty()
     dataset = ndb.StringProperty()
     et_model = ndb.StringProperty()
+'''
+
 
 
 class Datatstore_Util(object):
@@ -83,21 +101,38 @@ class Datatstore_Util(object):
         region, dataset, et_model and year
         :return: dict of data for the features
         '''
+        metadata = []
+        '''
         qry = METADATA.query(METADATA.region == self.region,
                          METADATA.year == int(self.year),
                          METADATA.dataset == self.dataset,
                          METADATA.et_model == self.et_model)
+        '''
 
-        # Spits out a list of query results
-        query_data = qry.fetch()
-        print query_data
+        '''
+        qry = ndb.Query(kind = 'METADATA',
+                        filters=ndb.AND(
+                            # METADATA.region == self.region,
+                            METADATA.year == int(self.year)
+                            # METADATA.dataset == self.dataset,
+                            # METADATA.et_model == self.et_model
+                        ))
+        '''
+
+        try:
+            qry = ndb.Query(kind = 'METADATA')
+            query_data = qry.fetch(10)
+        except:
+            query_data = []
+
         if len(query_data) > 0:
-            meta_data = json.loads(query_data)
+            metadata = json.loads(query_data)
+            logging.info('SUCCESSFULLY READ METADATA FROM DB')
         else:
             logging.info('NO METADATA FOUND IN DB')
-            return []
-        logging.info('READ DATA FROM DB')
-        return meta_data
+            return metadata
+
+        return metadata
 
     def read_data_from_db(self):
         '''
@@ -105,18 +140,33 @@ class Datatstore_Util(object):
 
         :return:
         '''
-        json_data = {}
+        data = []
+        '''
         qry = DATA.query(DATA.region == self.region,
                          DATA.year == int(self.year),
                          DATA.dataset == self.dataset,
                          DATA.et_model == self.et_model)
+        '''
 
-        # Spits out a list of query results
-        query_data = qry.fetch()
+        '''
+        qry = ndb.Query(kind = 'DATA',
+                        filters = ndb.AND(
+                            # DATA.region == self.region,
+                            DATA.year == int(self.year)
+                            # DATA.dataset == self.dataset,
+                            # DATA.et_model == self.et_model
+                        ))
+        '''
+        try:
+            qry = ndb.Query(kind = 'DATA')
+            query_data = qry.fetch(10)
+        except:
+            query_data = []
+
         if len(query_data) > 0:
-            json_data = json.loads(query_data)
+            data = json.loads(query_data)
+            logging.info('SUCCESSFULLY READ DATA FROM DB')
         else:
             logging.info('NO DATA FOUND IN DB')
-            return []
-        logging.info('READ DATA FROM DB')
-        return json_data
+            return data
+        return data
