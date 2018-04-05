@@ -297,11 +297,11 @@ MAP_APP = {
 
         /*
         LOAD THE DATA FROM THE TEMPLATE VARIABLE
-        json_data global var that hold et data and 
+        etdata global var that hold et data and
         geometry info,  defined in scripts.html
         */
-        if (Object.keys(json_data).length != 0){
-            data.addGeoJson(json_data);
+        if (Object.keys(etdata).length != 0){
+            data.addGeoJson(etdata);
             console.log(data);
             
         }
@@ -310,7 +310,7 @@ MAP_APP = {
             No data could be pulled from the db, read data from 
             statics dir for now
             FIX ME: we should always have data from the db
-            stored in tv var json_data
+            stored in tv var etdata
             */
             f_name = 'static/geojson/Mason_' + field_year + '.geojson';
             data.loadGeoJson(f_name);
@@ -320,7 +320,6 @@ MAP_APP = {
             count = 0;
             data.forEach(function(feature) {
                 count+=1;
-                console.log(count)
                 var feat_bounds = new google.maps.LatLngBounds();
                 processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
                 var sw = feat_bounds.getSouthWest();

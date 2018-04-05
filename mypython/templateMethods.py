@@ -91,8 +91,9 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv['form_options'] = set_form_options(tv['variables'])
     # Get the etdata from the geo database
     if app_name != 'dataBaseTasks':
-        tv['json_data'] = get_etdata_from_db(tv)
+        tv['metadata'], tv['etdata'] = get_etdata_from_db(tv)
     else:
-        tv['json_data'] = {}
+        tv['etdata'] = []
+        tv['metadata'] = []
     return tv
 

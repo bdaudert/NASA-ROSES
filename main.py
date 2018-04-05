@@ -149,7 +149,8 @@ class defaultApplication(webapp2.RequestHandler):
         log_values = {
             k: v for k, v in tv.items()
             if not k.startswith('form') and
-            not k.startswith('json_data')
+            not k.startswith('etdata') and
+               not k.startswith('metadata')
         }
         # Log all values at once
         logging.info('{}'.format(log_values))

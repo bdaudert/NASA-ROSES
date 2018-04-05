@@ -83,7 +83,6 @@ class Datatstore_Util(object):
         region, dataset, et_model and year
         :return: dict of data for the features
         '''
-        json_data = {}
         qry = METADATA.query(METADATA.region == self.region,
                          METADATA.year == int(self.year),
                          METADATA.dataset == self.dataset,
@@ -95,8 +94,8 @@ class Datatstore_Util(object):
         if len(query_data) > 0:
             meta_data = json.loads(query_data)
         else:
-            logging.info('NO DATA FOUND IN DB')
-            return {}
+            logging.info('NO METADATA FOUND IN DB')
+            return []
         logging.info('READ DATA FROM DB')
         return meta_data
 
@@ -118,6 +117,6 @@ class Datatstore_Util(object):
             json_data = json.loads(query_data)
         else:
             logging.info('NO DATA FOUND IN DB')
-            return {}
+            return []
         logging.info('READ DATA FROM DB')
         return json_data
