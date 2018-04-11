@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os, sys, socket
 import logging
 import json
 import hashlib
@@ -7,27 +8,8 @@ import hashlib
 from google.appengine.ext import ndb
 
 from config import statics
+from config import EE_PRIVATE_KEY_FILE
 
-import socket
-print(socket.gethostname())
-if str(socket.gethostname()).startswith('localhost'):
-    from google.appengine.ext.remote_api import remote_api_stub
-    '''
-    try:
-        import dev_appserver
-        dev_appserver.fix_sys_path()
-    except ImportError:
-        print('Please make sure the App Engine SDK is in your PYTHONPATH.')
-        raise
-    '''
-
-    remote_api_stub.ConfigureRemoteApiForOAuth(
-        '{}.appspot.com'.format('open-et-1'),
-        '/_ah/remote_api')
-
-
-
-'''
 class DATA(ndb.Model):
     feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
@@ -43,8 +25,6 @@ class METADATA(ndb.Model):
     year = ndb.IntegerProperty()
     dataset = ndb.StringProperty()
     et_model = ndb.StringProperty()
-'''
-
 
 
 class Datatstore_Util(object):
@@ -73,13 +53,14 @@ class Datatstore_Util(object):
         :param feat_idx: feature index (db property)
         :return: dict of metadata for the feature
         '''
-        unique_str = ('-').join([self.region, self.dataset, self.et_model, self.year, str(feat_idx)])
+        # FIX ME: not tested
+        unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(feat_idx)])
         UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
-        data_obj = ndb.Key('METADATA', UNIQUE_ID).get()
-        if not data_obj:
-            return {}
+        query_data = ndb.Key('METADATA', UNIQUE_ID).get()
+        if not query_data:
+            return []
         logging.info('READING FROM DB: ' + UNIQUE_ID)
-        metadata = json.loads(data_obj)
+        metadata = json.dumps(query_data.to_dict())
         return metadata
 
     def read_feat_data_from_db(self, feat_idx):
@@ -88,14 +69,15 @@ class Datatstore_Util(object):
         :param feat_idx: feature index (db property)
         :return: dict of data for the feature
         '''
-        unique_str = ('-').join([self.region, self.dataset, self.et_model, self.year, str(feat_idx)])
+        # FIX ME: not tested
+        unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(feat_idx)])
         UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
-        data_obj = ndb.Key('DATA', UNIQUE_ID).get()
-        if not data_obj:
-            return {}
+        query_data = ndb.Key('DATA', UNIQUE_ID).get()
+        if not query_data:
+            return []
         logging.info('READING FROM DB: ' + UNIQUE_ID)
-        et_data = json.loads(data_obj)
-        return et_data
+        etdata = json.dumps(query_data.to_dict())
+        return etdata
 
     def read_meta_from_db(self):
         '''
@@ -105,35 +87,22 @@ class Datatstore_Util(object):
         :return: dict of data for the features
         '''
         metadata = []
-        '''
-        qry = METADATA.query(METADATA.region == self.region,
-                         METADATA.year == int(self.year),
-                         METADATA.dataset == self.dataset,
-                         METADATA.et_model == self.et_model)
-        '''
-
-        '''
-        qry = ndb.Query(kind = 'METADATA',
-                        filters=ndb.AND(
-                            # METADATA.region == self.region,
-                            METADATA.year == int(self.year)
-                            # METADATA.dataset == self.dataset,
-                            # METADATA.et_model == self.et_model
-                        ))
-        '''
-
         try:
-            qry = ndb.Query(kind = 'METADATA')
-            query_data = qry.fetch(10)
+            qry = ndb.Query(kind='METADATA'). \
+                filter(METADATA.year == self.year,
+                       METADATA.region == self.region,
+                       METADATA.dataset == self.dataset,
+                       METADATA.et_model == self.et_model)
+            query_data = qry.fetch()
         except:
             query_data = []
 
+        metadata = json.dumps([q.to_dict() for q in query_data])
+
         if len(query_data) > 0:
-            metadata = json.loads(query_data)
             logging.info('SUCCESSFULLY READ METADATA FROM DB')
         else:
             logging.info('NO METADATA FOUND IN DB')
-            return metadata
 
         return metadata
 
@@ -144,32 +113,32 @@ class Datatstore_Util(object):
         :return:
         '''
         data = []
-        '''
-        qry = DATA.query(DATA.region == self.region,
-                         DATA.year == int(self.year),
-                         DATA.dataset == self.dataset,
-                         DATA.et_model == self.et_model)
-        '''
-
-        '''
-        qry = ndb.Query(kind = 'DATA',
-                        filters = ndb.AND(
-                            # DATA.region == self.region,
-                            DATA.year == int(self.year)
-                            # DATA.dataset == self.dataset,
-                            # DATA.et_model == self.et_model
-                        ))
-        '''
         try:
-            qry = ndb.Query(kind = 'DATA')
-            query_data = qry.fetch(10)
+            qry = ndb.Query(kind='DATA').\
+                filter(DATA.year==self.year,
+                       DATA.region==self.region,
+                       DATA.dataset==self.dataset,
+                       DATA.et_model==self.et_model)
+            query_data = qry.fetch()
         except:
             query_data = []
 
+        data = json.dumps([q.to_dict() for q in query_data])
+
         if len(query_data) > 0:
-            data = json.loads(query_data)
             logging.info('SUCCESSFULLY READ DATA FROM DB')
         else:
             logging.info('NO DATA FOUND IN DB')
-            return data
         return data
+
+    def read_from_db(self):
+        '''
+        Read metadata and data from db
+        :return: metadata, data
+        '''
+        metadata = self.read_meta_from_db()
+        data = self.read_data_from_db()
+        return metadata, data
+
+
+

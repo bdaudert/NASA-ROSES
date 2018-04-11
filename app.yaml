@@ -15,6 +15,16 @@ handlers:
   script: oauth2client.appengine.application
 - url: /.*
   script: main.app
+  secure: always
+- url: /admin/.*
+  script: main.app
+  login: admin
+  secure: always
+- url: /login/.*
+  script: main.app
+  login: required
+  secure: always
+  redirect_http_response_code: 301
 
 libraries:
 - name: jinja2

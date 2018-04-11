@@ -50,9 +50,8 @@ def get_etdata_from_db(tv):
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
     DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
-    metadata = DU.read_meta_from_db()
-    etdata = DU.read_data_from_db()
-    return metadata, etdata
+    metadata, data = DU.read_from_db()
+    return metadata, data
 
 
 def set_initial_template_values(RequestHandler, app_name, method):
