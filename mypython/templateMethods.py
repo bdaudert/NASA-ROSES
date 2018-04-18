@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # import statics
-import json
 
+import logging
 from config import statics
 from config import GMAP_API_KEY as GMAP_API_KEY
 from config import GEO_DIR as GEO_DIR
@@ -94,7 +94,9 @@ def set_initial_template_values(RequestHandler, app_name, method):
     else:
         tv['etdata'] = []
         tv['metadata'] = []
-    print('LOOOOK')
-    print(tv['etdata'])
+
+    logging.info('METADATA AND ETDATA')
+    logging.info(tv['metdata'])
+    logging.info(tv['etdata'])
     return tv
 
