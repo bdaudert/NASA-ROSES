@@ -300,35 +300,24 @@ MAP_APP = {
         etdata global var that hold et data and
         geometry info,  defined in scripts.html
         */
-        if (Object.keys(etdata).length != 0){
+        if (etdata.length > 0) {
             data.addGeoJson(etdata);
-            console.log(data);
-            
+            //Only show data that are in current map bound
+            setTimeout(function () {
+                count = -1;
+                data.forEach(function (feature) {
+                    count += 1;
+                    var feat_bounds = new google.maps.LatLngBounds();
+                    //processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
+                    processPoints(geomdata[count]['coordinates'], feat_bounds.extend, feat_bounds);
+                    var sw = feat_bounds.getSouthWest();
+                    var ne = feat_bounds.getNorthEast();
+                    if (!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
+                        data.remove(feature);
+                    }
+                });
+            }, 500);
         }
-        else{
-            /*
-            No data could be pulled from the db, read data from 
-            statics dir for now
-            FIX ME: we should always have data from the db
-            stored in tv var etdata
-            */
-            f_name = 'static/geojson/Mason_' + field_year + '.geojson';
-            data.loadGeoJson(f_name);
-        }
-        //Only show data that are in current map bound
-        setTimeout(function() {
-            count = 0;
-            data.forEach(function(feature) {
-                count+=1;
-                var feat_bounds = new google.maps.LatLngBounds();
-                processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
-                var sw = feat_bounds.getSouthWest();
-                var ne = feat_bounds.getNorthEast();
-                if(!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
-                    data.remove(feature);
-                }
-            });
-        }, 500);
         
 
         featureStyle = MAP_APP.set_featureStyle(field_year);
@@ -428,7 +417,6 @@ var initialize_map = function() {
         window.layers.push(null);
     }
     if (mapZoom >=8){
-        //MAP_APP.set_ft_map_layer(1);
         MAP_APP.set_geojson_map_layers();
     }
 

@@ -4,8 +4,6 @@
 import logging
 from config import statics
 from config import GMAP_API_KEY as GMAP_API_KEY
-from config import GEO_DIR as GEO_DIR
-
 import databaseMethods
 
 
@@ -40,18 +38,14 @@ def set_dates():
     }
     return dates
 
-
-def get_etdata_from_db(tv):
-    rgn = tv['variables']['region']
-    if rgn in ['ee_map']:
-        return {}
+def set_database_util(tv):
     # Load the data from the database
+    rgn = tv['variables']['region']
     yr = tv['variables']['field_year']
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
     DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
-    metadata, data = DU.read_from_db()
-    return metadata, data
+    return DU
 
 
 def set_initial_template_values(RequestHandler, app_name, method):
@@ -70,7 +64,6 @@ def set_initial_template_values(RequestHandler, app_name, method):
 
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
-        'GEO_DIR': GEO_DIR,
         'app_name': app_name,
         'variables': statics['variable_defaults'],
         'form_options': {},
@@ -88,13 +81,23 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv['variables'].update(dates)
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
-    # Get the etdata from the geo database
+
+    # Get the etdata and geometry from the geo database
     tv['etdata'] = []
     tv['metadata'] = []
-    if app_name != 'dataBaseTasks':
-        tv['metadata'], tv['etdata'] = get_etdata_from_db(tv)
+    tv['geomdata'] = []
+    DU = set_database_util(tv)
+    if app_name == 'dataBaseTasks':
+        return tv
+    if  tv['variables']['region'] in ['ee_map']:
+        return tv
+
+    tv['metadata'], tv['etdata'] = DU.read_from_db()
+    tv['geomdata'] = DU.read_geometries_from_bucket()
+    '''
     logging.info('METADATA AND ETDATA')
     logging.info(tv['metadata'])
     logging.info(tv['etdata'])
+    '''
     return tv
 

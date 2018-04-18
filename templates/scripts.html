@@ -27,30 +27,43 @@
 
 <!--Run Time Scripts-->
 <script>
-    //Set etdata
-    try{
-        var metadata = JSON.parse('{{ metadata|safe }}');
-        var etdata = JSON.parse('{{ etdata|safe }}');
-    }
-    catch(e){
-        var metadata = [];
-        var etdata = [];
-    }
+    //Define global data varaiables 
+    //var metadata = $.parseJSON('[]');;
+    //var etdata = JSON.parse('[]'); 
+    //var metadata = $.parseJSON(JSON.stringify({{ metadata}}));
+    //var etdata = JSON.parse({{ etdata|safe }});
+    //var geomdata = JSON.parse({{ geomdata|safe }});
     //Set the statics
-    var statics, js_statics;
-    //Statics for bboth python and js
-    $.getJSON( 'static/json/statics.json', function( data ) {
-        statics = data;
-    });
-    //javascript specific statics
-    $.getJSON( 'static/json/js_statics.json', function( data ) {
-        js_statics = data;
-    });
-    google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
-    google.charts.setOnLoadCallback(initialize_map);
-    
-    // Make selected divs draggable, e.g. the form
-    $(function(){
-        $( ".draggable" ).draggable();
+    var statics = {}, js_statics = {};
+    $.ajax({
+        url: 'static/json/statics.json',
+        async: false,
+        dataType: 'json',
+        success: function(data) {
+            statics = data; 
+        }
     }); 
+    $.ajax({
+        url: 'static/json/js_statics.json',
+        async: false,
+        dataType: 'json',
+        success: function(data) {
+            js_statics = data;
+        }
+    });
+    
+    function initialize() {
+        window.metadata = {{ metadata|safe }};
+        window.etdata = {{ etdata|safe }};
+        window.geomdata = {{ geomdata|safe}};
+        //Set etdata
+        google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
+        google.charts.setOnLoadCallback(initialize_map);
+    
+        // Make selected divs draggable, e.g. the form
+        $(function(){
+            $( ".draggable" ).draggable();
+        }); 
+    };
+    $(document).ready(initialize);
 </script>
