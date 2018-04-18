@@ -18,7 +18,13 @@ from google.appengine.ext import ndb
 from google.appengine.ext.remote_api import remote_api_stub
 
 class METADATA(ndb.Model):
-    # times_requested = ndb.IntegerProperty('r')
+    feat_idx = ndb.IntegerProperty()
+    region = ndb.StringProperty()
+    year = ndb.IntegerProperty()
+    dataset = ndb.StringProperty()
+    et_model = ndb.StringProperty()
+
+class DATA(ndb.Model):
     feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
     year = ndb.IntegerProperty()
@@ -66,17 +72,17 @@ def read_meta_from_db(region, dataset, et_model, year):
     '''
     metadata = []
     try:
-        qry = ndb.Query(kind='METADATA'). \
-            filter(METADATA.year==year,
-                   METADATA.region==region,
-                   METADATA.dataset==dataset,
-                   METADATA.et_model==et_model)
+        qry = ndb.Query(kind='METADATA').filter(
+            METADATA.year==year,
+            METADATA.region==region,
+            METADATA.dataset==dataset,
+            METADATA.et_model==et_model
+        )
         query_data = qry.fetch(2)
     except:
         query_data = []
 
     metadata = json.dumps([q.to_dict() for q in query_data])
-
     if len(query_data) > 0:
         logging.info('SUCCESSFULLY READ METADATA FROM DB')
     else:
@@ -92,17 +98,16 @@ def read_data_from_db(region, dataset, et_model, year):
     '''
     data = []
     try:
-        qry = ndb.Query(kind='DATA').\
-            filter(DATA.year==year,
-                   DATA.region==region,
-                   DATA.dataset==dataset,
-                   DATA.et_model==et_model)
+        qry = ndb.Query(kind='DATA').filter(
+            DATA.year==year,
+            DATA.region==region,
+            DATA.dataset==dataset,
+            DATA.et_model==et_model
+        )
         query_data = qry.fetch(2)
     except:
         query_data = []
-
     data = json.dumps([q.to_dict() for q in query_data])
-
     if len(query_data) > 0:
         logging.info('SUCCESSFULLY READ DATA FROM DB')
     else:
@@ -114,26 +119,13 @@ def main(project_id):
         '{}.appspot.com'.format(project_id),
         '/_ah/remote_api')
 
-    '''
-    # TEST
-    # List the first 10 keys in the datastore.
-    keys = ndb.Query(kind='METADATA').fetch(10, keys_only=True)
-    for key in keys:
-        print(key)
-    '''
-    '''
-    qry = ndb.Query(kind='METADATA').\
-        filter(METADATA.year==2003,
-               METADATA.region=='Mason',
-               METADATA.dataset=='MODIS',
-               METADATA.et_model=='SSEBop')
-    #qry = METADATA.query()
-    query_data = qry.fetch(2)
-    json_data = json.dumps([q.to_dict() for q in query_data])
-    print json_data
-    '''
-    # print read_meta_from_db('Mason', 'MODIS', 'SSEBop', 2003)
-    print read_feat_meta_from_db('Mason', 'MODIS', 'SSEBop', 2003, 1)
+    print('DATA')
+    print read_data_from_db('Mason', 'MODIS', 'SSEBop', 2003)
+    print('METADATA')
+    print read_meta_from_db('Mason', 'MODIS', 'SSEBop', 2003)
+    #print read_feat_meta_from_db('Mason', 'MODIS', 'SSEBop', 2003, 1)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=__doc__,

@@ -89,14 +89,12 @@ def set_initial_template_values(RequestHandler, app_name, method):
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
     # Get the etdata from the geo database
+    tv['etdata'] = []
+    tv['metadata'] = []
     if app_name != 'dataBaseTasks':
         tv['metadata'], tv['etdata'] = get_etdata_from_db(tv)
-    else:
-        tv['etdata'] = []
-        tv['metadata'] = []
-
     logging.info('METADATA AND ETDATA')
-    logging.info(tv['metdata'])
+    logging.info(tv['metadata'])
     logging.info(tv['etdata'])
     return tv
 

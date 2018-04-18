@@ -19,7 +19,6 @@ class DATA(ndb.Model):
 
 
 class METADATA(ndb.Model):
-    # times_requested = ndb.IntegerProperty('r')
     feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
     year = ndb.IntegerProperty()
@@ -84,48 +83,45 @@ class Datatstore_Util(object):
         Reads metadata for all features defined by
         region, dataset, et_model and year
         region, dataset, et_model and year
-        :return: dict of data for the features
+        :return: dict of metadata for the features
         '''
         metadata = []
         try:
-            qry = ndb.Query(kind='METADATA'). \
-                filter(METADATA.year == self.year,
-                       METADATA.region == self.region,
-                       METADATA.dataset == self.dataset,
-                       METADATA.et_model == self.et_model)
+            qry = ndb.Query(kind='METADATA').filter(METADATA.year == self.year,
+                METADATA.region == self.region,
+                METADATA.dataset == self.dataset,
+                METADATA.et_model == self.et_model
+            )
             query_data = qry.fetch()
         except:
             query_data = []
 
-        metadata = json.dumps([q.to_dict() for q in query_data])
-
         if len(query_data) > 0:
+            metadata = json.dumps([q.to_dict() for q in query_data])
             logging.info('SUCCESSFULLY READ METADATA FROM DB')
         else:
             logging.info('NO METADATA FOUND IN DB')
-
         return metadata
 
     def read_data_from_db(self):
         '''
         Reads data for all feaqtures defined by
-
-        :return:
+        :return:  dict of data for the features
         '''
         data = []
         try:
-            qry = ndb.Query(kind='DATA').\
-                filter(DATA.year==self.year,
-                       DATA.region==self.region,
-                       DATA.dataset==self.dataset,
-                       DATA.et_model==self.et_model)
+            qry = ndb.Query(kind='DATA').filter(
+                DATA.year==self.year,
+                DATA.region==self.region,
+                DATA.dataset==self.dataset,
+                DATA.et_model==self.et_model
+            )
             query_data = qry.fetch()
         except:
             query_data = []
 
-        data = json.dumps([q.to_dict() for q in query_data])
-
         if len(query_data) > 0:
+            data = json.dumps([q.to_dict() for q in query_data])
             logging.info('SUCCESSFULLY READ DATA FROM DB')
         else:
             logging.info('NO DATA FOUND IN DB')
