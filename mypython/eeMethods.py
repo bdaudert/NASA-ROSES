@@ -215,6 +215,7 @@ class ET_Util(object):
                 continue
         return etdata
 
+
     def get_features_geo_and_etdata(self):
         '''
         Gets geo features from geojson file

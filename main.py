@@ -144,7 +144,8 @@ class defaultApplication(webapp2.RequestHandler):
             k: v for k, v in tv.items()
             if not k.startswith('form') and
             not k.startswith('etdata') and
-               not k.startswith('metadata')
+            not k.startswith('metadata') and
+            not k.startswith('geomdata')
         }
         # Log all values at once
         logging.info('{}'.format(log_values))
