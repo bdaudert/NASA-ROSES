@@ -85,7 +85,7 @@ def set_initial_template_values(RequestHandler, app_name, method):
     # Get the etdata and geometry from the geo database
     tv['etdata'] = []
     tv['metadata'] = []
-    tv['geomdata'] = []
+    tv['geomdata'] = {}
     DU = set_database_util(tv)
     if app_name == 'dataBaseTasks':
         return tv

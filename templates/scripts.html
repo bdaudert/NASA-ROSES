@@ -27,12 +27,6 @@
 
 <!--Run Time Scripts-->
 <script>
-    //Define global data varaiables 
-    //var metadata = $.parseJSON('[]');;
-    //var etdata = JSON.parse('[]'); 
-    //var metadata = $.parseJSON(JSON.stringify({{ metadata}}));
-    //var etdata = JSON.parse({{ etdata|safe }});
-    //var geomdata = JSON.parse({{ geomdata|safe }});
     //Set the statics
     var statics = {}, js_statics = {};
     $.ajax({
@@ -51,7 +45,18 @@
             js_statics = data;
         }
     });
+    window.metadata = {{ metadata|safe }};
+    window.etdata = {{ etdata|safe }};
+    window.geomdata = {{ geomdata|safe}};
+    //Set etdata
+    google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
+    google.charts.setOnLoadCallback(initialize_map);
     
+    // Make selected divs draggable, e.g. the form
+    $(function(){
+        $( ".draggable" ).draggable();
+    }); 
+    /*
     function initialize() {
         window.metadata = {{ metadata|safe }};
         window.etdata = {{ etdata|safe }};
@@ -66,4 +71,5 @@
         }); 
     };
     $(document).ready(initialize);
+    */
 </script>

@@ -137,20 +137,18 @@ MAP_APP = {
     },
     populate_dataModalFromFT: function(e){
         // e is the click event
-        var col_name, col_names = [],
-            v, t_res, m_idx, m_str, c_idx, data_val,
-            html, data_div = $('#modal_data');
+        var col_name, m_idx, m_str, c_idx, data_val, html = '',
+            v = $('#variable').val(), t_res = $('#t_res').val();
+
         //Clear out old modal content
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
-        v = $('#variable').val();
-        t_res = $('#t_res').val();
-        html = '';
+
         //Title
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
             col_name = statics.title_cols[c_idx];
             html += '<b>' + col_name + '</b>'+ ': ';
-            html += e.row[col_name].value + '<br>';
+            html += metadata[idx][col_name] + '<br>';
         }
         html += '<b>' + v + '</b>';
         if ($('#form-field_year').css('display') != 'none'){
@@ -163,20 +161,18 @@ MAP_APP = {
         //populate html with data
         for (c_idx = 0; c_idx < col_names.length; c_idx++){
             col_name = col_names[c_idx];
-            data_val = e.row[col_name].value;
+            data_val = metadata[idx][col_name];
             html += col_name + ': ' + data_val + '<br>'
         }
         $('#dataModal_data').append(html);
     },
     initialize_dataModal: function(e){
+
         // e is the click event
-        var prop_name, prop_names = [],
-            v, t_res, m_idx, m_str, c_idx, data_val,
-            html, data_div = $('#modal_data'), 
-            year_idx,year;
+        var prop_name, v, t_res, c_idx, html,years,
+            idx = e.feature.getProperty('idx');
         //NOTE: currently we only allow one field for fields
-        //var years = $('#field_years').val();
-        var years = [$('#field_year').val()];
+        years = [$('#field_year').val()];
         //Clear out old modal content
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
@@ -187,60 +183,68 @@ MAP_APP = {
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
             prop_name = statics.title_cols[c_idx];
             html += '<b>' + prop_name + '</b>'+ ': ';
-            html += e.feature.getProperty(prop_name) + '<br>';
+            if (metadata[idx][prop_name]) {
+                html += metadata[idx][prop_name] + '<br>'
+            }
         }
         html += '<b>Variable</b>: ' + v + '<br>';
         html += '<b>Years</b>: ' + years + '<br>';
         $('#dataModal_title').append(html);
     },
-    add_dataToModal: function(e){
-        var feat_ID= e.feature.getProperty('OBJECTID'),
-            year, year_idx, 
-            data, prop_names, prop_name, c_idx, html,
+    add_dataToModal: function(e) {
+        var idx = e.feature.getProperty('idx'),
+            year, year_idx, prop_names, prop_name, c_idx, html, data_val,
             v = $('#variable').val(),
             t_res = $('#t_res').val();
 
         //NOTE: currently we only allow one field for fields
-        //var years = $('#field_years').val();
         var years = [$('#field_year').val()];
-        for (year_idx = 0; year_idx < years.length; year_idx++){
-            y = years[year_idx];
-            y_idx = $.inArray(y, statics.all_field_years);
-            data = window.layers[y_idx];
-            data.forEach(function(feat) {
-                if (feat.getProperty('OBJECTID') != feat_ID){
-                    //Continue to next feature
-                    return;
-                }
-                html = '';
-                html = 'Year: ' + year + '<br>';
-                //Populate the columnnames
-                prop_names = statics.stats_by_var_res[v][t_res];
-                //populate html with data
-                for (c_idx = 0; c_idx < prop_names.length; c_idx++){
-                    prop_name = prop_names[c_idx].toUpperCase();
-                    data_val = feat.getProperty(prop_name);
-                    html += prop_name + ': ' + data_val + '<br>'
-                }
-                html += '<br>';
-            });
-            $('#dataModal_data').append(html);
+        html = '';
+        html = 'Year: ' + year + '<br>';
+        //Populate the columnnames
+        prop_names = statics.stats_by_var_res[v][t_res];
+        //populate html with data
+        for (year_idx = 0; year_idx < years.length; year_idx++) {
+            year = years[year_idx];
+            html = '';
+            html = 'Year: ' + String(year) + '<br>';
+            for (c_idx = 0; c_idx < prop_names.length; c_idx++) {
+                prop_name = prop_names[c_idx];
+                data_val = etdata[idx][prop_name];
+                html += prop_name + ': ' + data_val + '<br>'
+            }
+            html += '<br>';
         }
+        $('#dataModal_data').append(html);
     },
-    populate_layerInfoModalFromGeojson: function(e){
+    populate_layerInfoModalFromGeojson: function(e) {
         // used on mouseover of a layer
         // e is the mouseover event
-        var html, c_idx, prop_name;
+        var html, c_idx, prop_name,
+            idx = e.feature.getProperty('idx');
         html = '';
         //Clear out old modal content
         $('#layerInfoModal_data').html('');
         //Title
-        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
+        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++) {
             prop_name = statics.title_cols[c_idx].toUpperCase();
-            html += '<b>' + prop_name + '</b>'+ ': ';
-            html += e.feature.getProperty(prop_name) + '<br>';
+            html += '<b>' + prop_name + '</b>' + ': ';
+            html += metadata[idx][prop_name] + '<br>';
         }
         $('#layerInfoModal_data').append(html);
+
+        for (year_idx = 0; year_idx < years.length; year_idx++) {
+            year = years[year_idx];
+            html = '';
+            html = 'Year: ' + String(year) + '<br>';
+            //Populate the columnnames
+            prop_names = statics.stats_by_var_res[v][t_res];
+            //populate html with data
+            for (c_idx = 0; c_idx < prop_names.length; c_idx++) {
+                data_val = etdata[idx][prop_name];
+                html += prop_name + ': ' + String(data_val) + '<br>';
+            }
+        }
     },
     get_ft_map_layer: function(ft_id, region){
         var layer = new google.maps.FusionTablesLayer({
@@ -300,16 +304,18 @@ MAP_APP = {
         etdata global var that hold et data and
         geometry info,  defined in scripts.html
         */
-        if (etdata.length > 0) {
-            data.addGeoJson(etdata);
+
+        if ( Object.keys(geomdata).length > 0 ) {
+            data.addGeoJson(geomdata);
+
+            //f_name = 'static/geojson/Mason_' + field_year + '.geojson';
+            //data.loadGeoJson(f_name);
+
             //Only show data that are in current map bound
             setTimeout(function () {
-                count = -1;
                 data.forEach(function (feature) {
-                    count += 1;
                     var feat_bounds = new google.maps.LatLngBounds();
-                    //processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
-                    processPoints(geomdata[count]['coordinates'], feat_bounds.extend, feat_bounds);
+                    processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
                     var sw = feat_bounds.getSouthWest();
                     var ne = feat_bounds.getNorthEast();
                     if (!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
@@ -376,7 +382,7 @@ MAP_APP = {
         field_years = [$('#field_year').val()];
         //field_years = $('#field_years').val();
         for (idx = 0; idx < field_years.length; idx++){
-            field_year = field_years[idx]
+            field_year = field_years[idx];
             y_idx = $.inArray(field_year, statics.all_field_years);
             MAP_APP.set_geojson_map_layer(y_idx);
         }
