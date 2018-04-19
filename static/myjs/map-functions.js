@@ -48,124 +48,6 @@ MAP_APP = {
         });
         return drawingManager;
     },
-    get_fusiontable_id: function(region, field_year){
-        var ft_id = null;
-        if (field_year){
-            ft_id = statics.fusiontables[region][field_year];
-        }
-        return ft_id;
-    },
-    set_fusiontableBounds: function(query) {
-        if (!query || !query.getDataTable()) {
-          return;
-        }
-        var bounds =  new google.maps.LatLngBounds(),
-            data = query.getDataTable(),
-            num_rows = data.getNumberOfRows(),
-            row_idx, lon_bounds, lat_bounds,
-            ll_NE, ll_SW, kml, geoXml;
-
-        for (row_idx = 0; row_idx < num_rows; row_idx++) {
-            kml = query.getDataTable().getValue(row_idx, 0);
-            geoXml = new geoXML3.parser({});
-            geoXml.parseKmlString('<Placemark>' + kml + '</Placemark>');
-            lon_bounds = geoXml.docs[0].internals.bounds.b;
-            lat_bounds = geoXml.docs[0].internals.bounds.f;
-            ll_NE = new google.maps.LatLng(String(lat_bounds.b), String(lon_bounds.b));
-            ll_SW = new google.maps.LatLng(String(lat_bounds.f), String(lon_bounds.f));
-            bounds.extend(ll_NE);
-            bounds.extend(ll_SW);
-        }
-        window.map.fitBounds(bounds);
-        /*
-        WEIRD: on sharelink request the zoom
-        somehow is 0 after the fitBounds call
-        so we need to save the zoom beforehand and reset
-        it after
-        */
-        /*
-        mapZoom = window.map.getZoom();
-        //note: fitBounds happens asynchronously
-        window.map.fitBounds(bounds);
-        google.maps.event.addListenerOnce(window.map, 'bounds_changed', function(event) {
-            if(mapZoom) {
-                window.map.setZoom(mapZoom);
-            }
-        });
-        */
-    },
-    zoomToFusiontable: function(queryText) {
-        var g_url = 'http://www.google.com/fusiontables/gvizdata?tq=';
-        var query = new google.visualization.Query(g_url  + queryText);
-        //set the callback function
-        query.send(MAP_APP.set_fusiontableBounds);
-    },
-    get_fusiontableQuery: function(ft_id, columnname, subchoice, needExact) {
-        var query = null,
-            where_text = null;
-
-        if (needExact) {
-            where_text = "'" + columnname + "' = '" + subchoice + "'";
-        } else {
-            if (subChoice && columnname) {
-                where_text = "'" + columnname + "' CONTAINS '" + subchoice + "'";
-            }
-        }
-        query = {
-            select: 'geometry',
-            from: ft_id
-        };
-
-        if (where_text) {
-            query['where'] = where_text;
-        }
-        return query;
-    },
-    get_fusiontableQueryText: function(ft_id, columnname, subChoice, needExact) {
-        var queryText = '';
-        if (needExact) { //plot exactly 1 region
-            queryText = "SELECT 'geometry' FROM " + ft_id + " WHERE '" + columnname + "' = '" + subchoice + "'";
-        } else {
-            if (subChoice && columnname) { //plot lots of regions w/ filter
-                queryText = "SELECT 'geometry' FROM " + ft_id + " WHERE '" + columnname + "' CONTAINS '" + subchoice + "'";
-            } else {
-                queryText = "SELECT 'geometry' FROM " + ft_id;
-            }
-        }
-        queryText = encodeURIComponent(queryText);
-        return queryText;
-    },
-    populate_dataModalFromFT: function(e){
-        // e is the click event
-        var col_name, m_idx, m_str, c_idx, data_val, html = '',
-            v = $('#variable').val(), t_res = $('#t_res').val();
-
-        //Clear out old modal content
-        $('#dataModal_title').html('');
-        $('#dataModal_data').html('');
-
-        //Title
-        for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
-            col_name = statics.title_cols[c_idx];
-            html += '<b>' + col_name + '</b>'+ ': ';
-            html += metadata[idx][col_name] + '<br>';
-        }
-        html += '<b>' + v + '</b>';
-        if ($('#form-field_year').css('display') != 'none'){
-            html += '<b>Year ' + $('#field_year').val() + '</b>:';
-        }
-        $('#dataModal_title').append(html);
-        html = '';
-        //Populate the columnnames
-        col_names = statics.stats_by_var_res[v][t_res];
-        //populate html with data
-        for (c_idx = 0; c_idx < col_names.length; c_idx++){
-            col_name = col_names[c_idx];
-            data_val = metadata[idx][col_name];
-            html += col_name + ': ' + data_val + '<br>'
-        }
-        $('#dataModal_data').append(html);
-    },
     initialize_dataModal: function(e){
 
         // e is the click event
@@ -245,40 +127,6 @@ MAP_APP = {
                 html += prop_name + ': ' + String(data_val) + '<br>';
             }
         }
-    },
-    get_ft_map_layer: function(ft_id, region){
-        var layer = new google.maps.FusionTablesLayer({
-            query: {
-                select: 'geometry',
-                from: ft_id
-            },
-            options: js_statics.ft_styles[region],
-            suppressInfoWindows: true
-        });
-        google.maps.event.addListener(layer, 'click', function(e) {
-            //Hide old data modal
-            $('#dataModal').modal('hide');
-            MAP_APP.populate_dataModalFromFT(e);
-            $('#dataModal').modal('toggle');
-        });
-        return layer;
-    },
-    set_ft_map_layer: function(idx){
-        //Get the map layer
-        var region = $('#region').val(),
-            field_year = null;
-        if (region.is_in(['US_fields', 'Mason'])) {
-            field_year = $('#field_year').val();
-        }
-        var ft_id = MAP_APP.get_fusiontable_id(region, field_year);
-        var layer = MAP_APP.get_ft_map_layer(ft_id, region);
-
-        //Set the map layer
-        layer.setMap(window.map);
-        window.layers[idx - 1] = layer;
-        //Zoom to layer
-        queryText = MAP_APP.get_fusiontableQueryText(ft_id, null, null, null);
-        MAP_APP.zoomToFusiontable(queryText);
     },
     set_geojson_map_layer: function(year_idx){
          function processPoints(geometry, callback, thisArg) {
@@ -407,7 +255,7 @@ var initialize_map = function() {
         return;
     }
     //Set the map zoom dependent on region
-    var mapZoom = 10;
+    var mapZoom = 11;
     if ($('#region').val().not_in(['US_fields', 'Mason'])){
         mapZoom = 4;
     }
