@@ -1,16 +1,66 @@
 /* MAP Utils*/
 var MAP_APP = MAP_APP || {};
 MAP_APP = {
-    set_polyStyle: function(){
-        var polyOptions = {
-            strokeWeight: 0,
-            fillOpacity: 0.45,
-            editable: true,
-            draggable:true,
-            fillColor: "#1E90FF",
-            strokeColor: "#0c3966"
-        };
-        return polyOptions;
+    LightenDarkenColor: function(col, amt) {
+        //Darken amnt = negative number
+        var usePound = false;
+        if ( col[0] == "#" ) {
+            col = col.slice(1);
+            usePound = true;
+        }
+        var num = parseInt(col,16);
+        var r = (num >> 16) + amt;
+
+        if ( r > 255 ) r = 255;
+        else if  (r < 0) r = 0;
+
+        var b = ((num >> 8) & 0x00FF) + amt;
+
+        if ( b > 255 ) b = 255;
+        else if  (b < 0) b = 0;
+
+        var g = (num & 0x0000FF) + amt;
+
+        if ( g > 255 ) g = 255;
+        else if  ( g < 0 ) g = 0;
+        return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
+    },
+    set_feat_colors: function(etdata, start_color, DOrL){
+        var v = $('#variable').val(),
+            t_res = $('#t_res').val(),
+            et_vars = statics.stats_by_var_res[v][t_res],
+            et_var, i, j, colors = [], data, mn, mx, bins = [], step, amt,
+            num_colors = 10, cb = {'colors':[], 'bins':[]}, new_color ;
+        //FIX ME: if t_res monthly, we need to decide better whihc month to pick
+        et_var = et_vars[0];
+        data = $.map(etdata, function(feat) {
+            if (Math.abs(feat[et_var] + 9999) > 0.0001) {
+                return feat[et_var];
+            }
+        });
+        if (!data) {
+            return cb;
+        }
+        mn = Math.floor(Math.min.apply(null, data));
+        mx = Math.ceil(Math.max.apply(null, data));
+        step = (mx - mn) / num_colors;
+        if ((mx - mn) % num_colors != 0){
+            mx = mx + step;
+        }
+        amt = 0, j = mn;
+        while (j < mx) {
+            new_color = MAP_APP.LightenDarkenColor(start_color, amt);
+            colors.push(new_color);
+            bins.push([j, j + step]);
+            if (DOrL != 'darken') {
+                amt += 10;
+            } else {
+                amt -= 10;
+            }
+            j += step;
+        }
+        cb = {'colors': colors, 'bins': bins}
+        return cb;
     },
     set_featureStyle: function(year){
         var featureStyle,
@@ -49,7 +99,6 @@ MAP_APP = {
         return drawingManager;
     },
     initialize_dataModal: function(e){
-
         // e is the click event
         var prop_name, v, t_res, c_idx, html,years,
             idx = e.feature.getProperty('idx');
@@ -114,10 +163,9 @@ MAP_APP = {
             html += metadata[idx][prop_name] + '<br>';
         }
         $('#layerInfoModal_data').append(html);
-
+        html = '';
         for (year_idx = 0; year_idx < years.length; year_idx++) {
             year = years[year_idx];
-            html = '';
             html = 'Year: ' + String(year) + '<br>';
             //Populate the columnnames
             prop_names = statics.stats_by_var_res[v][t_res];
@@ -126,6 +174,7 @@ MAP_APP = {
                 data_val = etdata[idx][prop_name];
                 html += prop_name + ': ' + String(data_val) + '<br>';
             }
+            $('#layerInfoModal_data').append(html);
         }
     },
     set_geojson_map_layer: function(year_idx){
@@ -140,42 +189,70 @@ MAP_APP = {
                 });
             }
         }
+        //Sanity check
+        if ( Object.keys(geomdata).length == 0 ) {
+            return;
+        }
 
         var year_list = statics.all_field_years,
             field_year = year_list[year_idx],
             featureStyle, data, bounds;
-
-        data = new google.maps.Data();
 
         /*
         LOAD THE DATA FROM THE TEMPLATE VARIABLE
         etdata global var that hold et data and
         geometry info,  defined in scripts.html
         */
+        data = new google.maps.Data();
+        data.addGeoJson(geomdata);
+        //f_name = 'static/geojson/Mason_' + field_year + '.geojson';
+        //data.loadGeoJson(f_name);
 
-        if ( Object.keys(geomdata).length > 0 ) {
-            data.addGeoJson(geomdata);
+        //Only show data that are in current map bound
+        setTimeout(function () {
+            data.forEach(function (feature) {
+                var feat_bounds = new google.maps.LatLngBounds();
+                processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
+                var sw = feat_bounds.getSouthWest();
+                var ne = feat_bounds.getNorthEast();
+                if (!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
+                    data.remove(feature);
+                }
+            });
+        }, 500);
 
-            //f_name = 'static/geojson/Mason_' + field_year + '.geojson';
-            //data.loadGeoJson(f_name);
+        //featureStyle = MAP_APP.set_featureStyle(field_year);
+        //data.setStyle(featureStyle);
+        var start_color = '#9bc2cf';
+        var cb = MAP_APP.set_feat_colors(etdata, start_color, 'darken');
+        var feat_colors = cb['colors'], bins = cb['bins'];
+        data.setStyle(function(feature) {
+            var idx, v, t_res, et_vars, et_var, data_val, i, color,
+                idx = feature.getProperty('idx'),
+                v = $('#variable').val(),
+                t_res = $('#t_res').val(),
+                et_vars = statics.stats_by_var_res[v][t_res],
+                et_var = et_vars[0],
+                data_val = etdata[idx][et_var],
+                color = start_color;
+            //Find the right bin
+            for (i = 0; i < bins.length; i++){
+                if (bins[i][0] <= data_val && data_val <= bins[i][1]){
+                    color = feat_colors[i];
+                    break;
+                }
+            }
+            props = {
+                fillColor: color,
+                fillOpacity: 0.5,
+                strokeColor: '#000000',
+                stokeOpacity: 0.8,
+                strokeWeight: 0.5
+            };
+            return props;
+        });
 
-            //Only show data that are in current map bound
-            setTimeout(function () {
-                data.forEach(function (feature) {
-                    var feat_bounds = new google.maps.LatLngBounds();
-                    processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
-                    var sw = feat_bounds.getSouthWest();
-                    var ne = feat_bounds.getNorthEast();
-                    if (!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
-                        data.remove(feature);
-                    }
-                });
-            }, 500);
-        }
-        
 
-        featureStyle = MAP_APP.set_featureStyle(field_year);
-        data.setStyle(featureStyle);
 
         /*
         // zoom to show all the features

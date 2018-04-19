@@ -52,8 +52,7 @@ class Datatstore_Util(object):
 
     def read_geometries_from_bucket(self):
         f = self.geo_bucket_url + self.geoFName
-        d = json.load(urllib2.urlopen(f))
-        # geom_data = [{'geometry': d['features'][idx]['geometry']} for idx in range(len(d['features']))]]
+        d = json.load(urllib2.urlopen(f));
         geom_data = {"type": "FeatureCollection",
                      'features': [
                          {'type': 'Feature',
@@ -131,10 +130,6 @@ class Datatstore_Util(object):
         :return:  dict of data for the features
         '''
         data = []
-        logging.debug(self.year)
-        logging.debug(self.region)
-        logging.debug(self.dataset)
-        logging.debug(self.et_model)
         qry = ndb.Query(kind='DATA').filter(
             DATA.year == self.year,
             DATA.region == self.region,

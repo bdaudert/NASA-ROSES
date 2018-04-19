@@ -1,9 +1,6 @@
 $(document).ready(function () {
-
     //Activate  Modal window
     //NOTE: if we omit this, models won't show
-    //$('#dataModal').modal('toggle');
-    //$('#modalError').modal('toggle');
     //Make modal draggable and resizable
     $('.modal-content').resizable();
     $('.modal-dialog').draggable();
