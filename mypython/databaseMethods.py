@@ -54,7 +54,12 @@ class Datatstore_Util(object):
         f = self.geo_bucket_url + self.geoFName
         d = json.load(urllib2.urlopen(f))
         # geom_data = [{'geometry': d['features'][idx]['geometry']} for idx in range(len(d['features']))]]
-        geom_data = [d['features'][idx]['geometry'] for idx in range(len(d['features']))]
+        geom_data = {"type": "FeatureCollection",
+                     'features': [
+                         {'type': 'Feature',
+                          'geometry': d['features'][idx]['geometry'],
+                          'properties': {'idx': idx}
+                          } for idx in range(len(d['features']))]}
         geom_data = json.dumps(geom_data, ensure_ascii=False).encode('utf8')
         return geom_data
 
