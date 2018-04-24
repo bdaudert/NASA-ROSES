@@ -33,14 +33,25 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 
     To install the necessary external Python modules:
     ```
-    conda install numpy=1.6.2=py27_4 oauth2client httplib2 cryptography pyOpenSSL cffi
+    conda install numpy=1.6.2=py27_4 oauth2client=2.2.0 httplib2 cryptography pyOpenSSL cffi
     pip install earthengine-api
     ```
 
+    Create the requirements.txt file.
+    At a minimum the requirements.txt file should look like this
+    ```
+    earthengine-api >= 0.1.100
+    httplib2
+    Jinja2 == 2.6
+    numpy == 1.6.2
+    oauth2client
+    six
+    ```
     The following command will install the the external Python modules listed in the requirements.txt file into the lib folder for upload to AppEngine.
     ```
     pip install -r requirements.txt -t lib
     ```
+    
     You will need to tell app engine to add the lib folder to the third party libraries as follows:
     ```
     # appengine_config.py
@@ -49,18 +60,22 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
     # Add any libraries install in the "lib" folder.
     vendor.add('lib')
     ```
-
-
-    Make symbolic link to private key:
-        - `ln -s ~/.keys/privatekey.pem`
-    Set Developer information:
-        - `x@developer.gserviceaccount.com` in config.py
+    
+    In config.py set your google account settings
+    ```
+    # The service account email address authorized by your Google contact.
+    # Set up a service account as described in the README.
+    EE_ACCOUNT = 'x@<projectID>.iam.gserviceaccount.com'
+    # The private key associated with your service account in JSON format.
+    EE_PRIVATE_KEY_FILE = 'privatekey.json'
+    EE_CREDENTIALS = ee.ServiceAccountCredentials(EE_ACCOUNT, EE_PRIVATE_KEY_FILE)
+    ```
 
 - Testing installation and authentication:
 
     `python -c "import ee; print ee.__version__"`
 
-    `python -c "import os; import ee; MY_SERVICE_ACCOUNT = os.environ.get('MY_SERVICE_ACCOUNT'); MY_PRIVATE_KEY_FILE = os.environ.get('MY_PRIVATE_KEY_FILE'); ee.Initialize(ee.ServiceAccountCredentials(MY_SERVICE_ACCOUNT, MY_PRIVATE_KEY_FILE)); print(ee.Image('srtm90_v4').getThumbUrl())"`
+    `python -c "import os; import ee; EE_ACCOUNT = os.environ.get('EE_ACCOUNT'); EE_PRIVATE_KEY_FILE = os.environ.get('EE_PRIVATE_KEY_FILE'); ee.Initialize(ee.ServiceAccountCredentials(EE_ACCOUNT, EE_PRIVATE_KEY_FILE)); print(ee.Image('srtm90_v4').getThumbUrl())"`
 
 - Configuring App Engine to use the conda Environment:
     Install Google App Engine for Python and clone Earth Engine API repository.

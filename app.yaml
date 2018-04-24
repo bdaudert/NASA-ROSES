@@ -2,8 +2,10 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
-builtins:
-- remote_api: on
+# cloud_sql_instances:open-et-1:us-west1:myinstance
+
+# builtins:
+#- remote_api: on
 
 handlers:
 - url: /static/
