@@ -16,6 +16,10 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 - Links:
     - https://docs.google.com/document/d/1tvkSGb-49YlSqW3AGknr7T_xoRB1KngCD3f2uiwOS3Q/edit
 - Installation
+
+    The preferred tooling for managing your App Engine applications in Python is Google Cloud SDK. Install it. 
+    - https://cloud.google.com/sdk/docs/
+
     To create the "ee-python" conda environment, execute the following:
     ```
     conda remove --name ee-python --all

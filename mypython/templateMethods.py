@@ -65,6 +65,7 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
         'app_name': app_name,
+        'tool_action': 'None',
         'variables': statics['variable_defaults'],
         'form_options': {},
         'map_options': {},
