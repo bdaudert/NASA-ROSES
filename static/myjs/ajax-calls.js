@@ -39,14 +39,14 @@ function set_error(error, cause, resolution, method) {
         generalResolutionMessage = resolution;
     if (cause === ""){
         //use default message defined in dataStore
-        if (default_generalCauseMessage.hasOwnProperty(method)){
-            generalCauseMessage = default_generalCauseMessage[method];
+        if (js_statics.default_generalCauseMessage.hasOwnProperty(method)){
+            generalCauseMessage = js_statics.default_generalCauseMessage[method];
         }
     }
     if (resolution === ""){
         //use default message defined in dataStore
-        if (default_generalResolutionMessage.hasOwnProperty(method)){
-            generalResolutionMessage = default_generalResolutionMessage[method];
+        if (js_statics.default_generalResolutionMessage.hasOwnProperty(method)){
+            generalResolutionMessage = js_statics.default_generalResolutionMessage[method];
         }
     }
     //Show error dialog
@@ -59,12 +59,15 @@ function set_error(error, cause, resolution, method) {
 
 
 function ajax_update_data(){
-    var tool_action = 'update_data';
+    var tool_action = 'update_data',
         url = clearOut_URL(),
-        form_data = $("#form_all").serialize(), jqXHR,
+        form_data, jqXHR,
         err_code, r, method = 'ajax', error, cause, i, tv_var;
+
     //Update the tool_action
     $('#tool_action').val(tool_action);
+    //Get the form data
+    form_data = $("#form_all").serialize();
     start_progressbar();
     jqXHR = $.ajax({
             url: url,
@@ -75,14 +78,15 @@ function ajax_update_data(){
     .done(function(response) {
         r = $.parseJSON(response);
         if (r.hasOwnProperty('error')) {
-            error = response.error;
+            error = r.error;
             set_error( error, '', '', method);
             end_progressbar();
         }
         //Set the new template variables
-        for (i=0; i < response_vars[tool_action].length; i++){
-            vt_var = response_vars[tool_action][i];
-            window.data[tv_var] = r[tv_var]
+        for (i=0; i < statics.response_vars[tool_action].length; i++){
+            tv_var = statics.response_vars[tool_action][i];
+            window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+
         }
         end_progressbar();
     }) // successfully got JSON response

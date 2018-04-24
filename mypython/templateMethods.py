@@ -65,17 +65,16 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
         'app_name': app_name,
-        'tool_action': 'None',
         'variables': statics['variable_defaults'],
         'form_options': {},
         'map_options': {},
-        'ts_options': {},
+        'ts_options': {}
     }
-
     # Overrode default variables if not GET
-    if method != 'GET':
+    if method == 'POST' or method == 'shareLink':
         for var_key, dflt in tv['variables'].iteritems():
-            RequestHandler.request.get(var_key, dflt)
+            if var_key in RequestHandler.request.arguments():
+                tv['variables'][var_key] = RequestHandler.request.get(var_key, dflt)
 
     # Set dates
     dates = set_dates()
@@ -87,12 +86,12 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv['etdata'] = []
     tv['metadata'] = []
     tv['geomdata'] = {}
-    DU = set_database_util(tv)
     if app_name == 'dataBaseTasks':
         return tv
     if  tv['variables']['region'] in ['ee_map']:
         return tv
-
+    # Get the relevant etdata
+    DU = set_database_util(tv)
     tv['metadata'], tv['etdata'] = DU.read_from_db()
     tv['geomdata'] = DU.read_geometries_from_bucket()
     '''

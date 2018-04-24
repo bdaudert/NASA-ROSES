@@ -63,6 +63,7 @@ $(document).ready(function () {
         }
     });
     $('#field_year').on('change', function(){
+        console.log($(this).val());
         change_inYear($(this).val());
     });
     $('#variable').on('change', function(){

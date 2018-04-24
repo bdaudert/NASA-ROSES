@@ -82,6 +82,7 @@ class defaultApplication(webapp2.RequestHandler):
             # Initial page load
             tv = runApp(self, self.app_name, 'GET')
             tv['method'] = 'GET'
+            print('GET EXECUTED')
         else:
             """Loading the main page or a sharelink will trigger a GET"""
             try:
@@ -94,10 +95,10 @@ class defaultApplication(webapp2.RequestHandler):
 
         self.tv_logging(tv, 'GET')
         template = JINJA_ENVIRONMENT.get_template(self.appHTML)
-
         self.response.out.write(template.render(tv))
 
     def post(self):
+        print('POST EXECUTED')
         """Calling Get Map or Get TimeSeries will trigger a POST"""
         tv = runApp(self, self.app_name, 'POST')
         if 'method' not in tv.keys():
@@ -115,7 +116,7 @@ class defaultApplication(webapp2.RequestHandler):
             if 'method' in tv.keys():
                 dataobj['method'] = tv['method']
         else:
-            for var in config.statics.response_vars[tv['tool_action']]:
+            for var in config.statics['response_vars'][tv['variables']['tool_action']]:
                 try:
                     dataobj[var] = tv[var]
                 except KeyError:
@@ -127,18 +128,18 @@ class defaultApplication(webapp2.RequestHandler):
         """
         logging.exception(exception)
         app_name = self.app_name
+        print('RUNNING HANDLE EXCEPTION')
         tv = runApp(self, app_name, 'GET')
         tv['error'] = str(exception)
         tv['method'] = 'POST'
         self.generateResponse(tv)
 
-    def tv_logging(self, tv, method='GET'):
+    def tv_logging(self, tv, method):
         """Log important template values
         These values are will be written to the appEngine logger
           so that we can tracks what page requests are being made
         """
         tv['method'] = method
-
         # Skip form values and maxDates
         log_values = {
             k: v for k, v in tv.items()
