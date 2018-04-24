@@ -25,7 +25,7 @@ function change_inRegion(region){
 function change_inYear(field_year){
 	// We ned to recompute the template vars
 	//geodata, metadata, etdata
-	ajax_update_template_vars();
+	ajax_update_data();
 	//Delete old layer
 	var year_idx, year,
 		year_list = statics.all_field_years;
