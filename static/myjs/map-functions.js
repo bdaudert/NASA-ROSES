@@ -25,7 +25,7 @@ MAP_APP = {
         else if  ( g < 0 ) g = 0;
         return (usePound?"#":"") + (g | (b << 8) | (r << 16)).toString(16);
     },
-    set_feat_colors: function(etdata, start_color, DOrL){
+    set_feat_colors: function(start_color, DOrL){
         var v = $('#variable').val(),
             t_res = $('#t_res').val(),
             et_vars = statics.stats_by_var_res[v][t_res],
@@ -33,7 +33,7 @@ MAP_APP = {
             num_colors = 10, cb = {'colors':[], 'bins':[]}, new_color ;
         //FIX ME: if t_res monthly, we need to decide better whihc month to pick
         et_var = et_vars[0];
-        data = $.map(etdata, function(feat) {
+        data = $.map(DATA.etdata, function(feat) {
             if (Math.abs(feat[et_var] + 9999) > 0.0001) {
                 return feat[et_var];
             }
@@ -114,8 +114,8 @@ MAP_APP = {
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
             prop_name = statics.title_cols[c_idx];
             html += '<b>' + prop_name + '</b>'+ ': ';
-            if (metadata[idx][prop_name]) {
-                html += metadata[idx][prop_name] + '<br>'
+            if (DATA.metadata[idx][prop_name]) {
+                html += DATA.metadata[idx][prop_name] + '<br>'
             }
         }
         html += '<b>Variable</b>: ' + v + '<br>';
@@ -141,7 +141,7 @@ MAP_APP = {
             html = 'Year: ' + String(year) + '<br>';
             for (c_idx = 0; c_idx < prop_names.length; c_idx++) {
                 prop_name = prop_names[c_idx];
-                data_val = etdata[idx][prop_name];
+                data_val = DATA.etdata[idx][prop_name];
                 html += prop_name + ': ' + data_val + '<br>'
             }
             html += '<br>';
@@ -160,7 +160,7 @@ MAP_APP = {
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++) {
             prop_name = statics.title_cols[c_idx].toUpperCase();
             html += '<b>' + prop_name + '</b>' + ': ';
-            html += metadata[idx][prop_name] + '<br>';
+            html += DATA.metadata[idx][prop_name] + '<br>';
         }
         $('#layerInfoModal_data').append(html);
         html = '';
@@ -171,7 +171,7 @@ MAP_APP = {
             prop_names = statics.stats_by_var_res[v][t_res];
             //populate html with data
             for (c_idx = 0; c_idx < prop_names.length; c_idx++) {
-                data_val = etdata[idx][prop_name];
+                data_val = DATA.etdata[idx][prop_name];
                 html += prop_name + ': ' + String(data_val) + '<br>';
             }
             $('#layerInfoModal_data').append(html);
@@ -190,7 +190,7 @@ MAP_APP = {
             }
         }
         //Sanity check
-        if ( Object.keys(geomdata).length == 0 ) {
+        if ( Object.keys(DATA.geomdata).length == 0 ) {
             return;
         }
 
@@ -204,7 +204,7 @@ MAP_APP = {
         geometry info,  defined in scripts.html
         */
         data = new google.maps.Data();
-        data.addGeoJson(geomdata);
+        data.addGeoJson(DATA.geomdata);
         //f_name = 'static/geojson/Mason_' + field_year + '.geojson';
         //data.loadGeoJson(f_name);
 
@@ -224,7 +224,7 @@ MAP_APP = {
         //featureStyle = MAP_APP.set_featureStyle(field_year);
         //data.setStyle(featureStyle);
         var start_color = '#9bc2cf';
-        var cb = MAP_APP.set_feat_colors(etdata, start_color, 'darken');
+        var cb = MAP_APP.set_feat_colors(start_color, 'darken');
         var feat_colors = cb['colors'], bins = cb['bins'];
         data.setStyle(function(feature) {
             var idx, v, t_res, et_vars, et_var, data_val, i, color,
@@ -233,7 +233,7 @@ MAP_APP = {
                 t_res = $('#t_res').val(),
                 et_vars = statics.stats_by_var_res[v][t_res],
                 et_var = et_vars[0],
-                data_val = etdata[idx][et_var],
+                data_val = DATA.etdata[idx][et_var],
                 color = start_color;
             //Find the right bin
             for (i = 0; i < bins.length; i++){

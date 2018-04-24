@@ -15,8 +15,12 @@
 <script src="//maps.googleapis.com/maps/api/js?key={{ GMAP_API_KEY }}&libraries=drawing"></script>
 <script src="//www.gstatic.com/charts/loader.js"></script>
 </script>
+<!--EXTERNAL JS-->
 <!--Needed to zoom to fusiontables!!!-->
 <script src="/static/js/geoxml3.js"></script>
+<!--Progress Bar-->
+<script src="/static/js/progressWindow.js"></script>
+
 <!--My JS-->
 <!--<script src="static/myjs/statics.js"></script>-->
 <script src="static/myjs/utils.js"></script>
@@ -24,6 +28,7 @@
 <script src="static/myjs/map-functions.js"></script>
 <script src="static/myjs/ts-functions.js"></script>
 <script src="static/myjs/listeners.js"></script>
+<script src="static/myjs/ajax-calls.js"></script>
 
 <!--Run Time Scripts-->
 <script>
@@ -45,9 +50,11 @@
             js_statics = data;
         }
     });
-    window.metadata = {{ metadata|safe }};
-    window.etdata = {{ etdata|safe }};
-    window.geomdata = {{ geomdata|safe}};
+    window.DATA = {
+        metadata: {{ metadata|safe }},
+        etdata: {{ etdata|safe }},
+        geomdata: {{ geomdata|safe}}
+    }
     //Set etdata
     google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
     google.charts.setOnLoadCallback(initialize_map);
