@@ -35,17 +35,6 @@
                         {% endfor %}
                     </select> 
                 </div> 
-                <!--
-                <div id='form-field_years' 
-                {% if variables.region |is_in('Mason, US_fields') %}style="display:none;"{%endif%}>
-                    <b>Year(s): </b><br>
-                    <select multiple class="years" id="field_years" name="field_years">
-                        {% for x in form_options.field_years %}
-                        <option value="{{ x }}" {% if x == variables.field_years  %} selected {% endif %}>{{ x }}</option>
-                        {% endfor %}
-                    </select> 
-                </div>
-                -->
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
         <div class="panel panel-default">
@@ -103,7 +92,8 @@
                 </div> 
                 <div id="form-timpeperiod">
                     <b>Timeperiod (Depends on resolution): </b>
-                    <select id="time_period" name="time_period" class="time_period">
+                    <select id="time_period" name="time_period" class="time_period"
+                    {% if x == variables.t_res|is_in('annual,monthly') %} multiple {% endif %}>
                         {% for x,y in form_options.time_period.items() %}
                         <option value="{{ x }}" {% if x == variables.time_period  %} selected {% endif %}>{{ y }}</option>
                         {% endfor %}
