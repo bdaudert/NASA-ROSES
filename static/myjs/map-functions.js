@@ -194,7 +194,7 @@ MAP_APP = {
             return;
         }
 
-        var year_list = statics.all_field_years,
+        var year_list = statics.all_field_year[$('#region').val()],
             field_year = year_list[year_idx],
             featureStyle, data, bounds;
 
@@ -298,19 +298,15 @@ MAP_APP = {
     },
     set_geojson_map_layers: function(){
         var region = $('#region').val(),
-            field_years, field_year, y_idx,
+            field_year, y_idx,
             featureStyle, bounds, data,
             //data = new google.maps.Data(),
             featureGeoJSON, idx;
 
         //NOTE: currently we only allow single years for fields
-        field_years = [$('#field_year').val()];
-        //field_years = $('#field_years').val();
-        for (idx = 0; idx < field_years.length; idx++){
-            field_year = field_years[idx];
-            y_idx = $.inArray(field_year, statics.all_field_years);
-            MAP_APP.set_geojson_map_layer(y_idx);
-        }
+        field_year = $('#field_year').val();
+        y_idx = $.inArray(field_year, statics.all_field_year[$('#region').val()]);
+        MAP_APP.set_geojson_map_layer(y_idx);
     },
     delete_layer: function(idx){
         if (window.layers.length && window.layers[idx] != null){
@@ -344,9 +340,7 @@ var initialize_map = function() {
     });
     //Need to set global vars for zooming and listeners
     window.layers = [];
-    for (var i = 0; i < statics.all_field_years.length; i++){
-        window.layers.push(null);
-    }
+    window.layers.push(null);
     if (mapZoom >=8){
         MAP_APP.set_geojson_map_layers();
     }
