@@ -20,5 +20,17 @@
         "2008": ["#696969", "#000000"],
         "2009": ["#696969", "#000000"],
         "2010": ["#696969", "#000000"]
+    },
+    "default_generalCauseMessage": {
+        "formChecks": "One or more form entries are invalid.",
+        "shareLink": "Your url link is not valid.",
+        "ajax": "Your request could not be completed",
+        "pageload": "Either there is a problem with your internet connection or you are not using the Chrome web browser."
+    },
+    "default_generalResolutionMessage": {
+        "formChecks": "Fix the form errors highlighted in red.",
+        "shareLink": "Regenerate your link using the latest version of the interface",
+        "ajax": "",
+        "pageload": "Are you using Chrome? Refresh the webpage and try again=,<br>Check your internet connection,<br>"
     }
 }

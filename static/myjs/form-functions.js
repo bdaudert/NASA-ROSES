@@ -22,6 +22,24 @@ function change_inRegion(region){
 	}
 }
 
+function change_inYear(field_year){
+	// We ned to recompute the template vars
+	//geodata, metadata, etdata
+	ajax_update_data();
+	//Delete old layer
+	var year_idx, year,
+		year_list = statics.all_field_years;
+	for (year_idx = 0; year_idx < year_list.length; year_idx++){
+		year = year_list[year_idx];
+		if (field_year === year){
+			MAP_APP.set_geojson_map_layer(year_idx);
+		}
+		else{
+			MAP_APP.delete_layer(year_idx);
+		}
+	}
+}
+
 function change_inVariable(variable){
     if ($('#region').val().is_in(['US_fields', 'Mason'])){
     	//Set new dataModal
@@ -56,7 +74,7 @@ function change_inVariable(variable){
     }
 }
 
-function change_inResolution(resolution){
+function change_inTRes(resolution){
 	var tps = statics.time_period_by_res[resolution], 
 		tp, tp_name, option;
 	$('#time_period > option').remove();
@@ -74,4 +92,8 @@ function change_inResolution(resolution){
     if ($('#region').val() == 'ee_map'){
     	//Get the map from db
     }
+}
+
+function change_inTimePeriod(time_period){
+
 }

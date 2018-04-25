@@ -9,33 +9,27 @@
 # instructions on how to set up authentication.
 
 import config
+
 import httplib2
 import json
 import logging
-import os
-import glob
+import os, socket
+
 
 import ee
 from google.appengine.api import urlfetch
-# from google.appengine.ext import ndb
+from google.appengine.api import users
 import jinja2
 import webapp2
 
-from config import statics
-from config import p_statics
-import JinjaFilters
 import templateMethods
-import databaseMethods
+import JinjaFilters
+
+
+
 
 
 # SET STATICS
-'''
-# Load the statics file
-static_dir = config.STATIC_BASE_DIR
-static_file = config.STATIC_FILE
-with open(static_file, 'rb') as fin:
-    statics = json.loads(fin)
-'''
 urlfetch.set_default_fetch_deadline(180000)
 httplib2.Http(timeout=180000)
 
@@ -88,6 +82,7 @@ class defaultApplication(webapp2.RequestHandler):
             # Initial page load
             tv = runApp(self, self.app_name, 'GET')
             tv['method'] = 'GET'
+            print('GET EXECUTED')
         else:
             """Loading the main page or a sharelink will trigger a GET"""
             try:
@@ -100,10 +95,10 @@ class defaultApplication(webapp2.RequestHandler):
 
         self.tv_logging(tv, 'GET')
         template = JINJA_ENVIRONMENT.get_template(self.appHTML)
-
         self.response.out.write(template.render(tv))
 
     def post(self):
+        print('POST EXECUTED')
         """Calling Get Map or Get TimeSeries will trigger a POST"""
         tv = runApp(self, self.app_name, 'POST')
         if 'method' not in tv.keys():
@@ -121,7 +116,7 @@ class defaultApplication(webapp2.RequestHandler):
             if 'method' in tv.keys():
                 dataobj['method'] = tv['method']
         else:
-            for var in statics.response_vars[tv['tool_action']]:
+            for var in config.statics['response_vars'][tv['variables']['tool_action']]:
                 try:
                     dataobj[var] = tv[var]
                 except KeyError:
@@ -133,24 +128,25 @@ class defaultApplication(webapp2.RequestHandler):
         """
         logging.exception(exception)
         app_name = self.app_name
+        print('RUNNING HANDLE EXCEPTION')
         tv = runApp(self, app_name, 'GET')
         tv['error'] = str(exception)
         tv['method'] = 'POST'
         self.generateResponse(tv)
 
-    def tv_logging(self, tv, method='GET'):
+    def tv_logging(self, tv, method):
         """Log important template values
         These values are will be written to the appEngine logger
           so that we can tracks what page requests are being made
         """
         tv['method'] = method
-
         # Skip form values and maxDates
         log_values = {
             k: v for k, v in tv.items()
             if not k.startswith('form') and
             not k.startswith('etdata') and
-               not k.startswith('metadata')
+            not k.startswith('metadata') and
+            not k.startswith('geomdata')
         }
         # Log all values at once
         logging.info('{}'.format(log_values))
@@ -160,7 +156,36 @@ class OpenET(defaultApplication):
     app_name = 'Open-ET-1'
     appHTML = 'open-et-1.html'
 
+class AdminPage(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            if users.is_current_user_admin():
+                self.response.write('You are an administrator.')
+            else:
+                self.response.write('You are not an administrator.')
+        else:
+            self.response.write('You are not logged in.')
+
+class LogInPage(webapp2.RequestHandler):
+    def get(self):
+        # [START user_details]
+        user = users.get_current_user()
+        if user:
+            nickname = user.nickname()
+            logout_url = users.create_logout_url('/')
+            greeting = 'Welcome, {}! (<a href="{}">sign out</a>)'.format(
+                nickname, logout_url)
+        else:
+            login_url = users.create_login_url('/')
+            greeting = '<a href="{}">Sign in</a>'.format(login_url)
+        # [END user_details]
+        self.response.write(
+            '<html><body>{}</body></html>'.format(greeting))
+
 
 app = webapp2.WSGIApplication([
-    ('/', OpenET)
+    ('/', OpenET),
+    ('/admin', AdminPage),
+    ('/login', LogInPage)
 ], debug=True)

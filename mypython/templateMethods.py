@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # import statics
-import json
 
+import logging
 from config import statics
 from config import GMAP_API_KEY as GMAP_API_KEY
-from config import GEO_DIR as GEO_DIR
-
 import databaseMethods
 
 
@@ -40,19 +38,14 @@ def set_dates():
     }
     return dates
 
-
-def get_etdata_from_db(tv):
-    rgn = tv['variables']['region']
-    if rgn in ['ee_map']:
-        return {}
+def set_database_util(tv):
     # Load the data from the database
+    rgn = tv['variables']['region']
     yr = tv['variables']['field_year']
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
     DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
-    metadata = DU.read_meta_from_db()
-    etdata = DU.read_data_from_db()
-    return metadata, etdata
+    return DU
 
 
 def set_initial_template_values(RequestHandler, app_name, method):
@@ -71,31 +64,40 @@ def set_initial_template_values(RequestHandler, app_name, method):
 
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
-        'GEO_DIR': GEO_DIR,
         'app_name': app_name,
         'variables': statics['variable_defaults'],
         'form_options': {},
         'map_options': {},
-        'ts_options': {},
+        'ts_options': {}
     }
-
     # Overrode default variables if not GET
-    if method != 'GET':
+    if method == 'POST' or method == 'shareLink':
         for var_key, dflt in tv['variables'].iteritems():
-            RequestHandler.request.get(var_key, dflt)
+            if var_key in RequestHandler.request.arguments():
+                tv['variables'][var_key] = RequestHandler.request.get(var_key, dflt)
 
     # Set dates
     dates = set_dates()
     tv['variables'].update(dates)
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
-    # Get the etdata from the geo database
-    if app_name != 'dataBaseTasks':
-        tv['metadata'], tv['etdata'] = get_etdata_from_db(tv)
-    else:
-        tv['etdata'] = []
-        tv['metadata'] = []
-    print('LOOOOK')
-    print(tv['etdata'])
+
+    # Get the etdata and geometry from the geo database
+    tv['etdata'] = []
+    tv['metadata'] = []
+    tv['geomdata'] = {}
+    if app_name == 'dataBaseTasks':
+        return tv
+    if  tv['variables']['region'] in ['ee_map']:
+        return tv
+    # Get the relevant etdata
+    DU = set_database_util(tv)
+    tv['metadata'], tv['etdata'] = DU.read_from_db()
+    tv['geomdata'] = DU.read_geometries_from_bucket()
+    '''
+    logging.info('METADATA AND ETDATA')
+    logging.info(tv['metadata'])
+    logging.info(tv['etdata'])
+    '''
     return tv
 

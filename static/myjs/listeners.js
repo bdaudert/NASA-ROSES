@@ -1,9 +1,6 @@
 $(document).ready(function () {
-
     //Activate  Modal window
     //NOTE: if we omit this, models won't show
-    //$('#dataModal').modal('toggle');
-    //$('#modalError').modal('toggle');
     //Make modal draggable and resizable
     $('.modal-content').resizable();
     $('.modal-dialog').draggable();
@@ -66,24 +63,16 @@ $(document).ready(function () {
         }
     });
     $('#field_year').on('change', function(){
-        //Delete old layer
-        var field_year = $(this).val(), year_idx, year, 
-            year_list = statics.all_field_years;
-        for (year_idx = 0; year_idx < year_list.length; year_idx++){
-            year = year_list[year_idx];
-            if (field_year === year){
-                MAP_APP.set_geojson_map_layer(year_idx);
-            }
-            else{
-                MAP_APP.delete_layer(year_idx);
-            }
-        }
+        console.log($(this).val());
+        change_inYear($(this).val());
     });
     $('#variable').on('change', function(){
         change_inVariable($(this).val());
     });
     $('#t_res').on('change', function(){
-        change_inResolution($(this).val());
+        change_inTRes($(this).val());
     });
-    
+     $('#time_period').on('change', function(){
+        change_inTimePeriod($(this).val());
+    });
 });

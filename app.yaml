@@ -2,8 +2,10 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
-builtins:
-- remote_api: on
+# cloud_sql_instances:open-et-1:us-west1:myinstance
+
+# builtins:
+#- remote_api: on
 
 handlers:
 - url: /static/
@@ -15,6 +17,16 @@ handlers:
   script: oauth2client.appengine.application
 - url: /.*
   script: main.app
+  secure: always
+- url: /admin/.*
+  script: main.app
+  login: admin
+  secure: always
+- url: /login/.*
+  script: main.app
+  login: required
+  secure: always
+  redirect_http_response_code: 301
 
 libraries:
 - name: jinja2
@@ -26,5 +38,5 @@ libraries:
 - name: numpy
   version: "1.6.1"
 
-inbound_services:
-- warmup
+#inbound_services:
+# - warmup

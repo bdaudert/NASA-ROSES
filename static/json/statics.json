@@ -90,6 +90,7 @@
     },
     "response_vars": {
         "None": [],
+        "update_data": ["geomdata", "etdata", "metadata"],
         "get_map": ["mapid", "token", "sharelink_map", "sharelink_ts"],
         "get_ts": ["ts_data", "token", "sharelink_map", "sharelink_ts"],
         "get_value": ["point_value"]
@@ -163,9 +164,6 @@
     },
     "all_data_cols": {
         "US_fields": [
-            "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
-            "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
-            "PIXELCOUNT", "AREA",
             "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
             "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
             "start_mon", "end_mon",
@@ -176,9 +174,6 @@
             "etrf_m01"
         ],
         "Mason": [
-            "geometry_simplified", "geometry_simplified_vertex_count", "geometry_vertex_count",
-            "OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME", 
-            "PIXELCOUNT", "AREA",
             "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
             "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
             "start_mon", "end_mon",
