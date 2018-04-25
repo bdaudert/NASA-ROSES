@@ -84,7 +84,6 @@ def set_initial_template_values(RequestHandler, app_name, method):
 
     # Get the etdata and geometry from the geo database
     tv['etdata'] = []
-    tv['metadata'] = []
     tv['geomdata'] = {}
     if app_name == 'dataBaseTasks':
         return tv
@@ -92,12 +91,7 @@ def set_initial_template_values(RequestHandler, app_name, method):
         return tv
     # Get the relevant etdata
     DU = set_database_util(tv)
-    tv['metadata'], tv['etdata'] = DU.read_from_db()
+    tv['etdata'] = DU.read_from_db()
     tv['geomdata'] = DU.read_geometries_from_bucket()
-    '''
-    logging.info('METADATA AND ETDATA')
-    logging.info(tv['metadata'])
-    logging.info(tv['etdata'])
-    '''
     return tv
 

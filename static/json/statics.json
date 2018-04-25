@@ -84,7 +84,7 @@
     },
     "response_vars": {
         "None": [],
-        "update_data": ["geomdata", "etdata", "metadata"],
+        "update_data": ["geomdata", "etdata"],
         "get_map": ["mapid", "token", "sharelink_map", "sharelink_ts"],
         "get_ts": ["ts_data", "token", "sharelink_map", "sharelink_ts"],
         "get_value": ["point_value"]
@@ -148,10 +148,9 @@
             "etrf_m01"
         ]
     },
-    "geo_meta_cols": ["OBJECTID", "BASIN", "STATE", "HYD_AREA", "HYD_AREA_N", "HUC8", "HUC8_NAME",
-            "PIXELCOUNT", "AREA"],
+    "geo_meta_cols": ["OBJECTID","STATE", "HUC8", "HUC8_NAME","PIXELCOUNT", "AREA"],
     "geo_meta_cols_type": ["int", "str", "str", "str", "str", "str", "str", "int", "float"],
-    "title_cols": ["BASIN", "STATE","HUC8", "HUC8_NAME"],
+    "title_cols": ["STATE","HUC8", "HUC8_NAME"],
     "stats_by_var_res":{
         "et": {
             "annual": ["et_annual"],

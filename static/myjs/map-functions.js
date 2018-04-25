@@ -114,8 +114,8 @@ MAP_APP = {
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
             prop_name = statics.title_cols[c_idx];
             html += '<b>' + prop_name + '</b>'+ ': ';
-            if (DATA.metadata[idx][prop_name]) {
-                html += DATA.metadata[idx][prop_name] + '<br>'
+            if (DATA.etdata[idx][prop_name]) {
+                html += DATA.etdata[idx][prop_name] + '<br>'
             }
         }
         html += '<b>Variable</b>: ' + v + '<br>';
@@ -160,7 +160,7 @@ MAP_APP = {
         for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++) {
             prop_name = statics.title_cols[c_idx].toUpperCase();
             html += '<b>' + prop_name + '</b>' + ': ';
-            html += DATA.metadata[idx][prop_name] + '<br>';
+            html += DATA.data[idx][prop_name] + '<br>';
         }
         $('#layerInfoModal_data').append(html);
         html = '';
@@ -205,9 +205,6 @@ MAP_APP = {
         */
         data = new google.maps.Data();
         data.addGeoJson(DATA.geomdata);
-        //f_name = 'static/geojson/Mason_' + field_year + '.geojson';
-        //data.loadGeoJson(f_name);
-
         //Only show data that are in current map bound
         setTimeout(function () {
             data.forEach(function (feature) {
@@ -221,7 +218,7 @@ MAP_APP = {
             });
         }, 500);
 
-        //featureStyle = MAP_APP.set_featureStyle(field_year);
+        featureStyle = MAP_APP.set_featureStyle(field_year);
         //data.setStyle(featureStyle);
         var start_color = '#9bc2cf';
         var cb = MAP_APP.set_feat_colors(start_color, 'darken');
