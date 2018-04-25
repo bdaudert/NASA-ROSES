@@ -48,22 +48,8 @@ $(document).ready(function () {
         change_inRegion($(this).val());
 
     });
-    $('#field_years').on('change', function(){
-    	//Delete old layer
-        var years = $(this).val(), year_idx, year, 
-            year_list = statics.all_field_years;
-        for (year_idx = 0; year_idx < year_list.length; year_idx++){
-            year = year_list[year_idx];
-            if (year.is_in(years)){
-                MAP_APP.set_geojson_map_layer(year_idx);
-            }
-            else{
-                MAP_APP.delete_layer(year_idx);
-            }
-        }
-    });
+
     $('#field_year').on('change', function(){
-        console.log($(this).val());
         change_inYear($(this).val());
     });
     $('#variable').on('change', function(){

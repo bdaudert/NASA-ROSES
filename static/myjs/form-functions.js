@@ -1,21 +1,22 @@
 function change_inRegion(region){
-	//Delete old layer
-	 MAP_APP.delete_layers();
+	// We ned to recompute the template vars
+	//geodata, metadata, etdata
+	ajax_update_data();
+    //Delete old layer
+    MAP_APP.delete_layers();
 	if (region.is_in(['US_fields', 'Mason'])){
 		var field_year, y_idx;
         //Field data
-		$('#form-field_years').css('display', 'inline');
 		$('#form-field_year').css('display', 'inline')
         $('#form-aggregation_area').css('display', 'inline');
         //Set new layer
         //MAP_APP.set_ft_map_layer(1);
         field_year = $('#field_year').val();
-        y_idx = $.inArray(field_year, statics.all_field_years);
+        y_idx = $.inArray(field_year, statics.all_field_year[$('#region').val()]);
         MAP_APP.set_geojson_map_layer(y_idx);
 	}
 	if (region == 'ee_map'){
 		//Maps
-		$('#form-field_years').css('display', 'none');
         $('#form-field_year').css('display', 'none');
 		$('#form-aggregation_area').css('display', 'none');
 		//Get the map from db
@@ -28,7 +29,7 @@ function change_inYear(field_year){
 	ajax_update_data();
 	//Delete old layer
 	var year_idx, year,
-		year_list = statics.all_field_years;
+		year_list = statics.all_field_year[$('#region').val()];
 	for (year_idx = 0; year_idx < year_list.length; year_idx++){
 		year = year_list[year_idx];
 		if (field_year === year){
@@ -75,6 +76,12 @@ function change_inVariable(variable){
 }
 
 function change_inTRes(resolution){
+    if (resolution.inList(['annual', 'monthly'])){
+        $('#time_period').attr('multiple','multiple');
+    }
+    else{
+        $('#time_period').removeAttr('multiple');
+    }
 	var tps = statics.time_period_by_res[resolution], 
 		tp, tp_name, option;
 	$('#time_period > option').remove();

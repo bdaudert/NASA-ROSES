@@ -16,9 +16,9 @@ def set_form_options(variables):
     var = variables['variable']
     region = variables['region']
     # Set field years form option
-    if region in ['US_fields', 'Mason']:
-        form_options['field_years'] = statics['all_field_years']
-        form_options['field_year'] = statics['all_field_year']
+    form_options['field_year'] = statics['all_field_year'][region]
+    # Set the time_period according to t_res
+    form_options['time_period'] = statics['time_period_by_res'][variables['t_res']]
     # Set datasets
     form_ds = {}
     for ds in statics['dataset_by_var'][var]:
