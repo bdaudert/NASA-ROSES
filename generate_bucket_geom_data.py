@@ -20,7 +20,7 @@ if __name__ == '__main__':
         feats = j_data['features']
         for feat in feats:
             data_dict = {
-                'GEOM_COORDINATES':feat['geometry']['coordinates']
+                'coordinates':feat['geometry']['coordinates']
             }
             data.append(data_dict)
         with open('static/geojson/' + data_file_name, 'w') as f:

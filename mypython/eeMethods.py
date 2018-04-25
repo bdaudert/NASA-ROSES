@@ -48,21 +48,6 @@ class ET_Util(object):
         self.missing_value = -9999
         self.geo_bucket_url = GEO_BUCKET_URL
 
-    def read_metadata_from_bucket(self):
-        '''
-        # FIX ME: this is not working
-        # path_to_file = '/' + GEO_BUCKET_NAME + '/' + self.geoFName
-        b = os.environ.get(
-            'BUCKET_NAME',
-            app_identity.get_default_gcs_bucket_name())
-        path_to_file = '/' + b + '/' + self.geoFName
-        gcs_file = gcs.open(path_to_file)
-        contents = json.load(gcs_file.read())
-        gcs_file.close()
-        '''
-        f = self.geo_bucket_url + self.geoFName
-        contents = json.load(urllib2.urlopen(f))
-        return contents
 
     def get_collection(self, t_res):
         '''
@@ -215,59 +200,4 @@ class ET_Util(object):
                 continue
         return etdata
 
-
-    def get_features_geo_and_etdata(self):
-        '''
-        Gets geo features from geojson file
-        and computes the et stats for all variables
-        and temporal resolutions
-        '''
-        # FIX ME: add more vars as data comes online
-        # MODIS SSEBop only has et right now
-        # var_list = statics['stats_by_var_res'].keys()
-        t_res_list = statics['all_t_res'].keys()
-        var_list = ['et']
-
-        # Get the colllections so we don't have to do it for each feature
-        colls = {}
-        for t_res in t_res_list:
-            coll = self.get_collection(t_res)
-            for var in var_list:
-                coll = self.filter_coll_by_var(coll, var)
-                colls[t_res + '_' + var] = coll
-
-        # Initialize data output
-        json_data = {
-            'type': 'FeatureCollection',
-            'features': []
-        }
-
-        geo_data = self.read_metadata_from_bucket()
-        if 'features' not in geo_data.keys():
-            logging.error('NO DATA FOUND IN BUCKET, FILE: ' + self.geoFName)
-            return json_data
-
-        # for f_idx, geo_feat in enumerate(geo_data['features'][0:1]):
-        for f_idx, geo_feat in enumerate(geo_data['features']):
-            # logging.info('PROCESSING FEATURE ' + str(f_idx + 1))
-            feat = {
-                'type': 'Feature',
-                'geometry': {
-                    'type': 'Polygon'
-                }
-            }
-            geom_coords = geo_feat['geometry']['coordinates']
-            geom_coords = [Utils.orient_poly_ccw(c) for c in geom_coords]
-            geom = ee.Geometry.Polygon(geom_coords)
-            feat['geometry']['coordinates'] = geom_coords
-            geo_props = geo_feat['properties']
-            feat['properties'] = self.set_geo_properties(geo_props)
-            feat['properties']['etdata'] = {}
-            for t_res in t_res_list:
-                for var in var_list:
-                    coll = colls[t_res + '_' + var]
-                    etdata = self.compute_et_stats(coll, var, geom, t_res)
-                    feat['properties']['etdata'].update(etdata)
-            json_data['features'].append(feat)
-        return json_data
 

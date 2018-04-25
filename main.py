@@ -23,6 +23,7 @@ import jinja2
 import webapp2
 
 import templateMethods
+import databaseMethods
 import JinjaFilters
 
 
@@ -198,14 +199,8 @@ class databaseTasks(webapp2.RequestHandler):
                 logging.info('PROCESSING Region/Year ' + region + '/' + year)
                 for ds in ['MODIS']:
                     for et_model in ['SSEBop']:
-                        DU = databaseMethods.Datatstore_Util(
-                            region, year, ds, et_model)
-                        name_l = [region, year, ds, et_model]
-                        tv_name = ('_').join(name_l)
-                        logging.info('PROCESSING ' + tv_name)
-                        json_data = DU.get_et_json_data()
-                        tv['json_data'][tv_name] = json_data
-                        DU.add_to_db(json_data)
+                        DU = databaseMethods.Datatstore_Util(region, year, ds, et_model)
+                        DU.add_to_db()
                 logging.info(region + '/' + year + ' PROCESSED!')
         template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
         self.response.out.write(template.render(tv))
