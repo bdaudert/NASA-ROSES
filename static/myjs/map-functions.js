@@ -75,6 +75,26 @@ MAP_APP = {
         };
         return featureStyle;
     },
+    drawMapColorbar: function(colors, bins){
+        var palette = '', ticks= [], myScale, colorbar, i;
+        for (i = 0; i < colors.length; i++) {
+            palette += colors[i].replace(/#/g, '');
+            if (i < colors.length - 1){
+                palette += ','
+            }
+            ticks.push(myRound(bins[i][0],1));
+        }
+        ticks.push(myRound(bins[bins.length - 1][1],1))
+        myScale =  d3.scale.quantize().range(colors).domain(d3.range(colors.length + 1));
+        myScale.type = 'QUANTIZE';
+        myScale.ticks = ticks;
+        colorbar = Colorbar()
+            .thickness(40)
+            .barlength(800)
+            .orient("horizontal")
+            .scale(myScale);
+        colorbarObject = d3.select("#colorbar").call(colorbar);
+    },
     setDrawingManager: function(){
         var mkrOptions = MAP_APP.setMarkerOptions();
         var polyOptions = MAP_APP.setPolyOptions();
@@ -248,8 +268,8 @@ MAP_APP = {
             };
             return props;
         });
-
-
+        //Draw the colorbar
+        MAP_APP.drawMapColorbar(cb['colors'], cb['bins']);
 
         /*
         // zoom to show all the features

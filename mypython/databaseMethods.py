@@ -13,6 +13,7 @@ from config import EE_PRIVATE_KEY_FILE
 from config import GEO_DIR
 from config import GEO_BUCKET_URL
 
+'''
 class DATA(ndb.Model):
     feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
@@ -25,7 +26,13 @@ class DATA(ndb.Model):
     HUC8 = ndb.StringProperty()
     HUC8_NAME = ndb.StringProperty()
     PIXELCOUNT = ndb.IntegerProperty()
-
+'''
+class DATA(ndb.Expando):
+    feat_idx = ndb.IntegerProperty()
+    region = ndb.StringProperty()
+    year = ndb.IntegerProperty()
+    dataset = ndb.StringProperty()
+    et_model = ndb.StringProperty()
 
 class Datatstore_Util(object):
     '''
@@ -45,12 +52,27 @@ class Datatstore_Util(object):
         self.dataset = dataset
         self.et_model = et_model
         self.geo_bucket_url = GEO_BUCKET_URL
+        # Used to read geometry data from buckets
         self.geoFName = region + '_' + year + '_GEOM'  '.geojson'
+        # Only used to populate local DATASTORE @8000
+        self.local_dataFName = 'static/geojson/' +  region + '_' + year + '_DATA'  '.geojson'
+
+    def read_etdata_from_local(self):
+        '''
+        Used to read the etdata from local storage
+        :return:
+        '''
+        with open(self.local_dataFName) as f:
+            return json.load(f)
 
     def read_geometries_from_bucket(self):
+        '''
+        Curtrently all geometry data are stored in cloud buckets
+        :return:
+        '''
         f = self.geo_bucket_url + self.geoFName
-        d = json.load(urllib2.urlopen(f));
-        geom_data = {
+        d = json.load(urllib2.urlopen(f))
+        geomdata = {
             "type": "FeatureCollection",
             'features': []
         }
@@ -60,27 +82,27 @@ class Datatstore_Util(object):
             UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
             feat_dict = {
                 'type': 'Feature',
-                'geometry': d[idx]['GEOM_COORDINATES'],
+                'geometry': d[idx]['coordinate'],
                 'properties': {'idx': idx, 'UNIQUE_ID': UNIQUE_ID}
             }
             geom_data['features'].append(feat_dict)
         '''
 
 
-        geom_data = {
+        geomdata = {
             'type': 'FeatureCollection',
             'features': [
                 {
                     'type': 'Feature',
                     'geometry': {
                         'type': 'Polygon',
-                        'coordinates': d[idx]['GEOM_COORDINATES']
+                        'coordinates': d[idx]['coordinates']
                     },
                     'properties': {'idx': idx}
                 } for idx in range(len(d))]
         }
-        geom_data = json.dumps(geom_data, ensure_ascii=False).encode('utf8')
-        return geom_data
+        geomdata = json.dumps(geomdata, ensure_ascii=False).encode('utf8')
+        return geomdata
 
     def read_feat_data_from_db(self, feat_idx):
         '''
@@ -141,17 +163,34 @@ class Datatstore_Util(object):
         return data
 
 
-    def add_data_to_db(self):
-        '''
-
-        :return:
-        '''
-
     def add_to_db(self):
         '''
-
+        Used to store data LOCAL DATASTORE
+        to mirror project DATASTORE
+        Only used in main.py databaseTasks
         :return:
         '''
+        etdata = self.read_etdata_from_local()
+        db_entities = []
+        for idx in range(len(etdata)):
+            feat = etdata[idx]
+            unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(idx)])
+            UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
+            db_entity = DATA(
+                feat_idx=idx,
+                region = self.region,
+                year = self.year,
+                dataset = self.dataset,
+                et_model = self.et_model
+            )
+            db_entity.populate(**feat)
+            db_entity.key = ndb.Key('DATA', UNIQUE_ID)
+            db_entities.append(db_entity)
+        db_keys = ndb.put_multi(db_entities)
+
+
+
+
 
 
 

@@ -1,6 +1,19 @@
 /*
 Utility functions:
 */
+
+function myRound(number, precision) {
+  var shift = function (number, precision, reverseShift) {
+    if (reverseShift) {
+      precision = -precision;
+    }
+    var numArray = ("" + number).split("e");
+    return +(numArray[0] + "e" + (numArray[1] ? (+numArray[1] + precision) : precision));
+  };
+  return shift(Math.round(shift(number, precision, false)), precision, true);
+}
+
+
 Array.prototype.indexOf = function(obj, start) {
      for (var i = (start || 0), j = this.length; i < j; i++) {
          if (this[i] === obj) { return i; }

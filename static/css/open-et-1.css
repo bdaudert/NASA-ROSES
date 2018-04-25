@@ -59,12 +59,31 @@ body {
 }
 
 .form-container-header {
-    padding: 10px;
+    padding: 0% 1%;
     cursor: move;
     z-index: 10;
     background-color: #2196F3;
     color: #fff;
 }
+
+.colorbar-container{
+    position: relative;
+    padding: 0% 1% 0% 1%;
+    top: 10%;
+    left: 50%;
+    z-index: 10;
+    background: #dcdcdc;
+    max-width: 38%;
+}
+
+.colorbar-container-header {
+    padding: 0% 1% 0% 1%;
+    cursor: move;
+    z-index: 10;
+    background-color: #2196F3;
+    color: #fff;
+}
+
 
 #main-map {
     width: 100%;

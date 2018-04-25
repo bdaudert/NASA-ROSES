@@ -93,7 +93,7 @@
                 <div id="form-timpeperiod">
                     <b>Timeperiod (Depends on resolution): </b>
                     <select id="time_period" name="time_period" class="time_period"
-                    {% if x == variables.t_res|is_in('annual,monthly') %} multiple {% endif %}>
+                    {% if variables.t_res|is_in('annual,monthly') %} multiple {% endif %}>
                         {% for x,y in form_options.time_period.items() %}
                         <option value="{{ x }}" {% if x == variables.time_period  %} selected {% endif %}>{{ y }}</option>
                         {% endfor %}
