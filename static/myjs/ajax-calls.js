@@ -63,7 +63,6 @@ function ajax_update_data(){
         url = clearOut_URL(),
         form_data, jqXHR,
         err_code, r, method = 'ajax', error, cause, i, tv_var;
-
     //Update the tool_action
     $('#tool_action').val(tool_action);
     //Get the form data
