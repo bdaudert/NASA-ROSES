@@ -143,28 +143,46 @@ MAP_APP = {
         $('#dataModal_title').append(html);
     },
     add_dataToModal: function(e) {
+        //FIX ME: Clean up, make separate utiils function
         var idx = e.feature.getProperty('idx'),
-            year, year_idx, prop_names, prop_name, c_idx, html, data_val,
+            year, p_idx, c_idx, p, prop_names, new_prop_names, prop_name,
+            v_idx, html, data_val, val_list = [],
             v = $('#variable').val(),
-            t_res = $('#t_res').val();
-
-        //NOTE: currently we only allow one field for fields
-        var years = [$('#field_year').val()];
-        html = '';
+            t_res = $('#t_res').val(),
+            time_period = $('#time_period').val(),
+            stat = $('#time_period_statistic').val();
+        if ($.type(time_period) == 'string'){
+            time_period = [time_period];
+        }
+        year = $('#field_year').val();
         html = 'Year: ' + year + '<br>';
         //Populate the columnnames
         prop_names = statics.stats_by_var_res[v][t_res];
-        //populate html with data
-        for (year_idx = 0; year_idx < years.length; year_idx++) {
-            year = years[year_idx];
-            html = '';
-            html = 'Year: ' + String(year) + '<br>';
-            for (c_idx = 0; c_idx < prop_names.length; c_idx++) {
-                prop_name = prop_names[c_idx];
-                data_val = DATA.etdata[idx][prop_name];
-                html += prop_name + ': ' + data_val + '<br>'
+        for (v_idx = 0; v_idx < prop_names.length; v_idx++) {
+            var tp, s;
+            if (t_res == "annual"){
+                tp = time_period[0];
             }
-            html += '<br>';
+            else if (t_res == "monthly") {
+                s = prop_names[v_idx].split('_');
+                tp = s[s.length -1].slice(-2);
+                if (tp.substring(0, 1) == '0') {
+                    tp = tp.substring(1, 2);
+                }
+            }
+            else{
+                //FIX ME NEED STUFF HERE FOR SESONAL DATA
+            }
+            if (tp.is_in(time_period)) {
+                val_list.push(DATA.etdata[idx][prop_names[v_idx]]);
+            }
+        }
+        /?FIX ME: sum/mean not working
+        val_list = compute_time_period_stat(val_list, stat, time_period);
+        new_prop_names = set_property_names(prop_names, stat, t_res, time_period);
+        for (v_idx = 0; v_idx < val_list.length; v_idx++) {
+            prop_name = new_prop_names[v_idx];
+            html += '<b>' +  prop_name  + '</b>: ' + val_list[v_idx] + '<br>';
         }
         $('#dataModal_data').append(html);
     },

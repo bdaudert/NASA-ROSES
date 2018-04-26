@@ -80,7 +80,7 @@
             <div class="panel-body panel-forms">
                 <b><span style="color:blue;font-size:medium">Processing:</span></b><br>
                 <div id="form-t_res">
-                    <b>Resolution (Depends on most above): </b>
+                    <b>Temporal Resolution: </b>
                     <select class="t_res" id="t_res" name="t_res">
                         {% for x,y in form_options.t_res.items() %}
                         <option value="{{ x }}" 
@@ -90,14 +90,23 @@
                         {% endfor %}
                     </select><br>
                 </div> 
-                <div id="form-timpeperiod">
-                    <b>Timeperiod (Depends on resolution): </b>
-                    <select id="time_period" name="time_period" class="time_period"
-                    {% if variables.t_res|is_in('annual,monthly') %} multiple {% endif %}>
+                <div id="form-timeperiod" 
+                {% if variables.t_res == "annual" %} style="display:none;"{% else %} style="display:block;"{% endif %}>
+                    <b>Timeperiod: </b><br>
+                    <select id="time_period" name="time_period" class="time_period" multiple >
                         {% for x,y in form_options.time_period.items() %}
-                        <option value="{{ x }}" {% if x == variables.time_period  %} selected {% endif %}>{{ y }}</option>
+                        <option value="{{ x }}" {% if x|is_in(variables.time_period) %} selected {% endif %}>{{ y }}</option>
                         {% endfor %}
                     </select> 
+                </div>
+                <div id="form-statistic" 
+                {% if variables.t_res == "annual" %} style="display:none;"{% else %} style="display:block;"{% endif %}>
+                    <b>Summary Statistic: </b>
+                    <select id="time_period_statistic" name="time_period_statistic" class="time_period_statistic">
+                        {% for x,y in form_options.time_period_statistic.items() %}
+                        <option value="{{ x }}" {% if x == variables.time_period_statistic  %} selected {% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div id="form-start_date" style="display:none;">
                     <b>Start Date: </b>

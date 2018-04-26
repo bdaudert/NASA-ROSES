@@ -126,27 +126,37 @@ class Datatstore_Util(object):
         Reads data for all feaqtures defined by
         :return:  dict of data for the features
         '''
+
         data = []
-        '''
-        qry = ndb.Query(kind='DATA').filter(
-            DATA.year == self.year,
-            DATA.region == self.region,
-            DATA.dataset == self.dataset,
-            DATA.et_model == self.et_model
-        )
-        '''
-        qry = DATA.query(
-            DATA.region == self.region,
-            DATA.year == int(self.year),
-            DATA.dataset == self.dataset,
-            DATA.et_model == self.et_model
-        )
-        query_data = qry.fetch()
-        if len(query_data) > 0:
-            data = json.dumps([q.to_dict() for q in query_data])
-            logging.info('SUCCESSFULLY READ DATA FROM DB')
+        if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+            # Production
+            '''
+            qry = ndb.Query(kind='DATA').filter(
+                DATA.year == self.year,
+                DATA.region == self.region,
+                DATA.dataset == self.dataset,
+                DATA.et_model == self.et_model
+            )
+            '''
+            qry = DATA.query(
+                DATA.region == self.region,
+                DATA.year == int(self.year),
+                DATA.dataset == self.dataset,
+                DATA.et_model == self.et_model
+            )
+            query_data = qry.fetch()
+            if len(query_data) > 0:
+                data = json.dumps([q.to_dict() for q in query_data])
+                logging.info('SUCCESSFULLY READ DATA FROM DB')
+            else:
+                logging.info('NO DATA FOUND IN DB')
+                logging.info('READING DATA FROM LOCAL FILE')
+                file_name = GEO_DIR + self.region + '_' + str(self.year) + '_DATA.geojson'
+                logging.info(file_name)
+                with open(file_name) as f:
+                    data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
         else:
-            logging.info('NO DATA FOUND IN DB')
+            # Local development server
             logging.info('READING DATA FROM LOCAL FILE')
             file_name = GEO_DIR + self.region + '_' + str(self.year) + '_DATA.geojson'
             logging.info(file_name)
