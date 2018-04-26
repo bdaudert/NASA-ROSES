@@ -76,14 +76,23 @@ function change_inVariable(variable){
 }
 
 function change_inTRes(resolution){
-    if (resolution.inList(['annual', 'monthly'])){
-        $('#time_period').attr('multiple','multiple');
+    var tps, tp, tp_name, option, key;
+    if (resolution.is_in(['annual'])){
+        $('#form-timeperiod').css('display','none');
+        $('#form-statistic').css('display','none');
+        $('#time_period').val($('#field_year').val());
+        $('#time_period_statistic').val('none');
+        tps = {}
+        key = $('#field_year').val();
+        tps[key] =  key;
     }
     else{
-        $('#time_period').removeAttr('multiple');
+        $('#form-timeperiod').css('display','block');
+        $('#form-statistic').css('display','block');
+        tps = statics.time_period_by_res[resolution];
     }
-	var tps = statics.time_period_by_res[resolution], 
-		tp, tp_name, option;
+
+    //Set new timeseries options
 	$('#time_period > option').remove();
 	for (key in tps){
 		tp =  key;
@@ -92,15 +101,12 @@ function change_inTRes(resolution){
         option+='</option>';
         $('#time_period').append(option);
 	}
-    if ($('#region').val().is_in(['US_fields', 'Mason'])){
-    	//Set new dataModals
-
-    }
     if ($('#region').val() == 'ee_map'){
     	//Get the map from db
     }
 }
 
 function change_inTimePeriod(time_period){
+    //Summarize the data over the time period
 
 }

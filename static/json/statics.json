@@ -1,7 +1,7 @@
 {
     "form_option_keys": [
         "tool_action", "region", "field_year", "aggregation_area",
-        "variable", "dataset", "et_model", "t_res"
+        "variable", "dataset", "et_model", "t_res", "time_period_statistic"
     ],
     "variable_defaults":  {
         "tool_action": "None",
@@ -12,7 +12,8 @@
         "dataset": "MODIS",
         "et_model": "SSEBop",
         "t_res": "annual",
-        "time_period": "2003"
+        "time_period": "2003",
+        "time_period_statistic": "none"
     },
     "all_region":  {
         "US_fields": "US Fields",
@@ -51,24 +52,10 @@
             "monthly": "Monthly",
             "annual": "Annual"
     },
-    "all_time_period":  {
-        "last15days": "Last 15 days",
-        "last30days": "Last 30 days",
-        "last60days": "Last 60 days",
-        "last90days": "Last 90 days",
-        "DJF": "DJF (Dec-Feb)",
-        "MAM": "MAM (Mar-May)",
-        "JJA": "JJA (Jun - Aug)",
-        "SON": "SON (Sept-Nov)",
-        "NWY": "Northern Water Year",
-        "SWY": "Southern Water Year",
-        "NGS": "Northern Growing Season (Apr - Oct)",
-        "SGS": "Southern Growing Season (Nov - Mar)",
-        "todateNWY": "Northern Water Year To Date",
-        "todateSWY": "Southern Water Year To Date",
-        "todateCY": "Calendar Year Year To Date",
-        "Ann": "Year",
-        "custom": "Custom"
+    "all_time_period_statistic": {
+        "none": "None",
+        "sum": "Sum",
+        "mean": "Mean"
     },
     "all_tool_action":  {
         "None": "None",        
@@ -115,16 +102,7 @@
             "NGS": "Last Northern Growing Season (Apr - Oct)",
             "SGS": "Last Southern Growing Season (Nov - Mar)"
         },
-        "annual": {
-            "2003": "2003",
-            "2004": "2004",
-            "2005": "2005",
-            "2006": "2006",
-            "2007": "2007",
-            "2008": "2008",
-            "2009": "2009",
-            "2010": "2010"
-        }
+        "annual": {}
     },
     "all_data_cols": {
         "US_fields": [
