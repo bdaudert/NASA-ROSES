@@ -68,7 +68,7 @@ Array.prototype.mean = function(){
         return null;
     }
     var sm = this.reduce(function(a, b) { return a + b; }, 0);
-    return myRound(sm / parseFloat(val_list.length), 4);
+    return myRound(sm / parseFloat(this.length), 4);
 }
 
 function compute_time_period_stat(val_list, stat, time_period){
@@ -76,39 +76,10 @@ function compute_time_period_stat(val_list, stat, time_period){
         return val_list;
     }
     if (stat == 'sum'){
-        return [myRound(val_list.sum, 4)];
+        return [myRound(val_list.sum(), 4)];
     }
     if (stat == 'mean'){
-        return [myRound(val_list.mean, 4)];
+        return [myRound(val_list.mean(), 4)];
     }
 }
 
-function set_property_names(old_prop_names, stat, t_res, time_period) {
-    var new_prop_names = [], periods = '', p;
-
-    if (t_res == 'annual'){
-        new_prop_names.push(time_period[0]);
-        return new_prop_names;
-    }
-
-    for (var t_idx = 0; t_idx < time_period.length; t_idx++) {
-        p = statics.time_period_by_res[t_res][time_period[t_idx]];
-        periods += p;
-        if (t_idx < time_period.length - 1) {
-            periods += ', ';
-        }
-        if (stat == 'none') {
-            new_prop_names.push(p)
-        }
-    }
-    if (stat == 'none') {
-        return new_prop_names;
-    }
-    if (stat == 'sum'){
-        new_prop_names.push('Total over ' + periods);
-    }
-    if (stat == 'mean'){
-        new_prop_names.push('Total over ' + periods);
-    }
-    return new_prop_names;
-}
