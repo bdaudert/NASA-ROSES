@@ -61,4 +61,5 @@ $(document).ready(function () {
      $('#time_period').on('change', function(){
         change_inTimePeriod($(this).val());
     });
+
 });
