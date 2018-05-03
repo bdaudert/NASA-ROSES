@@ -16,8 +16,8 @@ def set_form_options(variables):
     var = variables['variable']
     region = variables['region']
     # Set field years form option
-    form_options['field_year'] = statics['all_field_year'][region]
-
+    form_options['field_year'] = statics['all_field_year']['US_fields']
+    form_options['field_years'] = statics['all_field_year']['US_fields']
     # Set the time_period according to t_res
     if variables['t_res'] == 'annual':
         periods = {}

@@ -72,22 +72,6 @@ class Datatstore_Util(object):
         '''
         f = self.geo_bucket_url + self.geoFName
         d = json.load(urllib2.urlopen(f))
-        geomdata = {
-            "type": "FeatureCollection",
-            'features': []
-        }
-        '''
-        for idx in range(len(d)):
-            unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(idx)])
-            UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
-            feat_dict = {
-                'type': 'Feature',
-                'geometry': d[idx]['coordinate'],
-                'properties': {'idx': idx, 'UNIQUE_ID': UNIQUE_ID}
-            }
-            geom_data['features'].append(feat_dict)
-        '''
-
 
         geomdata = {
             'type': 'FeatureCollection',
@@ -123,7 +107,7 @@ class Datatstore_Util(object):
 
     def read_data_from_db(self):
         '''
-        Reads data for all feaqtures defined by
+        Reads all features for region, year, dataset, et_model
         :return:  dict of data for the features
         '''
 

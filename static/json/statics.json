@@ -18,6 +18,10 @@
     "all_region":  {
         "US_fields": "US Fields",
         "Mason": "Mason Valley",
+        "county": "Counties",
+        "state": "States",
+        "huc6": "HUC 6",
+        "huc8": "HUC 8",
         "ee_map": "Map"
     },
     "all_aggregation_area": {
