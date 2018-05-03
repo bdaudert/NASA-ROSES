@@ -6,17 +6,23 @@ function change_inRegion(region){
     MAP_APP.delete_map_layers();
 	if (region.is_in(['US_fields', 'Mason'])){
         //Field data
-		$('#form-field_year').css('display', 'inline')
-        $('#form-aggregation_area').css('display', 'inline');
+		$('#form-field_year').css('display', 'inline');
+		$('#form-field_years').css('display', 'none');
+        //Not clear if/when this will be used
+		//$('#form-aggregation_area').css('display', 'inline');
         //Set new map layer
         MAP_APP.set_map_layer();
 	}else if (region == 'ee_map'){
 		//Maps
+		$('#form-field_years').css('display', 'none');
 		$('#form-field_year').css('display', 'none');
-		$('#form-aggregation_area').css('display', 'none');
+		//Not clear if/when this will be used
+		//$('#form-aggregation_area').css('display', 'none');
 	}else{
 		//Predefined aggregation areas
-		MAP_APP.set_map_layer();
+		$('#form-field_years').css('display', 'inline');
+		$('#form-field_year').css('display', 'none');
+		//MAP_APP.set_map_layer();
 	}
 }
 
@@ -71,8 +77,11 @@ function change_inTRes(resolution){
         $('#time_period').val($('#field_year').val());
         $('#time_period_statistic').val('none');
         tps = {}
-        key = $('#field_year').val();
-        tps[key] =  key;
+        //Set the time period to the field year for filed region
+        if ($('#region').val().is_in(['US_fields', 'Mason'])) {
+            key = $('#field_year').val();
+            tps[key] = key;
+        }
     }
     else{
         $('#form-timeperiod').css('display','block');
@@ -94,10 +103,6 @@ function change_inTRes(resolution){
     }
 }
 
-function change_inTimePeriod(time_period){
-    //Summarize the data over the time period
-
-}
 
 
 function set_dataModalHeader(idx){

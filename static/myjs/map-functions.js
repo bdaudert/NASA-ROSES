@@ -163,8 +163,8 @@ MAP_APP = {
         html = set_dataModalData(val_list, new_prop_names);
         $('#dataModal_data').append(html);
     },
-    set_map_layer: function(){
-         function processPoints(geometry, callback, thisArg) {
+    set_data_layer: function(){
+        function processPoints(geometry, callback, thisArg) {
             if (geometry instanceof google.maps.LatLng) {
                 callback.call(thisArg, geometry);
             } else if (geometry instanceof google.maps.Data.Point) {
@@ -175,19 +175,12 @@ MAP_APP = {
                 });
             }
         }
-        //Sanity check
-        if ( Object.keys(DATA.geomdata).length == 0 ) {
-            return;
-        }
-
-        var field_year = $('#field_year').val(), data, bounds;
-
         /*
         LOAD THE DATA FROM THE TEMPLATE VARIABLE
         etdata global var that hold et data and
         geometry info,  defined in scripts.html
         */
-        data = new google.maps.Data();
+        var data = new google.maps.Data();
         data.addGeoJson(DATA.geomdata);
         //Only show data that are in current map bound
         setTimeout(function () {
@@ -201,14 +194,7 @@ MAP_APP = {
                 }
             });
         }, 500);
-        //Set styles for chloropleth map
-        var start_color = MAP_APP.set_start_color(),
-            cb = MAP_APP.set_feat_colors(start_color, 'darken');
-
-        MAP_APP.set_featureStyle(data, cb);
-        //Draw the colorbar
-        MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
-        /*
+         /*
         // zoom to show all the features
         bounds = new google.maps.LatLngBounds();
         data.addListener('addfeature', function(e) {
@@ -216,20 +202,28 @@ MAP_APP = {
             window.map.fitBounds(bounds);
         });
         */
-
-        data.setMap(window.map);
-        data.addListener('click', function(e) {
-            /*
-            var bounds = new google.maps.LatLngBounds();
-            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
-            map.fitBounds(bounds);
-            */
+         data.addListener('click', function(e) {
             //Hide old data modal
             $('#dataModal').modal('hide');
             MAP_APP.initialize_dataModal(e);
             MAP_APP.add_dataToModal(e);
             $('#dataModal').modal('toggle');
-        });
+         });
+         return data;
+    },
+    set_map_layer: function(){
+        //Sanity check
+        if ( Object.keys(DATA.geomdata).length == 0 ) {
+            return;
+        }
+        var data = MAP_APP.set_data_layer();
+        data.setMap(window.map);
+        //Set styles for chloropleth map
+        var start_color = MAP_APP.set_start_color(),
+            cb = MAP_APP.set_feat_colors(start_color, 'darken');
+        MAP_APP.set_featureStyle(data, cb);
+        //Draw the colorbar
+        MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
     },
     set_map_layers: function() {
         var region = $('#region').val();

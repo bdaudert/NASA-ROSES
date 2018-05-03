@@ -22,8 +22,4 @@ $(document).ready(function () {
         change_inTRes($(this).val());
     });
 
-    $('#time_period').on('change', function(){
-        change_inTimePeriod($(this).val());
-    });
-
 });
