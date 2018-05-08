@@ -113,8 +113,8 @@ function set_dataModalHeader(idx){
 	for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
 		prop_name = statics.title_cols[c_idx];
 		html += '<b>' + prop_name + '</b>'+ ': ';
-		if (DATA.etdata[idx][prop_name]) {
-			html += DATA.etdata[idx][prop_name] + '<br>'
+		if (DATA.etdata.features[idx][prop_name]) {
+			html += DATA.etdata.features[idx][prop_name] + '<br>'
 		}
 	}
 	html += '<b>Variable</b>: ' + v + '<br>';
@@ -170,7 +170,7 @@ function set_dataModalValList(v, t_res, time_period, stat, idx){
 			//FIX ME NEED STUFF HERE FOR SESONAL DATA
 		}
 		if (tp.is_in(time_period)) {
-			val_list.push(DATA.etdata[idx][prop_names[v_idx]]);
+			val_list.push(DATA.etdata.features[idx][prop_names[v_idx]]);
 		}
 	}
 	val_list = compute_time_period_stat(val_list, stat, time_period);

@@ -22,7 +22,7 @@ if __name__ == '__main__':
         l = file_name.split('.')[0].split('_')
         region = l[0]
         year = l[1]
-        data_file_name = region + '_' + year + '_' + 'DATA' + '.json'
+        data_file_name = region + '_' + year + '_' + 'DATA' + '.geojson'
         data = {
             'type': 'FeatureCollection',
             'features': []
@@ -51,7 +51,7 @@ if __name__ == '__main__':
                     p_key = ('PR_' + prop_key.split('_')[1]).lower()
                     data_dict[p_key] = props[prop_key]
             data['features'].append(data_dict)
-        with open('static/json/' + data_file_name, 'w') as f:
+        with open('static/geojson/' + data_file_name, 'w') as f:
             json.dump(data, f)
     '''
     #Test

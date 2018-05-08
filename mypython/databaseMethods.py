@@ -53,10 +53,15 @@ class Datatstore_Util(object):
         self.et_model = et_model
         self.geo_bucket_url = GEO_BUCKET_URL
         # Used to read geometry data from buckets
-        self.geoFName = region + '_' + year + '_GEOM'  '.geojson'
-        # Only used to populate local DATASTORE @8000
-        self.local_dataFName = 'static/geojson/' +  region + '_' + year + '_DATA'  '.geojson'
-
+        if self.year is not None:
+            # Field boundaries depend on years
+            self.geoFName = region + '_' + year + '_GEOM'  '.geojson'
+            # Only used to populate local DATASTORE @8000
+            self.local_dataFName = 'static/json/' +  region + '_' + year + '_DATA'  '.json'
+        else:
+            self.geoFName = region + '_GEOM'  '.geojson'
+            # Only used to populate local DATASTORE @8000
+            self.local_dataFName = 'static/json/' + region + '_DATA'  '.json'
     def read_etdata_from_local(self):
         '''
         Used to read the etdata from local storage
@@ -72,7 +77,7 @@ class Datatstore_Util(object):
         '''
         f = self.geo_bucket_url + self.geoFName
         d = json.load(urllib2.urlopen(f))
-
+        '''
         geomdata = {
             'type': 'FeatureCollection',
             'features': [
@@ -86,6 +91,8 @@ class Datatstore_Util(object):
                 } for idx in range(len(d))]
         }
         geomdata = json.dumps(geomdata, ensure_ascii=False).encode('utf8')
+        '''
+        geomdata = json.dumps(d, ensure_ascii=False).encode('utf8')
         return geomdata
 
     def read_feat_data_from_db(self, feat_idx):
@@ -130,19 +137,23 @@ class Datatstore_Util(object):
             )
             query_data = qry.fetch()
             if len(query_data) > 0:
-                data = json.dumps([q.to_dict() for q in query_data])
+                data = {
+                    'type': 'FeatureCollection'
+                }
+                data['features'] = json.dumps([q.to_dict() for q in query_data])
+                # data = json.dumps([q.to_dict() for q in query_data])
                 logging.info('SUCCESSFULLY READ DATA FROM DB')
             else:
                 logging.info('NO DATA FOUND IN DB')
                 logging.info('READING DATA FROM LOCAL FILE')
-                file_name = GEO_DIR + self.region + '_' + str(self.year) + '_DATA.geojson'
+                file_name = self.local_dataFName
                 logging.info(file_name)
                 with open(file_name) as f:
                     data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
         else:
             # Local development server
             logging.info('READING DATA FROM LOCAL FILE')
-            file_name = GEO_DIR + self.region + '_' + str(self.year) + '_DATA.geojson'
+            file_name = self.local_dataFName
             logging.info(file_name)
             with open(file_name) as f:
                 data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')

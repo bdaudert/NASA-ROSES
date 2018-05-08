@@ -35,7 +35,7 @@ MAP_APP = {
             et_var, i, j, colors = [], data, mn, mx, bins = [], step, amt,
             num_colors = 10, cb = {'colors':[], 'bins':[]}, new_color ;
         et_var = et_vars[0];
-        data = $.map(DATA.etdata, function(feat) {
+        data = $.map(DATA.etdata.features, function(feat) {
             if (Math.abs(feat[et_var] + 9999) > 0.0001) {
                 return feat[et_var];
             }
@@ -73,7 +73,7 @@ MAP_APP = {
                 t_res = $('#t_res').val(),
                 et_vars = statics.stats_by_var_res[v][t_res],
                 et_var = et_vars[0],
-                data_val = DATA.etdata[idx][et_var],
+                data_val = DATA.etdata.features[idx][et_var],
                 color = start_color, i;
             //Find the right bin
             for (i = 0; i < bins.length; i++){
