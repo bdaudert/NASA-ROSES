@@ -12,6 +12,7 @@ from config import statics
 from config import EE_PRIVATE_KEY_FILE
 from config import GEO_DIR
 from config import GEO_BUCKET_URL
+from config import LOCAL_DATA_DIR
 
 '''
 class DATA(ndb.Model):
@@ -53,15 +54,14 @@ class Datatstore_Util(object):
         self.et_model = et_model
         self.geo_bucket_url = GEO_BUCKET_URL
         # Used to read geometry data from buckets
-        if self.year is not None:
+        if self.region in ['Mason', 'US_fields']:
             # Field boundaries depend on years
-            self.geoFName = region + '_' + year + '_GEOM'  '.geojson'
-            # Only used to populate local DATASTORE @8000
-            self.local_dataFName = 'static/json/' +  region + '_' + year + '_DATA'  '.json'
+            self.geoFName = region + '_' + year + '_GEOM.geojson'
         else:
-            self.geoFName = region + '_GEOM'  '.geojson'
-            # Only used to populate local DATASTORE @8000
-            self.local_dataFName = 'static/json/' + region + '_DATA'  '.json'
+            self.geoFName = region + '_GEOM.geojson'
+        # Only used to populate local DATASTORE @8000
+        self.local_dataFName = LOCAL_DATA_DIR + self.et_model + '/' +  region + '_' + year + '_DATA'  '.json'
+
     def read_etdata_from_local(self):
         '''
         Used to read the etdata from local storage
@@ -75,23 +75,12 @@ class Datatstore_Util(object):
         Curtrently all geometry data are stored in cloud buckets
         :return:
         '''
-        f = self.geo_bucket_url + self.geoFName
-        d = json.load(urllib2.urlopen(f))
-        '''
-        geomdata = {
-            'type': 'FeatureCollection',
-            'features': [
-                {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'Polygon',
-                        'coordinates': d[idx]['coordinates']
-                    },
-                    'properties': {'idx': idx}
-                } for idx in range(len(d))]
-        }
-        geomdata = json.dumps(geomdata, ensure_ascii=False).encode('utf8')
-        '''
+        url = self.geo_bucket_url + self.geoFName
+        try:
+            d = json.load(urllib2.urlopen(url))
+        except Exception(e):
+            logging.error(e)
+            raise Exception(e)
         geomdata = json.dumps(d, ensure_ascii=False).encode('utf8')
         return geomdata
 

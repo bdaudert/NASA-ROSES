@@ -1,17 +1,23 @@
 function change_inRegion(region){
-	// We ned to recompute the template vars
-	//geodata, etdata
-	ajax_update_data();
     //Delete old layer
     MAP_APP.delete_map_layers();
+    //Set the new map_layer
+	if (region == "ee_map"){
+		//Generate a dynamic map with EE
+		//ajax_get_ee_map();
+	}else{
+		// We ned to recompute the template vars
+		//geodata, etdata
+		ajax_update_data();
+		//Set new map layer
+        MAP_APP.set_choropleth_layer();
+	}
 	if (region.is_in(['US_fields', 'Mason'])){
         //Field data
 		$('#form-field_year').css('display', 'inline');
 		$('#form-field_years').css('display', 'none');
         //Not clear if/when this will be used
-		//$('#form-aggregation_area').css('display', 'inline');
-        //Set new map layer
-        MAP_APP.set_map_layer();
+		//$('#form-aggregation_area').css('display', 'inline')
 	}else if (region == 'ee_map'){
 		//Maps
 		$('#form-field_years').css('display', 'none');
@@ -22,7 +28,6 @@ function change_inRegion(region){
 		//Predefined aggregation areas
 		$('#form-field_years').css('display', 'inline');
 		$('#form-field_year').css('display', 'none');
-		//MAP_APP.set_map_layer();
 	}
 }
 
@@ -32,7 +37,7 @@ function change_inYear(field_year){
 	// We ned to recompute the template vars
 	//geodata, etdata
 	ajax_update_data();
-	MAP_APP.set_map_layer();
+	MAP_APP.set_choropleth_layer();
 }
 
 function change_inVariable(variable){
@@ -70,7 +75,7 @@ function change_inVariable(variable){
 }
 
 function change_inTRes(resolution){
-    var tps, tp, tp_name, option, key;
+    var tps, tp, tp_name, option, key, key_list = [];
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');
         $('#form-statistic').css('display','none');
@@ -92,12 +97,14 @@ function change_inTRes(resolution){
     //Set new timeseries options
 	$('#time_period > option').remove();
 	for (key in tps){
+		key_list.push(key);
 		tp =  key;
 		tp_name = tps[key]
 		option = '<option value="' + tp + '">' + tp_name;
         option+='</option>';
         $('#time_period').append(option);
 	}
+	$('#time_period').val(key_list);
     if ($('#region').val() == 'ee_map'){
     	//Get the map from db
     }
@@ -168,9 +175,10 @@ function set_dataModalValList(v, t_res, time_period, stat, idx){
 		}
 		else{
 			//FIX ME NEED STUFF HERE FOR SESONAL DATA
+			tp = 'net'
 		}
 		if (tp.is_in(time_period)) {
-			val_list.push(DATA.etdata.features[idx][prop_names[v_idx]]);
+			val_list.push(DATA.etdata.features[idx]['properties'][prop_names[v_idx]]);
 		}
 	}
 	val_list = compute_time_period_stat(val_list, stat, time_period);

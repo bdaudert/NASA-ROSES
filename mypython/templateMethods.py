@@ -15,23 +15,19 @@ def set_form_options(variables):
     # Override default form options if needed
     var = variables['variable']
     region = variables['region']
+    dataset = variables['dataset']
     # Set field years form option
-    form_options['field_year'] = statics['all_field_year']['US_fields']
-    form_options['field_years'] = statics['all_field_year']['US_fields']
+    form_options['field_year'] = statics['all_field_year'][dataset]
+    form_options['field_years'] = statics['all_field_year'][dataset]
     # Set the time_period according to t_res
     if variables['t_res'] == 'annual':
-        periods = {}
-        year = variables['field_year']
-        periods[year] = year
+        form_options['time_period'] = {variables['field_year']: variables['field_year']}
     else:
         periods = statics['time_period_by_res'][variables['t_res']]
-    # form_options['time_period'] =  periods
-    keys = sorted(periods.keys())
-    form_options['time_period'] = {}
-    for key in keys:
-        if key not in statics['all_field_year'][region]:
-            continue
-        form_options['time_period'][key] = periods[key]
+        keys = sorted(periods.keys())
+        form_options['time_period'] = {}
+        for key in keys:
+            form_options['time_period'][key] = periods[key]
 
     # Set datasets
     form_ds = {}

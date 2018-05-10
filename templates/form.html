@@ -101,7 +101,7 @@
                 <div id="form-timeperiod" 
                 {% if variables.t_res == "annual" %} style="display:none;"{% else %} style="display:block;"{% endif %}>
                     <b>Timeperiod: </b><br>
-                    <select id="time_period" name="time_period" class="time_period" multiple >
+                    <select id="time_period" name="time_period" class="time_period" multiple>
                         {% for x,y in form_options.time_period.items() %}
                         <option value="{{ x }}" {% if x|is_in(variables.time_period) %} selected {% endif %}>{{ y }}</option>
                         {% endfor %}

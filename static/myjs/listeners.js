@@ -7,7 +7,6 @@ $(document).ready(function () {
 
     $('#region').on('change', function(){
         change_inRegion($(this).val());
-
     });
 
     $('#field_year').on('change', function(){

@@ -1,4 +1,38 @@
 {
+    "map_zoom_by_region": {
+      "ee_map": 4,
+      "Mason": 11,
+      "US_fields": 11,
+      "US_states_west_500k": 4,
+      "US_counties_west_500k": 5,
+      "US_HUC2_west": 6,
+      "US_HUC4_west": 7,
+      "US_HUC6_west": 8,
+      "US_HUC8_west": 9,
+      "US_HUC10_west": 10
+    },
+    "region_by_map_zoom": {
+      "4": "US_states_west_500k",
+      "5": "US_counties_west_500k",
+      "6": "Huc2_west",
+      "7": "Huc4_west",
+      "8": "Huc6_west",
+      "9": "Huc8_west",
+      "10": "Huc10_west",
+      "11": "Mason"
+    },
+    "map_center_by_region": {
+      "ee_map": {"lat": 38.96, "lng": -119.16},
+      "Mason": {"lat": 38.96, "lng": -119.16},
+      "US_fields": {"lat": 38.96, "lng": -119.16},
+      "US_states_west_500k": {"lat": 38.96, "lng": -119.16},
+      "US_counties_west_500k": {"lat": 38.96, "lng": -119.16},
+      "US_HUC2_west": {"lat": 38.96, "lng": -119.16},
+      "US_HUC4_west": {"lat": 38.96, "lng": -119.16},
+      "US_HUC6_west": {"lat": 38.96, "lng": -119.16},
+      "US_HUC8_west": {"lat": 38.96, "lng": -119.16},
+      "US_HUC10_west": {"lat": 38.96, "lng": -119.16}
+    },
     "ft_styles": {
         "US_fields": {
             "styleId": 2,
@@ -9,7 +43,7 @@
             "templateId": 2
         }
     }, 
-    "featureStyleByYear": {
+    "ft_style_by_year": {
         "2001": ["#696969", "#000000"],
         "2002": ["#b2b2ff", "#0000ff"], 
         "2003": ["#696969", "#000000"],
