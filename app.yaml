@@ -38,5 +38,10 @@ libraries:
 - name: numpy
   version: "1.6.1"
 
+#skip_files:
+#- static/geojson/
+#- static/json/DATA/
+#- .git/objects/
+
 #inbound_services:
 # - warmup

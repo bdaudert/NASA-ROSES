@@ -107,7 +107,10 @@ class Datatstore_Util(object):
         :return:  dict of data for the features
         '''
 
-        data = []
+        data = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
         if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
             # Production
             '''
@@ -126,19 +129,9 @@ class Datatstore_Util(object):
             )
             query_data = qry.fetch()
             if len(query_data) > 0:
-                data = {
-                    'type': 'FeatureCollection'
-                }
                 data['features'] = json.dumps([q.to_dict() for q in query_data])
                 # data = json.dumps([q.to_dict() for q in query_data])
                 logging.info('SUCCESSFULLY READ DATA FROM DB')
-            else:
-                logging.info('NO DATA FOUND IN DB')
-                logging.info('READING DATA FROM LOCAL FILE')
-                file_name = self.local_dataFName
-                logging.info(file_name)
-                with open(file_name) as f:
-                    data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
         else:
             # Local development server
             logging.info('READING DATA FROM LOCAL FILE')

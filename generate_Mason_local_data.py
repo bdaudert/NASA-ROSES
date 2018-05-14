@@ -13,7 +13,7 @@ if __name__ == '__main__':
             "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
             "etrf_m01"]
 
-    geo_files = filter(os.path.isfile, glob.glob('static/geojson/Mason_' + '*.geojson'))
+    geo_files = filter(os.path.isfile, glob.glob('/Users/bdaudert/EE/NASA-ROSES-DATA/geojson/Mason_' + '*.geojson'))
     et_models = ['SSEBop']
     for et_model in et_models:
         for geo_file in geo_files[0: -1]:

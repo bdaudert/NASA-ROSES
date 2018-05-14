@@ -12,7 +12,7 @@ if __name__ == '__main__':
             "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
             "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
             "etrf_m01"]
-    geo_dir = 'static/geojson/'
+    geo_dir = '/Users/bdaudert/EE/NASA-ROSES-DATA/geojson/'
     geo_files = [
                 'US_states_west_500k_GEOM.geojson',
                 'US_counties_west_500k_GEOM.geojson',

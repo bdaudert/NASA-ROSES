@@ -4,7 +4,7 @@ import glob
 
 if __name__ == '__main__':
     meta_cols = ["OBJECTID", "STATE", "HUC8", "HUC8_NAME", "PIXELCOUNT", "AREA"]
-    geo_files = filter(os.path.isfile, glob.glob('static/geojson/Mason_' + '*.geojson'))
+    geo_files = filter(os.path.isfile, glob.glob('/Users/bdaudert/EE/NASA-ROSES-DATA/geojson/Mason_' + '*.geojson'))
     for geo_file in geo_files[0: -1]:
         file_name = os.path.basename(geo_file)
         if file_name.endswith('GEOM.geojson') or file_name.endswith('DATA.geojson'):

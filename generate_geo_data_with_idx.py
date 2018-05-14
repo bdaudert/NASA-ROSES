@@ -9,7 +9,7 @@ if __name__ == '__main__':
         "US_HUC8_west": ["AREASQKM", "STATES", "HUC2", "NAME"],
         "US_HUC10_west": ["AREASQKM", "STATES", "HUC2", "NAME"]
     }
-    geo_dir = 'static/geojson/'
+    geo_dir = '/Users/bdaudert/EE/NASA-ROSES-DATA/geojson/'
     geo_files = [
         'US_states_west_500k.geojson',
         'US_counties_west_500k.geojson',
