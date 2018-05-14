@@ -196,7 +196,6 @@ MAP_APP = {
         //Only show data that are in current map bound
         setTimeout(function () {
             data.forEach(function (feature) {
-                console.log(feature.getGeometry());
                 var feat_bounds = new google.maps.LatLngBounds();
                 processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
                 var sw = feat_bounds.getSouthWest();
