@@ -29,6 +29,7 @@ MAP_APP = {
         return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
     },
     set_feat_colors: function (start_color, DOrL) {
+
         var v = $('#variable').val(),
             t_res = $('#t_res').val(),
             et_var = $('#variable').val(),
@@ -191,11 +192,17 @@ MAP_APP = {
         etdata global var that hold et data and
         geometry info,  defined in scripts.html
         */
-        var data = new google.maps.Data();
-        data.addGeoJson(DATA.geomdata);
+        window.map.data = new google.maps.Data({
+            map: window.map
+        });
+
+        window.map.data.addGeoJson(DATA.geomdata);
+        /*
         //Only show data that are in current map bound
         setTimeout(function () {
-            data.forEach(function (feature) {
+            var msg = 'Adding layers to map';
+            start_progressbar(msg=msg);
+            window.map.data.forEach(function (feature) {
                 var feat_bounds = new google.maps.LatLngBounds();
                 processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
                 var sw = feat_bounds.getSouthWest();
@@ -204,56 +211,54 @@ MAP_APP = {
                     data.remove(feature);
                 }
             });
+            end_progressbar();
         }, 500);
+        */
+
         /*
        // zoom to show all the features
        bounds = new google.maps.LatLngBounds();
-       data.addListener('addfeature', function(e) {
+       window.map.data.addListener('addfeature', function(e) {
            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
            window.map.fitBounds(bounds);
        });
        */
-        data.addListener('click', function (e) {
+        window.map.data.addListener('click', function (e) {
             //Hide old data modal
             $('#dataModal').modal('hide');
             MAP_APP.initialize_dataModal(e);
             MAP_APP.add_dataToModal(e);
             $('#dataModal').modal('toggle');
         });
-        return data;
     },
     set_choropleth_layer: function () {
         //Sanity check
+        start_progressbar(mgs='Adding layers to map');
         if (Object.keys(DATA.geomdata).length == 0) {
             return;
         }
-        var data = MAP_APP.set_data_layer();
-        data.setMap(window.map);
-        //Set global var
-        if (!window.map_layers) {
-            window.map_layers = {};
-        }
-        window.map_layers[$('#region').val()] = data;
+        MAP_APP.set_data_layer();
+
         //Set styles for chloropleth map
         var start_color = MAP_APP.set_start_color(),
             cb = MAP_APP.set_feat_colors(start_color, 'darken');
-        MAP_APP.set_feat_styles(data, cb);
+        MAP_APP.set_feat_styles(window.map.data, cb);
         //Draw the colorbar
         MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
+        end_progressbar();
     },
     delete_map_layers: function () {
         if (window.map.data) {
-            window.map.data.setMap(null);
-            window.map.data = null;
-            /*
             window.map.data.forEach(function (feature) {
-                console.log(feature);
-                // If you want, check here for some constraints.
                 window.map.data.remove(feature);
+                //window.map.data.setStyle(feature, {});
             });
-            */
+
+            //window.map.data.setStyle({});
+            window.map.data.setMap(null);
+            //window.map.data = new google.maps.Data({});
         }
-    },
+    }
 }
 
 
@@ -273,20 +278,18 @@ var initialize_map = function() {
         zoom: mapZoom,
         mapTypeId: 'satellite'
     });
-
     if (region == "ee_map"){
         //ajax_get_ee_map();
     }else {
         MAP_APP.set_choropleth_layer();
     }
+
     /* Show different regions at different zoom levels */
     google.maps.event.addListener(window.map, 'zoom_changed', function() {
         var zoom = window.map.getZoom();
-
         if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
             var region = $('#region').val(),
-                new_region = js_statics.region_by_map_zoom(String(zoom));
-
+                new_region = js_statics.region_by_map_zoom[String(zoom)];
             if (region != new_region) {
                 change_inRegion(new_region);
             }

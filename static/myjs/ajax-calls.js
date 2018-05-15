@@ -67,12 +67,13 @@ function ajax_update_data(){
     $('#tool_action').val(tool_action);
     //Get the form data
     form_data = $("#form_all").serialize();
-    start_progressbar();
+    start_progressbar(mgs='Obtaining data');
     jqXHR = $.ajax({
-            url: url,
-            method: "POST",
-            timeout: 60 * 5 * 1000,
-            data: form_data
+        url: url,
+        method: "POST",
+        timeout: 60 * 5 * 1000,
+        data: form_data,
+
     })
     .done(function(response) {
         r = $.parseJSON(response);
@@ -87,6 +88,8 @@ function ajax_update_data(){
             window.DATA[tv_var] = $.parseJSON(r[tv_var]);
 
         }
+        //Set new map layer
+        MAP_APP.set_choropleth_layer();
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {

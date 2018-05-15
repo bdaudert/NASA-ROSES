@@ -2,6 +2,7 @@
 # import statics
 
 import logging
+import operator
 from config import statics
 from config import GMAP_API_KEY as GMAP_API_KEY
 import databaseMethods
@@ -11,7 +12,15 @@ def set_form_options(variables):
     form_options = {}
     for var_key, dflt in variables.iteritems():
         if var_key in statics['form_option_keys']:
-            form_options[var_key] = statics['all_' + var_key]
+            # form_options[var_key] = statics['all_' + var_key]
+            fo = statics['all_' + var_key]
+            if isinstance(fo, dict):
+                # Sort by dict values
+                sorted_fo = dict(sorted(fo.items(), key=operator.itemgetter(1)))
+                form_options[var_key] = sorted_fo
+            else:
+                form_options[var_key] = fo
+
     # Override default form options if needed
     var = variables['variable']
     region = variables['region']

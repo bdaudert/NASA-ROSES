@@ -4,21 +4,13 @@
       "Mason": 11,
       "US_fields": 11,
       "US_states_west_500k": 4,
-      "US_counties_west_500k": 5,
-      "US_HUC2_west": 6,
-      "US_HUC4_west": 7,
-      "US_HUC6_west": 8,
-      "US_HUC8_west": 9,
-      "US_HUC10_west": 10
+      "US_counties_west_500k": 7,
+      "US_HUC4_west": 10
     },
     "region_by_map_zoom": {
       "4": "US_states_west_500k",
-      "5": "US_counties_west_500k",
-      "6": "Huc2_west",
-      "7": "Huc4_west",
-      "8": "Huc6_west",
-      "9": "Huc8_west",
-      "10": "Huc10_west",
+      "7": "US_counties_west_500k",
+      "10": "HUC4_west",
       "11": "Mason"
     },
     "map_center_by_region": {

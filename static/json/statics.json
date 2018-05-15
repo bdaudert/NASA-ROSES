@@ -18,11 +18,7 @@
     "all_region":  {
         "US_states_west_500k": "States, Western US",
         "US_counties_west_500k": "Counties, Western US",
-        "huc2": "HUC 2, Western US",
-        "huc4": "HUC 4, Western US",
-        "huc6": "HUC 6, Western US",
-        "huc8": "HUC 8, Western US",
-        "huc10": "Huc 10, Western US",
+        "HUC4": "HUC 4, Western US",
         "US_fields": "US Fields",
         "Mason": "Mason Valley",
         "ee_map": "Map"
@@ -30,11 +26,11 @@
     "all_aggregation_area": {
         "US_states_west_500k": "States, Western US",
         "US_counties_west_500k": "Counties, Western US",
-        "huc2": "HUC 2, Western US",
-        "huc4": "HUC 4, Western US",
-        "huc6": "HUC 6, Western US",
-        "huc8": "HUC 8, Western US",
-        "huc10": "Huc 10, Western US"
+        "HUC2": "HUC 2, Western US",
+        "HUC4": "HUC 4, Western US",
+        "HUC6": "HUC 6, Western US",
+        "HUC8": "HUC 8, Western US",
+        "HUC10": "HUC 10, Western US"
     },
     "all_field_year": {
         "MODIS": ["2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010"]
