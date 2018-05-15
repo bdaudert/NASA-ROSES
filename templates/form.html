@@ -69,21 +69,21 @@
         <div class="panel panel-default">
             <div class="panel-body panel-forms">
                 <b><span style="color:blue;font-size:medium">Processing:</span></b><br>
-                 <div id='form-field_year' 
+                 <div id='form-year' 
                 {% if variables.region |not_in('Mason, US_fields') %}style="display:none;"{%endif%}>
                     <b>Year: </b><br>
-                    <select class="years" id="field_year" name="field_year">
-                        {% for x in form_options.field_year %}
-                        <option value="{{ x }}" {% if x == variables.field_year  %} selected {% endif %}>{{ x }}</option>
+                    <select class="years" id="year" name="year">
+                        {% for x in form_options.year %}
+                        <option value="{{ x }}" {% if x == variables.year  %} selected {% endif %}>{{ x }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div id='form-field_years' 
+                <div id='form-years' 
                 {% if variables.region |is_in('Mason, US_fields') %}style="display:none;"{%endif%}>
                     <b>Years: </b><br>
-                    <select class="years" id="field_years" name="field_years" multiple>
-                        {% for x in form_options.field_year %}
-                        <option value="{{ x }}" {% if x == variables.field_years  %} selected {% endif %}>{{ x }}</option>
+                    <select class="years" id="years" name="years" multiple>
+                        {% for x in form_options.years %}
+                        <option value="{{ x }}" {% if x |is_in(variables.years) %} selected {% endif %}>{{ x }}</option>
                         {% endfor %}
                     </select>
                 </div>

@@ -9,16 +9,18 @@ $(document).ready(function () {
         change_inRegion($(this).val());
     });
 
-    $('#field_year').on('change', function(){
+    $('#year').on('change', function(){
         change_inYear($(this).val());
     });
 
-    $('#variable').on('change', function(){
+    $('#years').on('change', function() {
+        change_inYears($(this).val());
+    });
+     $('#variable').on('change', function(){
         change_inVariable($(this).val());
     });
 
     $('#t_res').on('change', function(){
         change_inTRes($(this).val());
     });
-
 });

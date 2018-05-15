@@ -231,6 +231,21 @@ MAP_APP = {
             $('#dataModal').modal('toggle');
         });
     },
+    set_map_overlay: function(){
+        //Sanity check
+        start_progressbar(mgs='Adding layers to map');
+        if (Object.keys(DATA.geomdata).length == 0) {
+            return;
+        }
+        var region = $('#region').val(),
+
+            region_zoom = js_statics.map_zoom_by_region[region];
+        MAP_APP.set_data_layer();
+        if (window.map.getZoom() < region_zoom){
+            window.map.setZoom(region_zoom);
+        }
+        end_progressbar();
+    },
     set_choropleth_layer: function () {
         //Sanity check
         start_progressbar(mgs='Adding layers to map');
@@ -238,13 +253,18 @@ MAP_APP = {
             return;
         }
         MAP_APP.set_data_layer();
-
         //Set styles for chloropleth map
         var start_color = MAP_APP.set_start_color(),
-            cb = MAP_APP.set_feat_colors(start_color, 'darken');
+            cb = MAP_APP.set_feat_colors(start_color, 'darken'),
+            region = $('#region').val(),
+            region_zoom = js_statics.map_zoom_by_region[region];
         MAP_APP.set_feat_styles(window.map.data, cb);
         //Draw the colorbar
         MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
+        //Set the map zoom
+        if (window.map.getZoom() < region_zoom){
+            window.map.setZoom(region_zoom);
+        }
         end_progressbar();
     },
     delete_map_layers: function () {

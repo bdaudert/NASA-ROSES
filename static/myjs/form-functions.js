@@ -17,24 +17,24 @@ function change_inRegion(region){
 	}
 	if (region.is_in(['US_fields', 'Mason'])){
         //Field data
-		$('#form-field_year').css('display', 'inline');
-		$('#form-field_years').css('display', 'none');
+		$('#form-year').css('display', 'inline');
+		$('#form-years').css('display', 'none');
         //Not clear if/when this will be used
 		//$('#form-aggregation_area').css('display', 'inline')
 	}else if (region == 'ee_map'){
 		//Maps
-		$('#form-field_years').css('display', 'none');
-		$('#form-field_year').css('display', 'none');
+		$('#form-years').css('display', 'none');
+		$('#form-year').css('display', 'none');
 		//Not clear if/when this will be used
 		//$('#form-aggregation_area').css('display', 'none');
 	}else{
 		//Predefined aggregation areas
-		$('#form-field_years').css('display', 'inline');
-		$('#form-field_year').css('display', 'none');
+		$('#form-years').css('display', 'inline');
+		$('#form-year').css('display', 'none');
 	}
 }
 
-function change_inYear(field_year){
+function change_inYear(year){
 	//Delete old layer
 	MAP_APP.delete_map_layers();
 	// We ned to recompute the template vars
@@ -42,6 +42,18 @@ function change_inYear(field_year){
 	ajax_update_data();
 	MAP_APP.set_choropleth_layer();
 }
+
+function change_inYears(years){
+	MAP_APP.delete_map_layers();
+	if (years.length != 1){
+		MAP_APP.set_map_overlay();
+		$('#form-statistic').css('display', 'block');
+	} else{
+		MAP_APP.set_choropleth_layer();
+		$('#form-statistic').css('display', 'none');
+	}
+}
+
 
 function change_inVariable(variable){
     if ($('#region').val().is_in(['US_fields', 'Mason'])){
@@ -81,14 +93,31 @@ function change_inTRes(resolution){
     var tps, tp, tp_name, option, key, key_list = [];
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');
-        $('#form-statistic').css('display','none');
-        $('#time_period').val($('#field_year').val());
-        $('#time_period_statistic').val('none');
-        tps = {}
-        //Set the time period to the field year for filed region
-        if ($('#region').val().is_in(['US_fields', 'Mason'])) {
-            key = $('#field_year').val();
-            tps[key] = key;
+        if ($('#years').css('display') !=  'none'){
+        	//Mutiple years
+			var year_list = $('#years').val();
+        	if ($('#years').val().length != 1) {
+				$('#form-statistic').css('display', 'block');
+            }else{
+        		$('#form-statistic').css('display', 'none');
+			}
+			//Set time_period options
+			tps = {}
+			for (var i=0; i< years_list.length; i++ ){
+        		tps[years_list[i]] = years_list[i];
+			}
+		}
+		else {
+        	//Only one year is displayed
+            $('#form-statistic').css('display', 'none');
+            $('#time_period').val($('#year').val());
+            $('#time_period_statistic').val('none');
+            tps = {}
+            //Set the time period to the field year(s) for region
+            if ($('#region').val() != 'ee_map') {
+                key = $('#year').val();
+                tps[key] = key;
+            }
         }
     }
     else{
@@ -117,15 +146,17 @@ function change_inTRes(resolution){
 
 function set_dataModalHeader(idx){
 	var v = $('#variable').val(),
-		year = $('#field_year').val(),
-		prop_name, html= '', c_idx;
+		year = $('#year').val(),
+		prop_name, html= '', c_idx,
+		region = $('#region').val();
 	//Title
-	for (c_idx = 0; c_idx < statics.title_cols.length; c_idx++){
-		prop_name = statics.title_cols[c_idx];
+	for (c_idx = 0; c_idx < statics.geo_meta_cols[region].length; c_idx++){
+		prop_name = statics.geo_meta_cols[region][c_idx];
 		html += '<b>' + prop_name + '</b>'+ ': ';
-		if (DATA.etdata.features[idx][prop_name]) {
-			html += DATA.etdata.features[idx][prop_name] + '<br>'
+		if (DATA.geomdata.features[idx]['properties'][prop_name]) {
+			html += DATA.geomdata.features[idx]['properties'][prop_name];
 		}
+		html+= '<br>';
 	}
 	html += '<b>Variable</b>: ' + v + '<br>';
 	html += '<b>Year</b>: ' + year + '<br>';
@@ -169,7 +200,7 @@ function set_dataModalValList(v, t_res, time_period, stat, idx){
 		if (t_res == "annual"){
 			tp = time_period[0];
 		}
-		else if (t_res == "monthly") {
+		if (t_res == "monthly") {
 			s = prop_names[v_idx].split('_');
 			tp = s[s.length -1].slice(-2);
 			if (tp.substring(0, 1) == '0') {
@@ -190,7 +221,7 @@ function set_dataModalValList(v, t_res, time_period, stat, idx){
 
 function set_dataModalData(val_list, new_prop_names){
 	var html, v_idx,
-		year = $('#field_year').val(),
+		year = $('#year').val(),
         html = 'Year: ' + year + '<br>';
 	for (v_idx = 0; v_idx < val_list.length; v_idx++) {
 		prop_name = new_prop_names[v_idx];

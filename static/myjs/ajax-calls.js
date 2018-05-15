@@ -67,7 +67,8 @@ function ajax_update_data(){
     $('#tool_action').val(tool_action);
     //Get the form data
     form_data = $("#form_all").serialize();
-    start_progressbar(mgs='Obtaining data');
+    var msg = 'Switching region';
+    start_progressbar(mgs=msg);
     jqXHR = $.ajax({
         url: url,
         method: "POST",

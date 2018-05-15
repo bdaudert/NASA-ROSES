@@ -25,12 +25,12 @@ def set_form_options(variables):
     var = variables['variable']
     region = variables['region']
     dataset = variables['dataset']
-    # Set field years form option
-    form_options['field_year'] = statics['all_field_year'][dataset]
-    form_options['field_years'] = statics['all_field_year'][dataset]
+    # Set the year form options
+    form_options['year'] = statics['all_year'][dataset]
+    form_options['years'] = statics['all_years'][dataset]
     # Set the time_period according to t_res
     if variables['t_res'] == 'annual':
-        form_options['time_period'] = {variables['field_year']: variables['field_year']}
+        form_options['time_period'] = {variables['year']: variables['year']}
     else:
         periods = statics['time_period_by_res'][variables['t_res']]
         keys = sorted(periods.keys())
@@ -60,7 +60,7 @@ def set_dates():
 def set_database_util(tv):
     # Load the data from the database
     rgn = tv['variables']['region']
-    yr = tv['variables']['field_year']
+    yr = tv['variables']['year']
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
     DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
@@ -93,7 +93,10 @@ def set_initial_template_values(RequestHandler, app_name, method):
     if method == 'POST' or method == 'shareLink':
         for var_key, dflt in tv['variables'].iteritems():
             if var_key in RequestHandler.request.arguments():
-                tv['variables'][var_key] = RequestHandler.request.get(var_key, dflt)
+                if isinstance(dflt, list):
+                    tv['variables'][var_key] = RequestHandler.request.get_all(var_key, dflt)
+                else:
+                    tv['variables'][var_key] = RequestHandler.request.get(var_key, dflt)
 
     # Set dates
     dates = set_dates()
