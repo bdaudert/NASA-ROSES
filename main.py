@@ -57,7 +57,7 @@ JINJA_ENVIRONMENT.filters['divisibleby'] = JinjaFilters.divisibleby
 
 def runApp(self, app_name, method):
     try:
-        tv = templateMethods.set_initial_template_values(
+        tv = templateMethods.set_template_values(
             self, app_name, method)
         tv['method'] = method
     except Exception as e:
@@ -188,7 +188,7 @@ class databaseTasks(webapp2.RequestHandler):
     def get(self):
         ee.Initialize(config.EE_CREDENTIALS)
         ee.data.setDeadline(180000)
-        tv = templateMethods.set_initial_template_values(
+        tv = templateMethods.set_template_values(
             self, 'databaseTask', 'GET')
         tv['json_data'] = {}
         # FIX ME: only do 2003 for testing

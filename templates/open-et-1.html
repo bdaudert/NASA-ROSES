@@ -2,9 +2,9 @@
 
 {% block content %}
 
-<div id="header-container">
+<div id="header-container" style="display:none;">
     {% include 'header.html' %}
-</div>
+</div><br>
 <div id="main-container">
     <input type="hidden" class="app_name" id="app_name" name="app_name" value="{{ app_name }}">
     <div id="map-container">{% include 'map.html'%}</div>
@@ -15,7 +15,7 @@
     <div class="row">
         <div class="colorbar-container draggable ui-widget-content">
             <div class="colorbar-container-header">You can move me!</div>
-            <div id="colorbar"></div>
+            <div id="colorbar" class="colorbar ui-widget-content"></div>
         </div>
     </div>
     <!-- MODAL WINDOWS -->

@@ -28,25 +28,25 @@ MAP_APP = {
         else if (g < 0) g = 0;
         return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
     },
-    set_feat_colors: function (start_color, DOrL) {
-
+    set_feat_colors: function (start_color, DOrL, year) {
         var v = $('#variable').val(),
             t_res = $('#t_res').val(),
             et_var = $('#variable').val(),
             time_period = $('#time_period').val(),
             stat = $('#time_period_statistic').val(),
-            et_stat, i, idx, j, colors = [], data, d, mn, mx, bins = [], step, amt,
-            num_colors = 10, cb = {'colors': [], 'bins': []}, new_color;
+            et_stat, i, idx, featdata, j, colors = [], data, d, mn, mx, years,
+            bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color;
+
         if (t_res == 'monthly') {
             data = [];
-            d = $.map(DATA.etdata.features, function (feat) {
+            d = $.map(DATA.etdata[year].features, function (featdata) {
                 idx = feat['properties']['idx'];
-                return set_dataModalValList(et_var, t_res, time_period, stat, idx)
+                return set_dataModalValList(years, et_var, t_res, time_period, stat, idx)
             });
             data = data.concat(d);
         } else {
             et_stat = statics.stats_by_var_res[et_var][t_res][0]
-            data = $.map(DATA.etdata.features, function (feat) {
+            data = $.map(DATA.etdata[year].features, function (feat) {
                 if (Math.abs(feat['properties'][et_stat] + 9999) > 0.0001) {
                     return feat['properties'][et_stat];
                 }
@@ -76,7 +76,7 @@ MAP_APP = {
         cb = {'colors': colors, 'bins': bins}
         return cb;
     },
-    set_feat_styles: function (data, cb, start_color) {
+    set_feat_styles: function (data, cb, start_color, year) {
         var feat_colors = cb['colors'], bins = cb['bins'];
         data.setStyle(function (feature) {
             var idx = feature.getProperty('idx'),
@@ -84,7 +84,7 @@ MAP_APP = {
                 t_res = $('#t_res').val(),
                 et_vars = statics.stats_by_var_res[v][t_res],
                 et_var = et_vars[0];
-            var data_val = DATA.etdata.features[idx]['properties'][et_var];
+            var data_val = DATA.etdata[year].features[idx]['properties'][et_var];
             var color = start_color, i;
             //Find the right bin
             for (i = 0; i < bins.length; i++) {
@@ -158,23 +158,30 @@ MAP_APP = {
         $('#dataModal_title').append(html);
     },
     add_dataToModal: function (e) {
-        var idx = e.feature.getProperty('idx'),
+        var feat_idx = e.feature.getProperty('idx'),
+            y_idx, year, years,
             html, val_list, new_prop_names,
             v = $('#variable').val(),
             t_res = $('#t_res').val(),
             time_period = $('#time_period').val(),
             stat = $('#time_period_statistic').val();
 
+
         if ($.type(time_period) == 'string') {
             time_period = [time_period];
         }
+        if ($('#years').css('display') != 'none'){
+            years = $('#years').val();
+        }else{
+            years = [$('#year').val()];
+        }
         //Populate the columnnames
-        val_list = set_dataModalValList(v, t_res, time_period, stat, idx);
+        val_list = set_dataModalValList(years, v, t_res, time_period, stat, feat_idx);
         new_prop_names = set_dataModalPropertyNames(v, t_res, time_period, stat);
         html = set_dataModalData(val_list, new_prop_names);
         $('#dataModal_data').append(html);
     },
-    set_data_layer: function () {
+    set_data_layer: function (data) {
         function processPoints(geometry, callback, thisArg) {
             if (geometry instanceof google.maps.LatLng) {
                 callback.call(thisArg, geometry);
@@ -196,7 +203,7 @@ MAP_APP = {
             map: window.map
         });
 
-        window.map.data.addGeoJson(DATA.geomdata);
+        window.map.data.addGeoJson(data);
         /*
         //Only show data that are in current map bound
         setTimeout(function () {
@@ -216,13 +223,13 @@ MAP_APP = {
         */
 
         /*
-       // zoom to show all the features
-       bounds = new google.maps.LatLngBounds();
-       window.map.data.addListener('addfeature', function(e) {
-           processPoints(e.feature.getGeometry(), bounds.extend, bounds);
-           window.map.fitBounds(bounds);
-       });
-       */
+        // zoom to show all the features
+        bounds = new google.maps.LatLngBounds();
+        window.map.data.addListener('addfeature', function(e) {
+            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
+            window.map.fitBounds(bounds);
+        });
+        */
         window.map.data.addListener('click', function (e) {
             //Hide old data modal
             $('#dataModal').modal('hide');
@@ -238,9 +245,11 @@ MAP_APP = {
             return;
         }
         var region = $('#region').val(),
+            region_zoom = js_statics.map_zoom_by_region[region],
+            year = $('#year').val(),
+            data = DATA.geomdata[year];
 
-            region_zoom = js_statics.map_zoom_by_region[region];
-        MAP_APP.set_data_layer();
+        MAP_APP.set_data_layer(data);
         if (window.map.getZoom() < region_zoom){
             window.map.setZoom(region_zoom);
         }
@@ -252,13 +261,16 @@ MAP_APP = {
         if (Object.keys(DATA.geomdata).length == 0) {
             return;
         }
-        MAP_APP.set_data_layer();
         //Set styles for chloropleth map
         var start_color = MAP_APP.set_start_color(),
-            cb = MAP_APP.set_feat_colors(start_color, 'darken'),
+            year = $('#years').val()[0],
+            cb = MAP_APP.set_feat_colors(start_color, 'darken', year),
             region = $('#region').val(),
-            region_zoom = js_statics.map_zoom_by_region[region];
-        MAP_APP.set_feat_styles(window.map.data, cb);
+            region_zoom = js_statics.map_zoom_by_region[region],
+            data = DATA.geomdata[year];
+
+        MAP_APP.set_data_layer(data);
+        MAP_APP.set_feat_styles(window.map.data, cb, start_color, year);
         //Draw the colorbar
         MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
         //Set the map zoom
@@ -301,7 +313,11 @@ var initialize_map = function() {
     if (region == "ee_map"){
         //ajax_get_ee_map();
     }else {
-        MAP_APP.set_choropleth_layer();
+        if ($('#years').val().length == 1) {
+            MAP_APP.set_choropleth_layer();
+        }else{
+            set_map_overlay();
+        }
     }
 
     /* Show different regions at different zoom levels */

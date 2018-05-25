@@ -100,3 +100,44 @@ function ajax_update_data(){
         end_progressbar();
     });
 }
+
+function ajax_get_feat_data(){
+    var tool_action = 'get_feat_data',
+        url = clearOut_URL(),
+        form_data, jqXHR,
+        err_code, r, method = 'ajax', error, cause, i, tv_var;
+    //Update the tool_action
+    $('#tool_action').val(tool_action);
+    //Get the form data
+    form_data = $("#form_all").serialize();
+    var msg = 'Obtaining feature data';
+    start_progressbar(mgs=msg);
+    jqXHR = $.ajax({
+        url: url,
+        method: "POST",
+        timeout: 60 * 5 * 1000,
+        data: form_data,
+
+    })
+    .done(function(response) {
+        r = $.parseJSON(response);
+        if (r.hasOwnProperty('error')) {
+            error = r.error;
+            set_error( error, '', '', method);
+            end_progressbar();
+        }
+        //Set the new template variables
+        for (i=0; i < statics.response_vars[tool_action].length; i++){
+            tv_var = statics.response_vars[tool_action][i];
+            window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+
+        }
+        end_progressbar();
+    }) // successfully got JSON response
+    .fail(function(jqXHR) {
+        err_code = jqXHR.status;
+        error = 'Server request failed with code ' + String(err_code) + '!'
+        set_error(error, '', '', method)
+        end_progressbar();
+    });
+}

@@ -81,25 +81,46 @@ class Datatstore_Util(object):
         except Exception(e):
             logging.error(e)
             raise Exception(e)
-        geomdata = json.dumps(d, ensure_ascii=False).encode('utf8')
+        # geomdata = json.dumps(d, ensure_ascii=False).encode('utf8')
+        geomdata = d
         return geomdata
 
-    def read_feat_data_from_db(self, feat_idx):
+    def read_feat_data_from_db(self, feat_index_list):
         '''
-        Reads one feature's data from db
+        Reads multiple feature's data from db using unique indices
         :param feat_idx: feature index (db property)
         :return: dict of data for the feature
         '''
         # FIX ME: not tested
-        unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(feat_idx)])
-        UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
-        query_data = ndb.Key('DATA', UNIQUE_ID).get()
-        if not query_data:
-            return []
-        logging.info('READING FROM DB: ' + UNIQUE_ID)
-        etdata = json.dumps(query_data.to_dict())
-        return etdata
+        feature_data = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        for feat_idx in feat_index_list:
+            unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(feat_idx)])
+            UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
+            query_data = ndb.Key('DATA', UNIQUE_ID).get()
+            if not query_data:
+                return {}
+            logging.info('READING FROM DB: ' + UNIQUE_ID)
+            featdata = json.dumps(query_data.to_dict())
+            feature_data['features'].append(featdata)
+        return feature_data
 
+    def read_feat_data_from_local(self, feat_index_list):
+        file_name = self.local_dataFName
+        feature_data = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        with open(file_name) as f:
+            all_data = json.load(f)
+
+        for feat_idx in feat_index_list:
+             feature_data['features'].append(all_data['features'][int(feat_idx)])
+
+        del all_data
+        return data
 
     def read_data_from_db(self):
         '''
@@ -111,44 +132,35 @@ class Datatstore_Util(object):
             'type': 'FeatureCollection',
             'features': []
         }
-        if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-            # Production
-            '''
-            qry = ndb.Query(kind='DATA').filter(
-                DATA.year == self.year,
-                DATA.region == self.region,
-                DATA.dataset == self.dataset,
-                DATA.et_model == self.et_model
-            )
-            '''
-            qry = DATA.query(
-                DATA.region == self.region,
-                DATA.year == int(self.year),
-                DATA.dataset == self.dataset,
-                DATA.et_model == self.et_model
-            )
-            query_data = qry.fetch()
-            if len(query_data) > 0:
-                data['features'] = json.dumps([q.to_dict() for q in query_data])
-                # data = json.dumps([q.to_dict() for q in query_data])
-                logging.info('SUCCESSFULLY READ DATA FROM DB')
-        else:
-            # Local development server
-            logging.info('READING DATA FROM LOCAL FILE')
-            file_name = self.local_dataFName
-            logging.info(file_name)
-            with open(file_name) as f:
-                data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
+        '''
+        qry = ndb.Query(kind='DATA').filter(
+            DATA.year == self.year,
+            DATA.region == self.region,
+            DATA.dataset == self.dataset,
+            DATA.et_model == self.et_model
+        )
+        '''
+        qry = DATA.query(
+            DATA.region == self.region,
+            DATA.year == int(self.year),
+            DATA.dataset == self.dataset,
+            DATA.et_model == self.et_model
+        )
+        query_data = qry.fetch()
+        if len(query_data) > 0:
+            data['features'] = json.dumps([q.to_dict() for q in query_data])
+            logging.info('SUCCESSFULLY READ DATA FROM DB')
         return data
 
-    def read_from_db(self):
-        '''
-        Read data from db
-        :return: data
-        '''
-        data = self.read_data_from_db()
+    def read_data_from_local(self):
+        # Local development server
+        logging.info('READING DATA FROM LOCAL FILE')
+        file_name = self.local_dataFName
+        logging.info(file_name)
+        with open(file_name) as f:
+            data = json.load(f)
+            # data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
         return data
-
 
     def add_to_db(self):
         '''

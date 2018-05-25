@@ -14,7 +14,8 @@
         "et_model": "SSEBop",
         "t_res": "annual",
         "time_period": ["2003"],
-        "time_period_statistic": "none"
+        "time_period_statistic": "none",
+        "feat_indices": ""
     },
     "all_region":  {
         "US_states_west_500k": "States, Western US",
@@ -80,6 +81,7 @@
     "response_vars": {
         "None": [],
         "update_data": ["geomdata", "etdata"],
+        "get_feat_data": ["featdata"],
         "get_map": ["mapid", "token", "sharelink_map", "sharelink_ts"],
         "get_ts": ["ts_data", "token", "sharelink_map", "sharelink_ts"],
         "get_value": ["point_value"]

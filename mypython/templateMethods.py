@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # import statics
 
+import os
+import json
 import logging
 import operator
 from config import statics
@@ -57,17 +59,17 @@ def set_dates():
     }
     return dates
 
-def set_database_util(tv):
+def set_database_util(year, tv):
     # Load the data from the database
     rgn = tv['variables']['region']
-    yr = tv['variables']['year']
+    yr = year
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
     DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
     return DU
 
 
-def set_initial_template_values(RequestHandler, app_name, method):
+def set_template_values(RequestHandler, app_name, method):
     '''
     Args:
     RequestHandler: webapp2.RequestHandler object
@@ -105,15 +107,40 @@ def set_initial_template_values(RequestHandler, app_name, method):
     tv['form_options'] = set_form_options(tv['variables'])
 
     # Get the etdata and geometry from the geo database
-    tv['etdata'] = []
+    tv['etdata'] = {}
     tv['geomdata'] = {}
+    tv['featdata'] = {}
     if app_name == 'dataBaseTasks':
         return tv
     if  tv['variables']['region'] in ['ee_map']:
         return tv
-    # Get the relevant etdata
-    DU = set_database_util(tv)
-    tv['etdata'] = DU.read_from_db()
-    tv['geomdata'] = DU.read_geometries_from_bucket()
+
+    feat_index_list = []
+    if 'feat_indices' in tv['variables'].keys() and tv['variables']['feat_indices']:
+        feat_index_list = tv['variables']['feat_indices'].replace(', ', ',').split(',')
+
+    for year in tv['variables']['years']:
+        DU = set_database_util(year, tv)
+        # Get the feature data by index
+        if feat_index_list:
+            if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+                # Running in production environment, read data from db
+                tv['featdata'][year] = DU.read_feat_data_from_db(feat_index_list)
+            else:
+                # Running in development environment
+                # Read data from loca
+                tv['featdata'][year] = DU.read_feat_data_from_db(feat_index_list)
+        # Get all data for single year if single year is selected
+        if len(tv['variables']['years']) == 1:
+            yr = tv['variables']['years'][0]
+            if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+                # Running in production environment, read data from db
+                etdata = DU.read_data_from_db()
+            else:
+                etdata = DU.read_data_from_local()
+
+            geomdata = DU.read_geometries_from_bucket()
+            tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
+            tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
     return tv
 
