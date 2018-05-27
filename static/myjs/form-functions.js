@@ -279,14 +279,20 @@ function set_dataModalPropertyNames(v, t_res, time_period, stat) {
 }
 
 function set_dataModalData(val_dict, new_prop_names){
-	var html = '', v_idx, val_list = [], year;
+	var html = '<table border="1" cellpadding="5">', p_idx, y_idx, val_list = [], year;
+    html+='<tr><th>Variable</th>';
 	for (year in val_dict) {
-	    html += 'Year: ' + year + '<br>';
-	    val_list = val_dict[year];
-	    for (v_idx=0; v_idx < val_list.length; v_idx++) {
-            prop_name = new_prop_names[v_idx];
-            html += '<b>' + prop_name + '</b>: ' + val_list[v_idx] + '<br>';
+        html += '<th>' + year + '</th>'
+    }
+    html += '</tr>';
+    for (p_idx=0; p_idx < new_prop_names.length; p_idx++) {
+        html += '<tr><td>' + new_prop_names[p_idx] + '</td>';
+        for (year in val_dict) {
+            val_list = val_dict[year];
+            html += '<td>' + val_list[p_idx] + '</td>';
         }
-	}
+        html += '</tr>'
+    }
+    html += '</table>';
 	return html;
 }
