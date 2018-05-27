@@ -218,6 +218,8 @@ MAP_APP = {
         });
         */
         window.map.data.addListener('click', function (e) {
+            var feat_idx =  e.feature.getProperty('idx');
+            $('#feat_indices').val(feat_idx);
             //Hide old data modal
             $('#dataModal').modal('hide');
             MAP_APP.initialize_dataModal(e);
