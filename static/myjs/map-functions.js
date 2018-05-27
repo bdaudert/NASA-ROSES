@@ -37,7 +37,7 @@ MAP_APP = {
             year = $('#year').val(),
             bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color,
             featdata = DATA.etdata[year];
-        val_list = set_singleYear_multiFeat_valList(year, et_var, t_res, time_period, stat, featdata);
+        val_list = set_singleYear_allFeat_valList(year, et_var, t_res, time_period, stat, featdata);
         if (!val_list) {
             return cb;
         }
