@@ -54,7 +54,8 @@
     });
     window.DATA = {
         etdata: {{ etdata|safe }},
-        geomdata: {{ geomdata|safe}}
+        geomdata: {{ geomdata|safe}},
+        featdata: {{featdata|safe}}
     }
     //Set etdata
     google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});

@@ -130,17 +130,16 @@ def set_template_values(RequestHandler, app_name, method):
                 # Running in development environment
                 # Read data from loca
                 tv['featdata'][year] = DU.read_feat_data_from_db(feat_index_list)
-        # Get all data for single year if single year is selected
-        if len(tv['variables']['years']) == 1:
-            yr = tv['variables']['years'][0]
-            if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-                # Running in production environment, read data from db
-                etdata = DU.read_data_from_db()
-            else:
-                etdata = DU.read_data_from_local()
 
-            geomdata = DU.read_geometries_from_bucket()
-            tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
-            tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
+    # Get all data for the first year in year_list
+    yr = tv['variables']['years'][0]
+    if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+        # Running in production environment, read data from db
+        etdata = DU.read_data_from_db()
+    else:
+        etdata = DU.read_data_from_local()
+    geomdata = DU.read_geometries_from_bucket()
+    tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
+    tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
     return tv
 

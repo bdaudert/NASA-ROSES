@@ -29,34 +29,20 @@ MAP_APP = {
         return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
     },
     set_feat_colors: function (start_color, DOrL, year) {
-        var v = $('#variable').val(),
+        var et_var = $('#variable').val(),
             t_res = $('#t_res').val(),
-            et_var = $('#variable').val(),
             time_period = $('#time_period').val(),
             stat = $('#time_period_statistic').val(),
-            et_stat, i, idx, featdata, j, colors = [], data, d, mn, mx, years,
-            bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color;
-
-        if (t_res == 'monthly') {
-            data = [];
-            d = $.map(DATA.etdata[year].features, function (featdata) {
-                idx = feat['properties']['idx'];
-                return set_dataModalValList(years, et_var, t_res, time_period, stat, idx)
-            });
-            data = data.concat(d);
-        } else {
-            et_stat = statics.stats_by_var_res[et_var][t_res][0]
-            data = $.map(DATA.etdata[year].features, function (feat) {
-                if (Math.abs(feat['properties'][et_stat] + 9999) > 0.0001) {
-                    return feat['properties'][et_stat];
-                }
-            });
-        }
-        if (!data) {
+            et_stat, i, idx, featdata, j, colors = [], val_list, d, mn, mx,
+            year = $('#year').val(),
+            bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color,
+            featdata = DATA.etdata[year];
+        val_list = set_singleYear_multiFeat_valList(year, et_var, t_res, time_period, stat, featdata);
+        if (!val_list) {
             return cb;
         }
-        mn = Math.floor(Math.min.apply(null, data));
-        mx = Math.ceil(Math.max.apply(null, data));
+        mn = Math.floor(Math.min.apply(null, val_list));
+        mx = Math.ceil(Math.max.apply(null, val_list));
         step = (mx - mn) / num_colors;
         if ((mx - mn) % num_colors != 0) {
             mx = mx + step;
@@ -159,9 +145,10 @@ MAP_APP = {
     },
     add_dataToModal: function (e) {
         var feat_idx = e.feature.getProperty('idx'),
+            feat_indices = [feat_idx],
             y_idx, year, years,
             html, val_list, new_prop_names,
-            v = $('#variable').val(),
+            et_var = $('#variable').val(),
             t_res = $('#t_res').val(),
             time_period = $('#time_period').val(),
             stat = $('#time_period_statistic').val();
@@ -176,9 +163,9 @@ MAP_APP = {
             years = [$('#year').val()];
         }
         //Populate the columnnames
-        val_list = set_dataModalValList(years, v, t_res, time_period, stat, feat_idx);
-        new_prop_names = set_dataModalPropertyNames(v, t_res, time_period, stat);
-        html = set_dataModalData(val_list, new_prop_names);
+        val_dict = set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, feat_indices);
+        new_prop_names = set_dataModalPropertyNames(et_var, t_res, time_period, stat);
+        html = set_dataModalData(val_dict, new_prop_names);
         $('#dataModal_data').append(html);
     },
     set_data_layer: function (data) {

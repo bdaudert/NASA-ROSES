@@ -147,7 +147,6 @@ function change_inTRes(resolution){
 }
 
 
-
 function set_dataModalHeader(idx){
 	var v = $('#variable').val(),
 		year = $('#year').val(),
@@ -167,70 +166,86 @@ function set_dataModalHeader(idx){
 	return html;
 }
 
-function set_dataModalValList_singleYear(year, variable, t_res, time_period, stat, feat_idx){
+
+function set_singleYear_singleFeat_valList(year, variable, t_res, time_period, stat, f_data){
     /*
-	We have a choropleth map and the etdata are loaded as a global var
-	Sets the values for the dataModal window when temporal resolution
-	is annual and we only have one year in the list
+	Sets the value list for a single year and single feature with data f_data
+	NOTE: stat is computed here, is that rght? FIX ME
     */
     var prop_names = statics.stats_by_var_res[variable][t_res],
-        prop_name, p_idx, s, tp, val_dict, val_list = [],
-        featdata =  DATA.etdata[year]['features'][feat_idx];
-
-    console.log(featdata);
+        prop_name, p_idx, s, tp, val_list = [];
     for (p_idx = 0; p_idx < prop_names.length; p_idx++) {
         prop_name = prop_names[p_idx];
         if (t_res != 'monthly'){
-            val_list.push(featdata['properties'][prop_name]);
+            if (Math.abs(f_data['properties'][prop_name] + 9999) > 0.0001) {
+                val_list.push(f_data['properties'][prop_name]);
+            }
         }else{
-            s = prop_names[v_idx].split('_');
+            s = prop_names[p_idx].split('_');
             tp = s[s.length - 1].slice(-2);
-
             if (tp.substring(0, 1) == '0') {
                 tp = tp.substring(1, 2);
             }
             if (tp.is_in(time_period)) {
-                val_list.push(featdata['properties'][prop_names[v_idx]]);
+            	if (Math.abs(f_data['properties'][prop_name] + 9999) > 0.0001) {
+                    val_list.push(f_data['properties'][prop_name]);
+                }
             }
         }
     }
     val_list = compute_time_period_stat(val_list, stat, time_period);
-	val_dict = {};
-	val_dict[String(year)] = val_list;
-    return val_dict;
+    return val_list;
 }
 
-function set_dataModalValList_multiYear(years, v, t_res, time_period, stat, feat_idx){
+function set_singleYear_multiFeat_valList(year, variable, t_res, time_period, stat, featdata){
+    /*
+	Sets the value list for a single year and multiple features
+	NOTE: stat is computed over each feature
+    */
+
+    var val_list = [], d;
+    d = $.map(featdata.features, function (f_data) {
+    	return set_singleYear_singleFeat_valList(year, variable, t_res, time_period, stat, f_data);
+    });
+    val_list = val_list.concat(d);
+    return val_list
+}
+
+function set_multiYear_multiFeat_valList(years, variable, t_res, time_period, stat, featdata){
+	var val_list, d;
+	d = $.map(years, function(year) {
+		return set_singleYear_multiFeat_valList(year, variable, t_res, time_period, stat, featdata);
+	});
+	console.log(d);
+	val_list = val_list.concat(d);
+    return val_list
+}
+
+
+
+function set_dataModalValList_multiYear(years, variable, t_res, time_period, stat, feat_indices){
 	//Sets the values for the dataModal over muliple years
-    var v_dict_year, val_dict, y_idx, featdata, year;
+    var v_dict_year, val_dict = {}, val_list = [], y_idx, year, f_data_list, featdata;
     //Lopp over the years
     for (y_idx = 0; y_idx < years.length; y_idx++){
         year = years[y_idx];
         if (DATA.etdata.hasOwnProperty(year)){
-            featdata = DATA.etdata[year]['features'][feat_idx];
+        	featdata = { type: 'FeatureCollection', features: []};
+        	f_data_list = $.map(DATA.etdata[year]['features'], function(f_data){
+        		if (feat_indices.includes(f_data['properties']['idx'])) {
+                    return f_data;
+                }
+            });
+			featdata['features'] = f_data_list;
         }else {
             featdata = ajax_get_feat_data(feat_idx);
         }
-        console.log(featdata);
-        v_dict_year = set_dataModalValList_singleYear(year, v, t_res, time_period, stat, featdata);
+        val_list = set_singleYear_multiFeat_valList(year, variable, t_res, time_period, stat, featdata);
+        val_dict[year] = val_list;
     }
-    val_dict[year] = v_dict_year[year];
 	return val_dict;
 }
 
-
-function set_dataModalValList(years, v, t_res, time_period, stat, feat_idx){
-	var	val_dict = {}, v_idx, s, tp,
-		prop_names = statics.stats_by_var_res[v][t_res];
-
-	if (years.length == 1){
-		val_dict = set_dataModalValList_singleYear(years[0], v, t_res, time_period, stat, feat_idx);
-	}
-	else{
-		val_dict = set_dataModalValList_multiYear(years, v, t_res, time_period, stat, feat_idx);
-	}
-    return val_dict;
-}
 
 function set_dataModalPropertyNames(v, t_res, time_period, stat) {
     var new_prop_names = [], periods = '', p,
@@ -264,7 +279,6 @@ function set_dataModalPropertyNames(v, t_res, time_period, stat) {
 
 function set_dataModalData(val_dict, new_prop_names){
 	var html = '', v_idx, val_list = [], year;
-
 	for (year in val_dict) {
 	    html += 'Year: ' + year + '<br>';
 	    val_list = val_dict[year];
