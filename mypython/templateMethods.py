@@ -129,7 +129,7 @@ def set_template_values(RequestHandler, app_name, method):
             else:
                 # Running in development environment
                 # Read data from loca
-                tv['featdata'][year] = DU.read_feat_data_from_db(feat_index_list)
+                tv['featdata'][year] = DU.read_feat_data_from_local(feat_index_list)
 
     # Get all data for the first year in year_list
     yr = tv['variables']['years'][0]

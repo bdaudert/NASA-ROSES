@@ -216,7 +216,6 @@ function set_multiYear_multiFeat_valList(years, variable, t_res, time_period, st
 	d = $.map(years, function(year) {
 		return set_singleYear_multiFeat_valList(year, variable, t_res, time_period, stat, featdata);
 	});
-	console.log(d);
 	val_list = val_list.concat(d);
     return val_list
 }
@@ -238,7 +237,8 @@ function set_dataModalValList_multiYear(years, variable, t_res, time_period, sta
             });
 			featdata['features'] = f_data_list;
         }else {
-            featdata = ajax_get_feat_data(feat_idx);
+            ajax_get_feat_data();
+            featdata = window.DATA.featdata;
         }
         val_list = set_singleYear_multiFeat_valList(year, variable, t_res, time_period, stat, featdata);
         val_dict[year] = val_list;

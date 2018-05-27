@@ -120,7 +120,7 @@ class Datatstore_Util(object):
              feature_data['features'].append(all_data['features'][int(feat_idx)])
 
         del all_data
-        return data
+        return feature_data
 
     def read_data_from_db(self):
         '''
@@ -128,7 +128,7 @@ class Datatstore_Util(object):
         :return:  dict of data for the features
         '''
 
-        data = {
+        feature_data = {
             'type': 'FeatureCollection',
             'features': []
         }
@@ -148,9 +148,9 @@ class Datatstore_Util(object):
         )
         query_data = qry.fetch()
         if len(query_data) > 0:
-            data['features'] = json.dumps([q.to_dict() for q in query_data])
+            feature_data['features'] = json.dumps([q.to_dict() for q in query_data])
             logging.info('SUCCESSFULLY READ DATA FROM DB')
-        return data
+        return feature_data
 
     def read_data_from_local(self):
         # Local development server

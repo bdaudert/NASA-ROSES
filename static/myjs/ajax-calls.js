@@ -129,8 +129,8 @@ function ajax_get_feat_data(){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            window.DATA[tv_var] = $.parseJSON(r[tv_var]);
-
+            //window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+            window.DATA[tv_var] = r[tv_var];
         }
         end_progressbar();
     }) // successfully got JSON response
