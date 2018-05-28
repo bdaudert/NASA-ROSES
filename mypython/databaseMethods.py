@@ -14,20 +14,7 @@ from config import GEO_DIR
 from config import GEO_BUCKET_URL
 from config import LOCAL_DATA_DIR
 
-'''
-class DATA(ndb.Model):
-    feat_idx = ndb.IntegerProperty()
-    region = ndb.StringProperty()
-    year = ndb.IntegerProperty()
-    dataset = ndb.StringProperty()
-    et_model = ndb.StringProperty()
-    STATE = ndb.StringProperty()
-    AREA = ndb.FloatProperty()
-    OBJECTID = ndb.IntegerProperty(indexed=False)
-    HUC8 = ndb.StringProperty()
-    HUC8_NAME = ndb.StringProperty()
-    PIXELCOUNT = ndb.IntegerProperty()
-'''
+
 class DATA(ndb.Expando):
     feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
