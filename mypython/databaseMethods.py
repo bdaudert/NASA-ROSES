@@ -102,7 +102,7 @@ class Datatstore_Util(object):
             query_data = ndb.Key('DATA', UNIQUE_ID).get()
             if not query_data:
                 continue
-            featdata = json.dumps(query_data.to_dict())
+            featdata = query_data.to_dict()
             feature_data['features'].append(featdata)
 
         if not feature_data['features']:
@@ -160,7 +160,7 @@ class Datatstore_Util(object):
         )
         query_data = qry.fetch()
         if len(query_data) > 0:
-            feature_data['features'] = json.dumps([q.to_dict() for q in query_data])
+            feature_data['features'] = [q.to_dict() for q in query_data]
             logging.info('SUCCESSFULLY READ DATA FROM DB')
         else:
             logging.error('NO DATA FOUND IN DB')

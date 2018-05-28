@@ -145,6 +145,7 @@ def set_template_values(RequestHandler, app_name, method):
         etdata = DU.read_data_from_db()
     else:
         etdata = DU.read_data_from_local()
+    # NOTE, need a json.dumps here so we can read data into global js vars in scripts.html
     tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
     tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
     return tv
