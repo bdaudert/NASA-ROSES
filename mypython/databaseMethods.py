@@ -101,10 +101,14 @@ class Datatstore_Util(object):
             UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
             query_data = ndb.Key('DATA', UNIQUE_ID).get()
             if not query_data:
-                return {}
-            logging.info('READING FROM DB: ' + UNIQUE_ID)
+                continue
             featdata = json.dumps(query_data.to_dict())
             feature_data['features'].append(featdata)
+
+        if not feature_data['features']:
+            logging.error('NO FEATURE DATA IN DATABASE')
+        else:
+            logging.info('SUCCESSFULLY READ FEATURE DATA FROM DATABASE')
         return feature_data
 
     def read_feat_data_from_local(self, feat_index_list):
@@ -117,9 +121,17 @@ class Datatstore_Util(object):
             all_data = json.load(f)
 
         for feat_idx in feat_index_list:
-             feature_data['features'].append(all_data['features'][int(feat_idx)])
+            try:
+                feature_data['features'].append(all_data['features'][int(feat_idx)])
+            except:
+                continue
 
         del all_data
+
+        if not feature_data['features']:
+            logging.error('NO FEATURE DATA IN LOCAL FILE')
+        else:
+            logging.info('SUCCESSFULLY READ FEATURE DATA FROM LOCAL FILE')
         return feature_data
 
     def read_data_from_db(self):
@@ -150,16 +162,21 @@ class Datatstore_Util(object):
         if len(query_data) > 0:
             feature_data['features'] = json.dumps([q.to_dict() for q in query_data])
             logging.info('SUCCESSFULLY READ DATA FROM DB')
+        else:
+            logging.error('NO DATA FOUND IN DB')
         return feature_data
 
     def read_data_from_local(self):
         # Local development server
-        logging.info('READING DATA FROM LOCAL FILE')
         file_name = self.local_dataFName
         logging.info(file_name)
         with open(file_name) as f:
             data = json.load(f)
             # data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
+        if 'features' in data.keys() and data['features']:
+            logging.info('SUCCESSFULLY READ DATA FROM LOCAL FILE')
+        else:
+            logging.error('NO DATA IN LOCAL FILE')
         return data
 
     def add_to_db(self):

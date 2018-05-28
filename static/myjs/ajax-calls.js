@@ -101,11 +101,10 @@ function ajax_update_data(){
     });
 }
 
-/*
 function ajax_set_feat_data(){
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
-        form_data, jqXHR,
+        form_data, jqXHR, f_idx,
         err_code, r, method = 'ajax', error, cause, i, tv_var;
     //Update the tool_action
     $('#tool_action').val(tool_action);
@@ -121,7 +120,8 @@ function ajax_set_feat_data(){
 
     })
     .done(function(response) {
-        r = $.parseJSON(response);
+        var r = $.parseJSON(response),
+            feat_idx_list, feat_idx, year;
         if (r.hasOwnProperty('error')) {
             error = r.error;
             set_error( error, '', '', method);
@@ -130,53 +130,24 @@ function ajax_set_feat_data(){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            //window.DATA[tv_var] = $.parseJSON(r[tv_var]);
-            window.DATA[tv_var] = r[tv_var];
+            //FIX ME, not sure why featdata do not need to be json parsed
+            if (tv_var.is_in(['featdata', 'featgeomdata'])) {
+                window.DATA[tv_var] = r[tv_var];
+            }
+            else{
+                window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+            }
         }
-        end_progressbar();
-    }) // successfully got JSON response
-    .fail(function(jqXHR) {
-        err_code = jqXHR.status;
-        error = 'Server request failed with code ' + String(err_code) + '!'
-        set_error(error, '', '', method)
-        end_progressbar();
-    });
-}
-*/
-
-function ajax_set_feat_data(){
-    var tool_action = 'get_feat_data',
-        url = clearOut_URL(),
-        form_data, jqXHR,
-        err_code, r, method = 'ajax', error, cause, i, tv_var;
-    //Update the tool_action
-    $('#tool_action').val(tool_action);
-    //Get the form data
-    form_data = $("#form_all").serialize();
-    var msg = 'Obtaining feature data';
-    start_progressbar(mgs=msg);
-    jqXHR = $.ajax({
-        url: url,
-        method: "POST",
-        timeout: 60 * 5 * 1000,
-        data: form_data,
-
-    })
-    .done(function(response) {
-        r = $.parseJSON(response);
-        if (r.hasOwnProperty('error')) {
-            error = r.error;
-            set_error( error, '', '', method);
-            end_progressbar();
-        }
-        //Set the new template variables
-        for (i=0; i < statics.response_vars[tool_action].length; i++){
-            tv_var = statics.response_vars[tool_action][i];
-            //window.DATA[tv_var] = $.parseJSON(r[tv_var]);
-            window.DATA[tv_var] = r[tv_var];
-        }
-        if ($('#years').val().length != 1){
-            MAP_APP.set_map_overlay();
+        //Hide old data modal
+        $('#dataModal').modal('hide');
+        year = $('#years').val()[0];
+        feat_idx_list = get_feat_index_from_featdata(year);
+        //FIX ME: what to do when multiple indices???
+        feat_idx = feat_idx_list[0];
+        if (feat_idx != ''){
+            MAP_APP.initialize_dataModal(window.DATA.featgeomdata[year]['features'][parseInt(feat_idx)]);
+            MAP_APP.add_dataToModal(feat_idx, window.DATA.featdata);
+            $('#dataModal').modal('toggle');
         }
         end_progressbar();
     }) // successfully got JSON response

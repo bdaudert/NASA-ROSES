@@ -132,20 +132,18 @@ MAP_APP = {
         });
         return drawingManager;
     },
-    initialize_dataModal: function (e) {
+    initialize_dataModal: function (feat_idx) {
         // e is the click event
         //idx is the feature index in etdata
-        var html,
-            idx = e.feature.getProperty('idx');
+        var html;
         //Clear out old modal content
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
-        html = set_dataModalHeader(idx);
+        html = set_dataModalHeader(feat_idx);
         $('#dataModal_title').append(html);
     },
-    add_dataToModal: function (e) {
-        var feat_idx = e.feature.getProperty('idx'),
-            feat_indices = [feat_idx],
+    add_dataToModal: function (feat_idx, featdata) {
+        var feat_indices = [feat_idx],
             y_idx, year, years,
             html, val_list, new_prop_names,
             et_var = $('#variable').val(),
@@ -163,7 +161,7 @@ MAP_APP = {
             years = [$('#year').val()];
         }
         //Populate the columnnames
-        val_dict = set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, feat_indices);
+        val_dict = set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, featdata, feat_indices);
         new_prop_names = set_dataModalPropertyNames(et_var, t_res, time_period, stat);
         html = set_dataModalData(val_dict, new_prop_names);
         $('#dataModal_data').append(html);
@@ -218,13 +216,23 @@ MAP_APP = {
         });
         */
         window.map.data.addListener('click', function (e) {
-            var feat_idx =  e.feature.getProperty('idx');
+            var feat_idx =  e.feature.getProperty('idx'),
+                y_idx, years = $('#years').val(), year;
             $('#feat_indices').val(feat_idx);
-            //Hide old data modal
-            $('#dataModal').modal('hide');
-            MAP_APP.initialize_dataModal(e);
-            MAP_APP.add_dataToModal(e);
-            $('#dataModal').modal('toggle');
+
+            if (years.length != 1) {
+                ajax_set_feat_data();
+            }else{
+                MAP_APP.initialize_dataModal(window.DATA.geomdata[years[0]]['features'][feat_idx]);
+                var featdata = {}
+                for (y_idx = 0; y_idx < years.length; y_idx++) {
+                    year = years[y_idx];
+                    featdata[year] = {type: 'FeatureCollection', features: []};
+                    featdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
+                }
+                MAP_APP.add_dataToModal(feat_idx, featdata);
+                $('#dataModal').modal('toggle');
+            }
         });
     },
     set_map_overlay: function(){

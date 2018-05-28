@@ -110,6 +110,7 @@ def set_template_values(RequestHandler, app_name, method):
     tv['etdata'] = {}
     tv['geomdata'] = {}
     tv['featdata'] = {}
+    tv['featgeomdata'] = {}
     if app_name == 'dataBaseTasks':
         return tv
     if  tv['variables']['region'] in ['ee_map']:
@@ -122,6 +123,11 @@ def set_template_values(RequestHandler, app_name, method):
     for year in tv['variables']['years']:
         DU = set_database_util(year, tv)
         # Get the feature data by index
+        geomdata = DU.read_geometries_from_bucket()
+        tv['featgeomdata'][year] = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
         if feat_index_list:
             if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
                 # Running in production environment, read data from db
@@ -130,7 +136,8 @@ def set_template_values(RequestHandler, app_name, method):
                 # Running in development environment
                 # Read data from loca
                 tv['featdata'][year] = DU.read_feat_data_from_local(feat_index_list)
-
+            for feat_idx in feat_index_list:
+                tv['featgeomdata'][year]['features'].append(geomdata['features'][int(feat_idx)])
     # Get all data for the first year in year_list
     yr = tv['variables']['years'][0]
     if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
@@ -138,7 +145,6 @@ def set_template_values(RequestHandler, app_name, method):
         etdata = DU.read_data_from_db()
     else:
         etdata = DU.read_data_from_local()
-    geomdata = DU.read_geometries_from_bucket()
     tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
     tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
     return tv

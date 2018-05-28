@@ -48,30 +48,16 @@ function change_inYear(year){
 function change_inYears(years){
     MAP_APP.delete_map_layers();
 	if (years.length != 1){
-	    ajax_set_feat_data();
 		$('#form-statistic').css('display', 'block');
+		MAP_APP.set_map_overlay();
 	} else{
-		MAP_APP.set_choropleth_layer();
+	    ajax_update_data();
 		$('#form-statistic').css('display', 'none');
 	}
 	//Couple year field to be first year of selection
     $('#year').val($('#years').val()[0])
 }
 
-/*
-function change_inYears(years){
-	MAP_APP.delete_map_layers();
-	if (years.length != 1){
-		MAP_APP.set_map_overlay();
-		$('#form-statistic').css('display', 'block');
-	} else{
-		MAP_APP.set_choropleth_layer();
-		$('#form-statistic').css('display', 'none');
-	}
-	//Couple year field to be first year of selection
-    $('#year').val($('#years').val()[0])
-}
-*/
 
 function change_inVariable(variable){
     if ($('#region').val().is_in(['US_fields', 'Mason'])){
@@ -161,7 +147,20 @@ function change_inTRes(resolution){
 }
 
 
-function set_dataModalHeader(idx){
+function get_feat_index_from_featdata(year) {
+    var f_idx_list = $('#feat_indices').val().replace(', ', ',').split(','), indices = [];
+
+    $.each(window.DATA.featgeomdata[year]['features'], function(idx, feat_data){
+        if (f_idx_list.includes(String(feat_data['properties']['idx']))) {
+            indices.push(String(idx));
+        }
+    });
+    return indices;
+}
+
+
+
+function set_dataModalHeader(feat_geomdata){
 	var v = $('#variable').val(),
 		year = $('#year').val(),
 		years = $('#years').val(),
@@ -171,8 +170,8 @@ function set_dataModalHeader(idx){
 	for (c_idx = 0; c_idx < statics.geo_meta_cols[region].length; c_idx++){
 		prop_name = statics.geo_meta_cols[region][c_idx];
 		html += '<b>' + prop_name + '</b>'+ ': ';
-		if (DATA.geomdata[year].features[idx]['properties'][prop_name]) {
-			html += DATA.geomdata[year].features[idx]['properties'][prop_name];
+		if (feat_geomdata['properties'][prop_name]) {
+			html += feat_geomdata['properties'][prop_name];
 		}
 		html+= '<br>';
 	}
@@ -219,7 +218,7 @@ function set_singleYear_allFeat_valList(year, variable, t_res, time_period, stat
     */
 
     var val_list = [], d;
-    d = $.map(featdata.features, function (f_data) {
+    d = $.map(featdata['features'], function (f_data) {
     	return set_singleYear_singleFeat_valList(year, variable, t_res, time_period, stat, f_data);
     });
     val_list = val_list.concat(d);
@@ -227,18 +226,9 @@ function set_singleYear_allFeat_valList(year, variable, t_res, time_period, stat
 }
 
 
-function set_dataModalValList_multiYear(years, variable, t_res, time_period, stat, feat_indices){
+function set_dataModalValList_multiYear(years, variable, t_res, time_period, stat, featdata, feat_indices){
 	//Sets the values for the dataModal over muliple years
-    var v_dict_year, val_dict = {}, f_idx, val_list = [], y_idx, year, f_data_list, featdata = {};
-    if (years.length == 1){
-        year = years[0]
-        featdata[year] = {type: 'FeatureCollection',  features: []};
-        for (f_idx = 0; f_idx < feat_indices.length; f_idx ++){
-            featdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_indices[f_idx]]);
-        }
-    }else {
-        featdata = window.DATA.featdata;
-    }
+    var v_dict_year, val_dict = {}, f_idx, val_list = [], y_idx, year, f_data_list;
     for (y_idx = 0; y_idx < years.length; y_idx++){
         year = years[y_idx];
         val_list = set_singleYear_allFeat_valList(year, variable, t_res, time_period, stat, featdata[year]);
