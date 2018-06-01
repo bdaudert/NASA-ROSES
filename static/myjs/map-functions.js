@@ -151,8 +151,7 @@ MAP_APP = {
 	    return html;
     },
     initialize_dataModal: function (feat_idx) {
-        // e is the click event
-        //idx is the feature index in etdata
+        //feat_idx is the feature index in etdata
         var html;
         //Clear out old modal content
         $('#dataModal_title').html('');
@@ -260,7 +259,7 @@ MAP_APP = {
         html += '</table>';
         return html;
     },
-    add_dataToModal: function (feat_idx, featdata) {
+    add_dataToModal: function(feat_idx, featdata) {
         var feat_indices = [feat_idx],
             y_idx, year, years,
             html, val_list, new_prop_names,
@@ -268,7 +267,6 @@ MAP_APP = {
             t_res = $('#t_res').val(),
             time_period = $('#time_period').val(),
             stat = $('#time_period_statistic').val();
-
 
         if ($.type(time_period) == 'string') {
             time_period = [time_period];
