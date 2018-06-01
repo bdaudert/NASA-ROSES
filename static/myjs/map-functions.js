@@ -37,7 +37,7 @@ MAP_APP = {
             year = $('#year').val(),
             bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color,
             featdata = DATA.etdata[year];
-        val_list = set_singleYear_allFeat_valList(year, et_var, t_res, time_period, stat, featdata);
+        val_list = MAP_APP.set_singleYear_allFeat_valList(year, et_var, t_res, time_period, stat, featdata);
         if (!val_list) {
             return cb;
         }
@@ -132,6 +132,24 @@ MAP_APP = {
         });
         return drawingManager;
     },
+    set_dataModalHeader: function(feat_geomdata){
+        var v = $('#variable').val(),
+		    year = $('#year').val(),
+		    years = $('#years').val(),
+		    prop_name, html= '', c_idx,
+		    region = $('#region').val();
+	    //Title
+	    for (c_idx = 0; c_idx < statics.geo_meta_cols[region].length; c_idx++){
+		    prop_name = statics.geo_meta_cols[region][c_idx];
+		    html += '<b>' + prop_name + '</b>'+ ': ';
+		    if (feat_geomdata['properties'][prop_name]) {
+			    html += feat_geomdata['properties'][prop_name];
+		    }
+		    html+= '<br>';
+	    }
+	    html += '<b>Variable</b>: ' + v + '<br>';
+	    return html;
+    },
     initialize_dataModal: function (feat_idx) {
         // e is the click event
         //idx is the feature index in etdata
@@ -139,8 +157,108 @@ MAP_APP = {
         //Clear out old modal content
         $('#dataModal_title').html('');
         $('#dataModal_data').html('');
-        html = set_dataModalHeader(feat_idx);
+        html = MAP_APP.set_dataModalHeader(feat_idx);
         $('#dataModal_title').append(html);
+    },
+    set_singleYear_singleFeat_valList: function(year, variable, t_res, time_period, stat, f_data){
+        /*
+        Sets the value list for a single year and single feature with data f_data
+        NOTE: stat is computed here, is that rght? FIX ME
+        */
+        var prop_names = statics.stats_by_var_res[variable][t_res],
+            prop_name, p_idx, s, tp, val_list = [];
+        for (p_idx = 0; p_idx < prop_names.length; p_idx++) {
+            prop_name = prop_names[p_idx];
+            if (t_res != 'monthly'){
+                if (Math.abs(f_data['properties'][prop_name] + 9999) > 0.0001) {
+                    val_list.push(f_data['properties'][prop_name]);
+                }
+            }else{
+                s = prop_names[p_idx].split('_');
+                tp = s[s.length - 1].slice(-2);
+                if (tp.substring(0, 1) == '0') {
+                    tp = tp.substring(1, 2);
+                }
+                if (tp.is_in(time_period)) {
+                    if (Math.abs(f_data['properties'][prop_name] + 9999) > 0.0001) {
+                        val_list.push(f_data['properties'][prop_name]);
+                    }
+                }
+            }
+        }
+        val_list = compute_time_period_stat(val_list, stat, time_period);
+        return val_list;
+    },
+    set_singleYear_allFeat_valList: function(year, variable, t_res, time_period, stat, featdata){
+        /*
+        Sets the value list for a single year and multiple features
+        NOTE: stat is computed over each feature
+        Used to set colorbar
+        */
+
+        var val_list = [], d;
+        d = $.map(featdata['features'], function (f_data) {
+            return MAP_APP.set_singleYear_singleFeat_valList(year, variable, t_res, time_period, stat, f_data);
+        });
+        val_list = val_list.concat(d);
+        return val_list;
+    },
+    set_dataModalValList_multiYear: function(years, variable, t_res, time_period, stat, featdata, feat_indices){
+	    //Sets the values for the dataModal over muliple years
+        var v_dict_year, val_dict = {}, f_idx, val_list = [], y_idx, year, f_data_list;
+        for (y_idx = 0; y_idx < years.length; y_idx++){
+            year = years[y_idx];
+            val_list = MAP_APP.set_singleYear_allFeat_valList(year, variable, t_res, time_period, stat, featdata[year]);
+            val_dict[year] = val_list;
+        }
+        return val_dict;
+    },
+    set_dataModalPropertyNames: function(v, t_res, time_period, stat) {
+        var new_prop_names = [], periods = '', p,
+            old_prop_names = statics.stats_by_var_res[v][t_res];
+        if (t_res == 'annual'){
+            new_prop_names.push(statics.stats_by_var_res[v][t_res]);
+            return new_prop_names;
+        }
+
+        for (var t_idx = 0; t_idx < time_period.length; t_idx++) {
+            p = statics.time_period_by_res[t_res][time_period[t_idx]];
+            periods += p;
+            if (t_idx < time_period.length - 1) {
+                periods += ', ';
+            }
+            if (stat == 'none') {
+                new_prop_names.push(p)
+            }
+        }
+        if (stat == 'none') {
+            return new_prop_names;
+        }
+        if (stat == 'sum'){
+            new_prop_names.push('Total over ' + periods);
+        }
+        if (stat == 'mean'){
+            new_prop_names.push('Mean over ' + periods);
+        }
+        return new_prop_names;
+    },
+    set_dataModalData: function(val_dict, new_prop_names){
+        var html = '<table border="1" cellpadding="5">', p_idx, y_idx, val_list = [], year;
+        html+='<tr><th>Variable</th>';
+        for (year in val_dict) {
+            html += '<th>' + year + '</th>'
+        }
+        html += '</tr>';
+        for (p_idx=0; p_idx < new_prop_names.length; p_idx++) {
+            html += '<tr><td>' + new_prop_names[p_idx] + '</td>';
+            for (year in val_dict) {
+                val_list = val_dict[year];
+                html += '<td>' + val_list[p_idx] + '</td>';
+            }
+            html += '</tr>'
+        }
+        html += '</table>';
+        return html;
     },
     add_dataToModal: function (feat_idx, featdata) {
         var feat_indices = [feat_idx],
@@ -161,9 +279,9 @@ MAP_APP = {
             years = [$('#year').val()];
         }
         //Populate the columnnames
-        val_dict = set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, featdata, feat_indices);
-        new_prop_names = set_dataModalPropertyNames(et_var, t_res, time_period, stat);
-        html = set_dataModalData(val_dict, new_prop_names);
+        val_dict = MAP_APP.set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, featdata, feat_indices);
+        new_prop_names = MAP_APP.set_dataModalPropertyNames(et_var, t_res, time_period, stat);
+        html = MAP_APP.set_dataModalData(val_dict, new_prop_names);
         $('#dataModal_data').append(html);
     },
     set_data_layer: function (data) {
