@@ -10,7 +10,6 @@ from google.appengine.ext import ndb
 
 from config import statics
 from config import EE_PRIVATE_KEY_FILE
-from config import GEO_DIR
 from config import GEO_BUCKET_URL
 from config import LOCAL_DATA_DIR
 
