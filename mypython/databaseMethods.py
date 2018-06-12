@@ -160,8 +160,12 @@ class Datatstore_Util(object):
 
     def add_to_db(self):
         '''
-        Store precomputed data from localhost to DATASTORE
-        Only used in main.py databaseTasks
+        NOTE:
+            This only stores data to the LOCAL DATASTORE @8000/instances
+            It does not work on project appspot/databaseTasks
+            Only used in main.py databaseTasks
+        To deploy data to project DATASTORE,
+        we need to run ET_stats_cron.py in nasa-roses-db env
         :return:
         '''
         etdata = self.read_data_from_local()
