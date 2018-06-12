@@ -406,6 +406,66 @@ MAP_APP = {
     }
 }
 
+var OL_MAP_APP = OL_MAP_APP || {};
+OL_MAP_APP = {
+    set_ol_raster: function(){
+        var raster = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+        return raster;
+    },
+    styleFunction: function(feature){
+        var style = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                lineDash: [4],
+                width: 3
+            }),
+            fill: new ol.style.Fill({
+                color: 'rgba(0, 0, 255, 0.1)'
+            })
+        });
+        return style;
+    },
+    set_geojson_layer: function(){
+        var year = $('#year').val();
+        var vectorSource = new ol.source.Vector({
+                features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
+                        {featureProjection: window.map.getView().getProjection()})
+            });
+
+        var geojsonLayer = new ol.layer.Vector({
+            source: vectorSource,
+            style: OL_MAP_APP.styleFunction,
+        });
+        return geojsonLayer;
+    }
+}
+
+
+var initialize_ol_map = function() {
+    var region = $('#region').val();
+    //Set the map zoom dependent on region
+    var mapZoom = js_statics.map_zoom_by_region[region],
+        mapCenter = js_statics.map_center_by_region[region];
+
+    //Set the basic map
+    var raster = OL_MAP_APP.set_ol_raster();
+
+    window.map = new ol.Map({
+        target: 'main-map',
+        projection:"EPSG:4326",
+        layers: [raster],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([mapCenter.lng, mapCenter.lat]),
+            zoom: mapZoom
+        })
+    });
+
+    //Add the geojson layer
+    var geojsonLayer = OL_MAP_APP.set_geojson_layer();
+    window. map.addLayer(geojsonLayer);
+}
 
 // Initialize the Google Map and add our custom layer overlay.
 var initialize_map = function() {
@@ -416,6 +476,7 @@ var initialize_map = function() {
     //Set the map zoom dependent on region
     var mapZoom = js_statics.map_zoom_by_region[region],
         mapCenter = js_statics.map_center_by_region[region];
+
     // Map
     window.map = new google.maps.Map(document.getElementById('main-map'), {
         //center: {lat: 38.96, lng:-119.16},
