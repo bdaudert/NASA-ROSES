@@ -8,8 +8,7 @@ import urllib2
 # Needed to read data from datastore within app engine
 from google.appengine.ext import ndb
 
-from config import statics
-from config import EE_PRIVATE_KEY_FILE
+
 from config import GEO_BUCKET_URL
 from config import LOCAL_DATA_DIR
 
@@ -48,13 +47,6 @@ class Datatstore_Util(object):
         # Only used to populate local DATASTORE @8000
         self.local_dataFName = LOCAL_DATA_DIR + self.et_model + '/' +  region + '_' + year + '_DATA'  '.json'
 
-    def read_etdata_from_local(self):
-        '''
-        Used to read the etdata from local storage
-        :return:
-        '''
-        with open(self.local_dataFName) as f:
-            return json.load(f)
 
     def read_geometries_from_bucket(self):
         '''
@@ -64,7 +56,7 @@ class Datatstore_Util(object):
         url = self.geo_bucket_url + self.geoFName
         try:
             d = json.load(urllib2.urlopen(url))
-        except Exception(e):
+        except Exception as e:
             logging.error(e)
             raise Exception(e)
         # geomdata = json.dumps(d, ensure_ascii=False).encode('utf8')
@@ -155,6 +147,7 @@ class Datatstore_Util(object):
     def read_data_from_local(self):
         # Local development server
         file_name = self.local_dataFName
+        logging.info('READING LOCAL FILE ')
         logging.info(file_name)
         with open(file_name) as f:
             data = json.load(f)
@@ -167,19 +160,18 @@ class Datatstore_Util(object):
 
     def add_to_db(self):
         '''
-        Used to store data LOCAL DATASTORE
-        to mirror project DATASTORE
+        Store precomputed data from localhost to DATASTORE
         Only used in main.py databaseTasks
         :return:
         '''
-        etdata = self.read_etdata_from_local()
+        etdata = self.read_data_from_local()
         db_entities = []
-        for idx in range(len(etdata)):
-            feat = etdata[idx]
+        for idx in range(len(etdata['features'])):
+            feat = etdata['features'][idx]
             unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(idx)])
             UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
             db_entity = DATA(
-                feat_idx=idx,
+                feat_idx = idx,
                 region = self.region,
                 year = self.year,
                 dataset = self.dataset,

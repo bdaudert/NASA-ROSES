@@ -78,8 +78,8 @@ def convert_shp(geojson_dir, shp_dir, shp_file):
 #M A I N
 ########
 if __name__ == '__main__' :
-    shp_dir = '/Users/bdaudert/EE/Open-ET-1/static/shp/mason_shapefiles/'
-    geojson_dir = '/Users/bdaudert/EE/Open-ET-1/static/geojson/'
+    shp_dir = '/Users/bdaudert/Documents/DHS/Open-ET:NASA ROSES/DATA/mason_shapefiles'
+    geojson_dir = '/Users/bdaudert/EE/nasa-roses-data/geojson/'
     for year in range(2001, 2002):
         shp_file = 'Mason_' + str(year) + '.shp'
         convert_shp(geojson_dir, shp_dir, shp_file)

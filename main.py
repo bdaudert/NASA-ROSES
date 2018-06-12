@@ -13,7 +13,7 @@ import config
 import httplib2
 import json
 import logging
-import os, socket
+import os
 
 
 import ee
@@ -155,9 +155,9 @@ class defaultApplication(webapp2.RequestHandler):
         logging.info('{}'.format(log_values))
 
 
-class OpenET(defaultApplication):
-    app_name = 'Open-ET-1'
-    appHTML = 'open-et-1.html'
+class NASA_ROSES(defaultApplication):
+    app_name = 'NASA-ROSES'
+    appHTML = 'nasa-roses.html'
 
 class AdminPage(webapp2.RequestHandler):
     def get(self):
@@ -193,10 +193,7 @@ class databaseTasks(webapp2.RequestHandler):
         tv = templateMethods.set_template_values(
             self, 'databaseTask', 'GET')
         tv['json_data'] = {}
-        # FIX ME: only do 2003 for testing
-        # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
-        # for geoFName in geo_files:
-        for region in ['Mason']:
+        for region in ['US_states_west_500k', 'Mason', 'US_counties_west_500k']:
             for year in ['2003']:
                 logging.info('PROCESSING Region/Year ' + region + '/' + year)
                 for ds in ['MODIS']:
@@ -209,7 +206,7 @@ class databaseTasks(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([
-    ('/', OpenET),
+    ('/', NASA_ROSES),
     ('/admin', AdminPage),
     ('/login', LogInPage),
     ('/databaseTasks', databaseTasks)

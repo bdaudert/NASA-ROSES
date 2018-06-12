@@ -112,9 +112,9 @@ To run in debugging mode:
 ```
 dev_appserver.py --port 8080 --log_level=debug app.yaml
 ```
-To run in debugging mode with nasa-roses-geojson as the default bucket:
+To run in debugging mode with roses-geojson as the default bucket:
 ```
-dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name nasa-roses-geojson
+dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name roses-geojson
 ```
 
 Sometimes windows needs the full path to dev_appserver.py:
