@@ -266,7 +266,7 @@ MAP_APP = {
             et_var = $('#variable').val(),
             t_res = $('#t_res').val(),
             time_period = $('#time_period').val(),
-            stat = $('#time_period_statistic').val();
+            stat = $('#time_period_statistic').val(), val_dict;
 
         if ($.type(time_period) == 'string') {
             time_period = [time_period];
@@ -492,14 +492,56 @@ OL_MAP_APP = {
         };
         return overlay;
     },
+    set_popup_header: function(featdata){
+        var geom_meta_cols = statics.geo_meta_cols[$('#region').val()],
+            i, html = '', key, br = '<br>';
+        for (i = 0; i< geom_meta_cols.length; i++){
+            key = geom_meta_cols[i];
+            try {
+                html += key + ': ' + featdata['properties'][key] + ', ';
+            }catch(e){}
+        }
+        return html;
+    },
+    set_popup_data: function(featdata){
+
+    },
     set_popup_window: function(evt, content, overlay, overlay_type) {
-        var coordinate = evt.coordinate;
         /*
+        var coordinate = evt.coordinate;
         var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
             coordinate, 'EPSG:3857', 'EPSG:4326'));
-        */
         content.innerHTML = '<p>You clicked here:</p><code>' + coordinate + '</code>';
         overlay.setPosition(coordinate);
+        */
+        var feats = [], feat_idx, feat_indices = [], html = '', featdata = {},
+            y_idx, years = $('#years').val(), year;
+
+        //get the features that where clicked on
+        window.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+            feats.push(feature);
+            feat_indices.push(feature.get('idx'));
+        });
+        if (features.length == 0) {
+            $('#feat_indices').val('');
+            return;
+        }
+
+        $('#feat_indices').val(feat_indices.join(','));
+        if (years.length != 1) {
+            ajax_set_ol_feat_data();
+        }else{
+            year = years[0];
+            for (var i = 0; i < features.length; ++i) {
+                feat_idx = feat_indices[i];
+                featdata = window.DATA.etdata[year]['features'][feat_idx]);
+                html += OL_MAP_APP.set_popup_header(featdata);
+                html += OL_MAP_APP.set_popup_data(featdata);
+             }
+             var coordinate = evt.coordinate;
+            content.innerHTML = html;
+            overlay.setPosition(coordinate);
+        }
     }
 }
 
