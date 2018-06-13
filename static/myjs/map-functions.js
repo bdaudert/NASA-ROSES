@@ -414,12 +414,38 @@ OL_MAP_APP = {
         });
         return raster;
     },
-    styleFunction: function(feature){
+    styleFunction: function(feature) {
+        var year = $('#years').val()[0],
+            idx = feature.get('idx'),
+            v = $('#variable').val(),
+            t_res = $('#t_res').val(),
+            et_var = statics.stats_by_var_res[v][t_res][0], color, i;
+
+        var data_val = DATA.etdata[year].features[idx]['properties'][et_var];
+        //Find the right bin
+        for (i = 0; i < window.bins.length; i++) {
+            if (window.bins[i][0] <= data_val && data_val <= window.bins[i][1]) {
+                color = window.feat_colors[i];
+                break;
+            }
+        }
+        var style = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'black',
+                width: 2
+            }),
+            fill: new ol.style.Fill({
+                color: color
+            })
+        });
+        return style;
+    },
+    defaultStyleFunction: function(feature){
         var style = new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: 'blue',
                 lineDash: [4],
-                width: 3
+                width: 2
             }),
             fill: new ol.style.Fill({
                 color: 'rgba(0, 0, 255, 0.1)'
@@ -427,18 +453,53 @@ OL_MAP_APP = {
         });
         return style;
     },
-    set_geojson_layer: function(){
+    set_choropleth_layer: function(){
         var year = $('#year').val();
         var vectorSource = new ol.source.Vector({
                 features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
                         {featureProjection: window.map.getView().getProjection()})
             });
-
         var geojsonLayer = new ol.layer.Vector({
             source: vectorSource,
             style: OL_MAP_APP.styleFunction,
         });
         return geojsonLayer;
+    },
+    set_map_layer: function(){
+        var year = $('#year').val();
+        var vectorSource = new ol.source.Vector({
+                features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
+                        {featureProjection: window.map.getView().getProjection()})
+            });
+        var geojsonLayer = new ol.layer.Vector({
+            source: vectorSource,
+            style: OL_MAP_APP.defaultStyleFunction,
+        });
+        return geojsonLayer;
+    },
+    initialize_popup_window: function(container, closer) {
+        var overlay = new ol.Overlay({
+            element: container,
+            autoPan: true,
+            autoPanAnimation: {
+                duration: 250
+            }
+        });
+        closer.onclick = function() {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+        };
+        return overlay;
+    },
+    set_popup_window: function(evt, content, overlay, overlay_type) {
+        var coordinate = evt.coordinate;
+        /*
+        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+            coordinate, 'EPSG:3857', 'EPSG:4326'));
+        */
+        content.innerHTML = '<p>You clicked here:</p><code>' + coordinate + '</code>';
+        overlay.setPosition(coordinate);
     }
 }
 
@@ -447,11 +508,14 @@ var initialize_ol_map = function() {
     var region = $('#region').val();
     //Set the map zoom dependent on region
     var mapZoom = js_statics.map_zoom_by_region[region],
-        mapCenter = js_statics.map_center_by_region[region];
+        mapCenter = js_statics.map_center_by_region[region],
+        popup_container = document.getElementById('popup'),
+        popup_content = document.getElementById('popup-content'),
+        popup_closer = document.getElementById('popup-closer');
+
 
     //Set the basic map
     var raster = OL_MAP_APP.set_ol_raster();
-
     window.map = new ol.Map({
         target: 'main-map',
         projection:"EPSG:4326",
@@ -461,10 +525,40 @@ var initialize_ol_map = function() {
             zoom: mapZoom
         })
     });
+    if (region == "ee_map"){
+        //ajax_get_ee_map();
+    }else {
+        //Initialize popover
+        var popup_layer = OL_MAP_APP.initialize_popup_window(popup_container, popup_closer);
+        window.map.addOverlay(popup_layer);
 
-    //Add the geojson layer
-    var geojsonLayer = OL_MAP_APP.set_geojson_layer();
-    window. map.addLayer(geojsonLayer);
+        //Set the choropleth or default layer
+        if ($('#years').val().length == 1) {
+            //Set the colors for Choropleth map
+            var year = $('#years').val()[0],
+                start_color = MAP_APP.set_start_color(),
+                cb = MAP_APP.set_feat_colors(start_color, 'darken', year),
+                geojsonLayer, overlay_type;
+            window.feat_colors = cb['colors'];
+            window.bins = cb['bins'];
+            //Add the geojson layer
+            geojsonLayer = OL_MAP_APP.set_choropleth_layer();
+            window.map.addLayer(geojsonLayer);
+            overlay_type = 'choropleth'
+        }else{
+            geojsonLayer = OL_MAP_APP.set_map_layer();
+            window.map.addLayer(geojsonLayer);
+            overlay_type = 'default';
+            MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
+        }
+
+        //Add the click event to the map
+        //window.map.on('click', function(evt) {
+        window.map.on('click', function(evt) {
+            OL_MAP_APP.set_popup_window(evt, popup_content, popup_layer,  overlay_type);
+        });
+    }
+
 }
 
 // Initialize the Google Map and add our custom layer overlay.
