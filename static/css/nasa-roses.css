@@ -51,8 +51,9 @@ body {
 }
 
 .form-container{
-    position: relative;
+    position: absolute;
     top: 10%;
+    left: 5%;
     z-index: 10;
     background: #dcdcdc;
     max-width: 20%;
@@ -73,12 +74,12 @@ body {
     left: 50%;
     z-index: 10;
     background: #dcdcdc;
-    width: 30%;
+    width: 40%;
 }
 
 .colorbar {
     position: relative;
-    width:100%;
+    width:99%;
 }
 
 .colorbar-container-header {
@@ -87,7 +88,7 @@ body {
     z-index: 10;
     background-color: #2196F3;
     color: #fff;
-    width: 99%;
+    width: 95%;
 }
 
 #main-map {

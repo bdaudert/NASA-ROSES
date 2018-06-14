@@ -453,26 +453,38 @@ OL_MAP_APP = {
         });
         return style;
     },
-    get_choropleth_layer: function(){
-        var year = $('#year').val();
+    set_vector_source: function(year){
         var vectorSource = new ol.source.Vector({
-                features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
-                        {featureProjection: window.map.getView().getProjection()})
-            });
+            features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
+                {featureProjection: window.map.getView().getProjection()})
+        });
+        window.vectorSource = vectorSource;
+    },
+    zoom_to_layer_extent: function(vectorSource){
+        if (vectorSource.getState() === 'ready') {
+            window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
+        }
+        /*
+        //Zoom to layer extent
+        vectorSource.once('change',function(e) {
+            if (vectorSource.getState() === 'ready') {
+                window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
+            }
+        });
+    */
+    },
+    get_choropleth_layer: function(){
+        OL_MAP_APP.set_vector_source($('#years').val()[0]);
         var geojsonLayer = new ol.layer.Vector({
-            source: vectorSource,
+            source: window.vectorSource,
             style: OL_MAP_APP.styleFunction,
         });
         return geojsonLayer;
     },
     get_default_map_layer: function(){
-        var year = $('#year').val();
-        var vectorSource = new ol.source.Vector({
-                features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
-                        {featureProjection: window.map.getView().getProjection()})
-            });
+        OL_MAP_APP.set_vector_source($('#years').val()[0]);
         var geojsonLayer = new ol.layer.Vector({
-            source: vectorSource,
+            source: window.vectorSource,
             style: OL_MAP_APP.defaultStyleFunction,
         });
         return geojsonLayer;
@@ -617,13 +629,15 @@ var initialize_ol_map = function() {
             //Add the geojson layer
             window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
             OL_MAP_APP.set_map_layer(window.main_map_layer);
+            MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
             overlay_type = 'choropleth'
         }else{
             window.main_map_layer = OL_MAP_APP.get_default_map_layer();
             OL_MAP_APP.set_map_layer(window.main_map_layer);
             overlay_type = 'default';
-            MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
+
         }
+        OL_MAP_APP.zoom_to_layer_extent(window.vectorSource);
 
         //Add the click event to the map
         window.map.on('click', function(evt) {

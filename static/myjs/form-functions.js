@@ -5,8 +5,9 @@ function change_inRegion(region){
 		$('#region').val(region);
 	}
     //Delete old layer
-    MAP_APP.delete_map_layers();
-    //Set the new map_layer
+    //MAP_APP.delete_map_layers();
+    OL_MAP_APP.delete_map_layer(window.main_map_layer);
+	//Set the new map_layer
 	if (region == "ee_map"){
 		//Generate a dynamic map with EE
 		//ajax_get_ee_map();
