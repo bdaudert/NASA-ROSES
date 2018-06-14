@@ -58,7 +58,7 @@ function set_error(error, cause, resolution, method) {
 
 
 
-function ajax_update_data_and_map_single_year(){
+function ajax_update_data_and_map(){
     var tool_action = 'update_data',
         url = clearOut_URL(),
         form_data, jqXHR,
@@ -89,8 +89,12 @@ function ajax_update_data_and_map_single_year(){
             window.DATA[tv_var] = $.parseJSON(r[tv_var]);
 
         }
-        //Set new map layer
-        MAP_APP.set_choropleth_layer();
+        //Set the map layer
+        if ($('#years').val().length == 1) {
+            MAP_APP.set_choropleth_layer();
+        } else{
+            MAP_APP.set_map_overlay();
+        }
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {
@@ -101,7 +105,7 @@ function ajax_update_data_and_map_single_year(){
     });
 }
 
-function ajax_update_ol_data_and_map_single_year(){
+function ajax_update_ol_data_and_map(){
     //Only used when single year request
     var tool_action = 'update_data',
         url = clearOut_URL(),
@@ -134,8 +138,7 @@ function ajax_update_ol_data_and_map_single_year(){
 
         }
         //Set new map layer
-        window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
-        OL_MAP_APP.set_map_layer(window.main_map_layer);
+        OL_MAP_APP.set_map_layer_and_popup();
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {
@@ -147,6 +150,7 @@ function ajax_update_ol_data_and_map_single_year(){
 }
 
 function ajax_set_feat_data_multi_year(){
+    //Sets feature data on map click of feature
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,
@@ -206,6 +210,7 @@ function ajax_set_feat_data_multi_year(){
 }
 
 function ajax_set_ol_feat_data_multi_year(evt, content, overlay, overlay_type){
+    //Sets feature data on map click of feature
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,

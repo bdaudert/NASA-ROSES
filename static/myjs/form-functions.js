@@ -6,7 +6,7 @@ function change_inRegion(region){
 	}
     //Delete old layer
     //MAP_APP.delete_map_layers();
-    OL_MAP_APP.delete_map_layer(window.main_map_layer);
+	OL_MAP_APP.delete_map_layer(window.main_map_layer);
 	//Set the new map_layer
 	if (region == "ee_map"){
 		//Generate a dynamic map with EE
@@ -14,8 +14,12 @@ function change_inRegion(region){
 	}else{
 		// We ned to recompute the template vars
 		//geodata, etdata and set the new map layer
-		//ajax_update_data_and_map_single_year();
-		ajax_update_ol_data_and_map_single_year();
+		if ($('#years').val().length == 1) {
+            //ajax_update_data_and_map();
+            ajax_update_ol_data_and_map();
+        }else{
+
+		}
 	}
 	if (region.is_in(['US_fields', 'Mason'])){
         //Field data
@@ -42,8 +46,8 @@ function change_inYear(year){
 	OL_MAP_APP.delete_map_layer(window.main_map_layer);
 	// We ned to recompute the template vars
 	//geodata, etdata
-	//ajax_update_data_and_map_single_year();
-	ajax_update_ol_data_and_map_single_year();
+	//ajax_update_data_and_map();
+	ajax_update_ol_data_and_map();
 	//MAP_APP.set_choropleth_layer();
 	window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
 	OL_MAP_APP.set_map_layer(window.main_map_layer);
@@ -61,8 +65,8 @@ function change_inYears(years){
 		OL_MAP_APP.set_map_layer(window.main_map_layer);
 	} else{
 		//New map layer is set inside ajax call (async issue)
-	    //ajax_update_data_and_map_single_year();
-		ajax_update_ol_data_and_map_single_year();
+	    //ajax_update_data_and_map();
+		ajax_update_ol_data_and_map();
 		$('#form-statistic').css('display', 'none');
 	}
 	//Couple year field to be first year of selection

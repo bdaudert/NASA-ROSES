@@ -585,34 +585,11 @@ OL_MAP_APP = {
             content.innerHTML = html;
             overlay.setPosition(coordinate);
         }
-    }
-}
-
-
-var initialize_ol_map = function() {
-    var region = $('#region').val();
-    //Set the map zoom dependent on region
-    var mapZoom = js_statics.map_zoom_by_region[region],
-        mapCenter = js_statics.map_center_by_region[region],
-        popup_container = document.getElementById('popup'),
-        popup_content = document.getElementById('popup-content'),
-        popup_closer = document.getElementById('popup-closer');
-
-
-    //Set the basic map
-    var raster = OL_MAP_APP.set_ol_raster();
-    window.map = new ol.Map({
-        target: 'main-map',
-        projection:"EPSG:4326",
-        layers: [raster],
-        view: new ol.View({
-            center: ol.proj.fromLonLat([mapCenter.lng, mapCenter.lat]),
-            zoom: mapZoom
-        })
-    });
-    if (region == "ee_map"){
-        //ajax_get_ee_map();
-    }else {
+    },
+    set_map_layer_and_popup: function(){
+        var popup_container = document.getElementById('popup'),
+            popup_content = document.getElementById('popup-content'),
+            popup_closer = document.getElementById('popup-closer');
         //Initialize popover
         var popup_layer = OL_MAP_APP.initialize_popup_window(popup_container, popup_closer);
         window.map.addOverlay(popup_layer);
@@ -638,13 +615,36 @@ var initialize_ol_map = function() {
 
         }
         OL_MAP_APP.zoom_to_layer_extent(window.vectorSource);
-
         //Add the click event to the map
         window.map.on('click', function(evt) {
             OL_MAP_APP.set_popup_window(evt, popup_content, popup_layer,  overlay_type);
         });
     }
+}
 
+
+var initialize_ol_map = function() {
+    var region = $('#region').val();
+    //Set the map zoom dependent on region
+    var mapZoom = js_statics.map_zoom_by_region[region],
+        mapCenter = js_statics.map_center_by_region[region];
+
+    //Set the basic map
+    var raster = OL_MAP_APP.set_ol_raster();
+    window.map = new ol.Map({
+        target: 'main-map',
+        projection:"EPSG:4326",
+        layers: [raster],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([mapCenter.lng, mapCenter.lat]),
+            zoom: mapZoom
+        })
+    });
+    if (region == "ee_map"){
+        //ajax_get_ee_map();
+    }else {
+        OL_MAP_APP.set_map_layer_and_popup();
+    }
 }
 
 // Initialize the Google Map and add our custom layer overlay.
