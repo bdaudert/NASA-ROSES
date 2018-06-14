@@ -337,7 +337,7 @@ MAP_APP = {
             $('#feat_indices').val(feat_idx);
 
             if (years.length != 1) {
-                ajax_set_feat_data_multi_year();
+                ajax_set_feat_data();
             }else{
                 MAP_APP.initialize_dataModal(window.DATA.geomdata[years[0]]['features'][feat_idx]);
                 var featdata = {}
@@ -565,7 +565,7 @@ OL_MAP_APP = {
 
         $('#feat_indices').val(feat_indices.join(','));
         if (years.length != 1) {
-            ajax_set_ol_feat_data_multi_year(evt, content, overlay, overlay_type);
+            ajax_set_ol_feat_data(evt, content, overlay, overlay_type);
         }else{
             year = years[0];
             featdata = {}
@@ -588,11 +588,7 @@ OL_MAP_APP = {
     },
     set_map_layer_and_popup: function(){
         var popup_container = document.getElementById('popup'),
-            popup_content = document.getElementById('popup-content'),
-            popup_closer = document.getElementById('popup-closer');
-        //Initialize popover
-        var popup_layer = OL_MAP_APP.initialize_popup_window(popup_container, popup_closer);
-        window.map.addOverlay(popup_layer);
+            popup_content = document.getElementById('popup-content');
 
         //Set the choropleth or default layer
         if ($('#years').val().length == 1) {
@@ -617,7 +613,7 @@ OL_MAP_APP = {
         OL_MAP_APP.zoom_to_layer_extent(window.vectorSource);
         //Add the click event to the map
         window.map.on('click', function(evt) {
-            OL_MAP_APP.set_popup_window(evt, popup_content, popup_layer,  overlay_type);
+            OL_MAP_APP.set_popup_window(evt, popup_content, window.popup_layer,  overlay_type);
         });
     }
 }
@@ -640,11 +636,30 @@ var initialize_ol_map = function() {
             zoom: mapZoom
         })
     });
+
+    var popup_container = document.getElementById('popup'),
+        popup_content = document.getElementById('popup-content'),
+        popup_closer = document.getElementById('popup-closer');
+    //Initialize popover
+    window.popup_layer = OL_MAP_APP.initialize_popup_window(popup_container, popup_closer);
+    window.map.addOverlay(window.popup_layer);
+
     if (region == "ee_map"){
         //ajax_get_ee_map();
     }else {
         OL_MAP_APP.set_map_layer_and_popup();
     }
+    /* Show different regions at different zoom levels */
+    window.map.on('moveend', function onMoveEnd(evt) {
+        var zoom = window.map.getView().getZoom();
+        if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
+            var region = $('#region').val(),
+                new_region = js_statics.region_by_map_zoom[String(zoom)];
+            if (region != new_region) {
+                change_inRegion(new_region);
+            }
+        }
+     });
 }
 
 // Initialize the Google Map and add our custom layer overlay.

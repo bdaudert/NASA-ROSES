@@ -149,7 +149,7 @@ function ajax_update_ol_data_and_map(){
     });
 }
 
-function ajax_set_feat_data_multi_year(){
+function ajax_set_feat_data(){
     //Sets feature data on map click of feature
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
@@ -209,7 +209,7 @@ function ajax_set_feat_data_multi_year(){
     });
 }
 
-function ajax_set_ol_feat_data_multi_year(evt, content, overlay, overlay_type){
+function ajax_set_ol_feat_data(evt, content, overlay, overlay_type){
     //Sets feature data on map click of feature
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),

@@ -1,7 +1,7 @@
 function change_inRegion(region){
 	if (region != $('#region').val()){
 		//Zoom level was changed
-		//We need to change the reggion value
+		//We need to change the region value
 		$('#region').val(region);
 	}
     //Delete old layer
@@ -14,12 +14,8 @@ function change_inRegion(region){
 	}else{
 		// We ned to recompute the template vars
 		//geodata, etdata and set the new map layer
-		if ($('#years').val().length == 1) {
-            //ajax_update_data_and_map();
-            ajax_update_ol_data_and_map();
-        }else{
-
-		}
+		//ajax_update_data_and_map();
+		ajax_update_ol_data_and_map();
 	}
 	if (region.is_in(['US_fields', 'Mason'])){
         //Field data
