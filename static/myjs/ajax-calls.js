@@ -58,7 +58,7 @@ function set_error(error, cause, resolution, method) {
 
 
 
-function ajax_update_data(){
+function ajax_update_data_and_map_single_year(){
     var tool_action = 'update_data',
         url = clearOut_URL(),
         form_data, jqXHR,
@@ -101,7 +101,52 @@ function ajax_update_data(){
     });
 }
 
-function ajax_set_feat_data(){
+function ajax_update_ol_data_and_map_single_year(){
+    //Only used when single year request
+    var tool_action = 'update_data',
+        url = clearOut_URL(),
+        form_data, jqXHR,
+        err_code, r, method = 'ajax', error, cause, i, tv_var;
+    //Update the tool_action
+    $('#tool_action').val(tool_action);
+    //Get the form data
+    form_data = $("#form_all").serialize();
+    var msg = 'Switching region';
+    start_progressbar(mgs=msg);
+    jqXHR = $.ajax({
+        url: url,
+        method: "POST",
+        timeout: 60 * 5 * 1000,
+        data: form_data,
+
+    })
+    .done(function(response) {
+        r = $.parseJSON(response);
+        if (r.hasOwnProperty('error')) {
+            error = r.error;
+            set_error( error, '', '', method);
+            end_progressbar();
+        }
+        //Set the new template variables
+        for (i=0; i < statics.response_vars[tool_action].length; i++){
+            tv_var = statics.response_vars[tool_action][i];
+            window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+
+        }
+        //Set new map layer
+        window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
+        OL_MAP_APP.set_map_layer(window.main_map_layer);
+        end_progressbar();
+    }) // successfully got JSON response
+    .fail(function(jqXHR) {
+        err_code = jqXHR.status;
+        error = 'Server request failed with code ' + String(err_code) + '!'
+        set_error(error, '', '', method)
+        end_progressbar();
+    });
+}
+
+function ajax_set_feat_data_multi_year(){
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,
@@ -141,6 +186,7 @@ function ajax_set_feat_data(){
         //Hide old data modal
         $('#dataModal').modal('hide');
         year = $('#years').val()[0];
+        //feature indices are the same each year
         feat_idx_list = get_feat_index_from_featdata(year);
         //FIX ME: what to do when multiple indices???
         feat_idx = feat_idx_list[0];
@@ -159,7 +205,7 @@ function ajax_set_feat_data(){
     });
 }
 
-function ajax_set_ol_feat_data(){
+function ajax_set_ol_feat_data_multi_year(){
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,
@@ -179,7 +225,7 @@ function ajax_set_ol_feat_data(){
     })
     .done(function(response) {
         var r = $.parseJSON(response),
-            feat_idx_list, feat_idx, year;
+            feat_idx_list, feat_idx, year, html = '';
         if (r.hasOwnProperty('error')) {
             error = r.error;
             set_error( error, '', '', method);
@@ -196,16 +242,17 @@ function ajax_set_ol_feat_data(){
                 window.DATA[tv_var] = $.parseJSON(r[tv_var]);
             }
         }
-        //Hide old data modal
-        $('#dataModal').modal('hide');
         year = $('#years').val()[0];
         feat_idx_list = get_feat_index_from_featdata(year);
         //FIX ME: what to do when multiple indices???
         feat_idx = feat_idx_list[0];
-        if (feat_idx != ''){
-            MAP_APP.initialize_dataModal(window.DATA.featgeomdata[year]['features'][parseInt(feat_idx)]);
-            MAP_APP.add_dataToModal(feat_idx, window.DATA.featdata);
-            $('#dataModal').modal('toggle');
+        if (feat_idx_list.length != 0){
+            html += OL_MAP_APP.set_popup_header(r['featgeomdata']);
+            if ($('#years').val().length == 1) {
+                //Choropleth, need to populate popup window with etdata
+                html += OL_MAP_APP.set_popup_data(r['featdata']);
+            }
+            $('#popup-content').html(html);
         }
         end_progressbar();
     }) // successfully got JSON response

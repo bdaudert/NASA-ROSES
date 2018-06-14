@@ -337,7 +337,7 @@ MAP_APP = {
             $('#feat_indices').val(feat_idx);
 
             if (years.length != 1) {
-                ajax_set_feat_data();
+                ajax_set_feat_data_multi_year();
             }else{
                 MAP_APP.initialize_dataModal(window.DATA.geomdata[years[0]]['features'][feat_idx]);
                 var featdata = {}
@@ -453,7 +453,7 @@ OL_MAP_APP = {
         });
         return style;
     },
-    set_choropleth_layer: function(){
+    get_choropleth_layer: function(){
         var year = $('#year').val();
         var vectorSource = new ol.source.Vector({
                 features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
@@ -465,7 +465,7 @@ OL_MAP_APP = {
         });
         return geojsonLayer;
     },
-    set_map_layer: function(){
+    get_default_map_layer: function(){
         var year = $('#year').val();
         var vectorSource = new ol.source.Vector({
                 features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
@@ -476,6 +476,12 @@ OL_MAP_APP = {
             style: OL_MAP_APP.defaultStyleFunction,
         });
         return geojsonLayer;
+    },
+    set_map_layer: function(layer){
+        window.map.addLayer(layer);
+    },
+    delete_map_layer: function(layer){
+        window.map.removeLayer(layer)
     },
     initialize_popup_window: function(container, closer) {
         var overlay = new ol.Overlay({
@@ -531,13 +537,6 @@ OL_MAP_APP = {
         return html;
     },
     set_popup_window: function(evt, content, overlay, overlay_type) {
-        /*
-        var coordinate = evt.coordinate;
-        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
-            coordinate, 'EPSG:3857', 'EPSG:4326'));
-        content.innerHTML = '<p>You clicked here:</p><code>' + coordinate + '</code>';
-        overlay.setPosition(coordinate);
-        */
         var feats = [], feat_idx, feat_indices = [], html = '', featdata = {},
             i, years = $('#years').val(), year, coordinate, geomdata;
 
@@ -554,7 +553,7 @@ OL_MAP_APP = {
 
         $('#feat_indices').val(feat_indices.join(','));
         if (years.length != 1) {
-            ajax_set_ol_feat_data();
+            ajax_set_ol_feat_data_multi_year();
         }else{
             year = years[0];
             featdata = {}
@@ -571,8 +570,6 @@ OL_MAP_APP = {
                 html += OL_MAP_APP.set_popup_data(featdata);
             }
             coordinate = evt.coordinate;
-            var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
-            coordinate, 'EPSG:3857', 'EPSG:4326'));
             content.innerHTML = html;
             overlay.setPosition(coordinate);
         }
@@ -618,12 +615,12 @@ var initialize_ol_map = function() {
             window.feat_colors = cb['colors'];
             window.bins = cb['bins'];
             //Add the geojson layer
-            geojsonLayer = OL_MAP_APP.set_choropleth_layer();
-            window.map.addLayer(geojsonLayer);
+            window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
+            OL_MAP_APP.set_map_layer(window.main_map_layer);
             overlay_type = 'choropleth'
         }else{
-            geojsonLayer = OL_MAP_APP.set_map_layer();
-            window.map.addLayer(geojsonLayer);
+            window.main_map_layer = OL_MAP_APP.get_default_map_layer();
+            OL_MAP_APP.set_map_layer(window.main_map_layer);
             overlay_type = 'default';
             MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
         }
