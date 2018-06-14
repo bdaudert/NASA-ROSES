@@ -205,7 +205,7 @@ function ajax_set_feat_data_multi_year(){
     });
 }
 
-function ajax_set_ol_feat_data_multi_year(){
+function ajax_set_ol_feat_data_multi_year(evt, content, overlay, overlay_type){
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,
@@ -244,15 +244,14 @@ function ajax_set_ol_feat_data_multi_year(){
         }
         year = $('#years').val()[0];
         feat_idx_list = get_feat_index_from_featdata(year);
-        //FIX ME: what to do when multiple indices???
-        feat_idx = feat_idx_list[0];
         if (feat_idx_list.length != 0){
             html += OL_MAP_APP.set_popup_header(r['featgeomdata']);
-            if ($('#years').val().length == 1) {
-                //Choropleth, need to populate popup window with etdata
+            if (overlay_type == 'choropleth') {
                 html += OL_MAP_APP.set_popup_data(r['featdata']);
             }
-            $('#popup-content').html(html);
+            coordinate = evt.coordinate;
+            content.innerHTML = html;
+            overlay.setPosition(coordinate);
         }
         end_progressbar();
     }) // successfully got JSON response

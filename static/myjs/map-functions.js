@@ -553,7 +553,7 @@ OL_MAP_APP = {
 
         $('#feat_indices').val(feat_indices.join(','));
         if (years.length != 1) {
-            ajax_set_ol_feat_data_multi_year();
+            ajax_set_ol_feat_data_multi_year(evt, content, overlay, overlay_type);
         }else{
             year = years[0];
             featdata = {}
