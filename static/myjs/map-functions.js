@@ -492,19 +492,43 @@ OL_MAP_APP = {
         };
         return overlay;
     },
-    set_popup_header: function(featdata){
+    set_popup_header: function(geomdata){
         var geom_meta_cols = statics.geo_meta_cols[$('#region').val()],
-            i, html = '', key, br = '<br>';
-        for (i = 0; i< geom_meta_cols.length; i++){
-            key = geom_meta_cols[i];
-            try {
-                html += key + ': ' + featdata['properties'][key] + ', ';
-            }catch(e){}
+            i, j, key, br = '<br>', html = '',
+            year = $('#years').val()[0];
+        for (j = 0; j < geomdata[year]['features'].length; j++) {
+            html += 'Feature ' + String(j + 1) + ':' + br;
+            for (i = 0; i < geom_meta_cols.length; i++) {
+                key = geom_meta_cols[i];
+                try {
+                    html += key + ': ' + geomdata[year]['features'][j]['properties'][key] + br;
+                } catch (e) {}
+            }
         }
         return html;
     },
     set_popup_data: function(featdata){
+        var feat_indices = $('#feat_indices').val().replace(', ', ',').split(','),
+            y_idx, year, years,
+            html, val_list, new_prop_names,
+            et_var = $('#variable').val(),
+            t_res = $('#t_res').val(),
+            time_period = $('#time_period').val(),
+            stat = $('#time_period_statistic').val(), val_dict;
 
+        if ($.type(time_period) == 'string') {
+            time_period = [time_period];
+        }
+        if ($('#years').css('display') != 'none'){
+            years = $('#years').val();
+        }else{
+            years = [$('#year').val()];
+        }
+        //Populate the columnnames
+        val_dict = MAP_APP.set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, featdata, feat_indices);
+        new_prop_names = MAP_APP.set_dataModalPropertyNames(et_var, t_res, time_period, stat);
+        html = MAP_APP.set_dataModalData(val_dict, new_prop_names);
+        return html;
     },
     set_popup_window: function(evt, content, overlay, overlay_type) {
         /*
@@ -515,14 +539,15 @@ OL_MAP_APP = {
         overlay.setPosition(coordinate);
         */
         var feats = [], feat_idx, feat_indices = [], html = '', featdata = {},
-            y_idx, years = $('#years').val(), year;
+            i, years = $('#years').val(), year, coordinate, geomdata;
 
         //get the features that where clicked on
         window.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
             feats.push(feature);
             feat_indices.push(feature.get('idx'));
         });
-        if (features.length == 0) {
+
+        if (feats.length == 0) {
             $('#feat_indices').val('');
             return;
         }
@@ -532,13 +557,22 @@ OL_MAP_APP = {
             ajax_set_ol_feat_data();
         }else{
             year = years[0];
-            for (var i = 0; i < features.length; ++i) {
+            featdata = {}
+            geomdata = {};
+            featdata[year] = {type: 'FeatureCollection', features: []};
+            geomdata[year] = {type: 'FeatureCollection', features: []};
+            for (i = 0; i < feats.length; ++i) {
                 feat_idx = feat_indices[i];
-                featdata = window.DATA.etdata[year]['features'][feat_idx]);
-                html += OL_MAP_APP.set_popup_header(featdata);
+                featdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
+                geomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
+            }
+            html += OL_MAP_APP.set_popup_header(geomdata);
+            if (overlay_type == 'choropleth') {
                 html += OL_MAP_APP.set_popup_data(featdata);
-             }
-             var coordinate = evt.coordinate;
+            }
+            coordinate = evt.coordinate;
+            var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+            coordinate, 'EPSG:3857', 'EPSG:4326'));
             content.innerHTML = html;
             overlay.setPosition(coordinate);
         }
@@ -595,7 +629,6 @@ var initialize_ol_map = function() {
         }
 
         //Add the click event to the map
-        //window.map.on('click', function(evt) {
         window.map.on('click', function(evt) {
             OL_MAP_APP.set_popup_window(evt, popup_content, popup_layer,  overlay_type);
         });
