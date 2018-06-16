@@ -1,4 +1,8 @@
-function change_inRegion(region){
+function change_inRegion(region, auto_set_region=false){
+	/*
+	auto_set_region = true: we change the region according to zoom level
+	aut_region = false: region is only determiined by region value, not by zoom level
+	*/
 	if (region != $('#region').val()){
 		//Zoom level was changed
 		//We need to change the region value
@@ -15,7 +19,7 @@ function change_inRegion(region){
 		// We ned to recompute the template vars
 		//geodata, etdata and set the new map layer
 		//ajax_update_data_and_map();
-		ajax_update_ol_data_and_map();
+		ajax_update_ol_data_and_map(auto_set_region=auto_set_region);
 	}
 	if (region.is_in(['US_fields', 'Mason'])){
         //Field data
@@ -43,7 +47,7 @@ function change_inYear(year){
 	// We ned to recompute the template vars
 	//geodata, etdata
 	//ajax_update_data_and_map();
-	ajax_update_ol_data_and_map();
+	ajax_update_ol_data_and_map(auto_set_region=false);
 	//MAP_APP.set_choropleth_layer();
 	window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
 	OL_MAP_APP.set_map_layer(window.main_map_layer);
@@ -62,7 +66,7 @@ function change_inYears(years){
 	} else{
 		//New map layer is set inside ajax call (async issue)
 	    //ajax_update_data_and_map();
-		ajax_update_ol_data_and_map();
+		ajax_update_ol_data_and_map(auto_set_region=false);
 		$('#form-statistic').css('display', 'none');
 	}
 	//Couple year field to be first year of selection

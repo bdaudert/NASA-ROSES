@@ -6,7 +6,7 @@ $(document).ready(function () {
     $('.modal-dialog').draggable();
 
     $('#region').on('change', function(){
-        change_inRegion($(this).val());
+        change_inRegion($(this).val(), auto_set_region=false);
     });
 
     $('#year').on('change', function(){

@@ -460,18 +460,50 @@ OL_MAP_APP = {
         });
         window.vectorSource = vectorSource;
     },
+    delay : function( timeout, id, callback ){
+        //Need this ro zoom properly
+        this.delays = this.delays || [];
+        var delay = this.delays[ id ];
+        if ( delay )
+        {
+                clearTimeout ( delay );
+        }
+        delay = setTimeout ( callback, timeout );
+        this.delays[ id ] = delay;
+    },
+    on_zoom_change_region: function(evt){
+        //Change the region at different zoom levels
+        var zoom = window.map.getView().getZoom();
+        if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
+            var region = $('#region').val(),
+                new_region = js_statics.region_by_map_zoom[String(zoom)];
+            if (region != new_region) {
+                change_inRegion(new_region, auto_set_region=true);
+            }
+        }
+    },
+    set_map_zoom_pan_listener: function(auto_set_region=false) {
+        if (!auto_set_region) {
+            try {
+                window.map.un('moveend', OL_MAP_APP.on_zoom_change_region);
+            }catch(e){}
+        }else{
+            // Show different regions at different zoom levels
+            window.map.on('moveend', OL_MAP_APP.on_zoom_change_region);
+            /*
+            window.map.on('moveend', function onMoveEnd(evt) {
+                OL_MAP_APP.on_zoom_change_region(evt);
+            });
+            */
+        }
+    },
     zoom_to_layer_extent: function(vectorSource){
         if (vectorSource.getState() === 'ready') {
-            window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
-        }
-        /*
-        //Zoom to layer extent
-        vectorSource.once('change',function(e) {
-            if (vectorSource.getState() === 'ready') {
+            OL_MAP_APP.delay(500, "uniqueId", function() {
                 window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
-            }
-        });
-    */
+            });
+            //window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
+        }
     },
     get_choropleth_layer: function(){
         OL_MAP_APP.set_vector_source($('#years').val()[0]);
@@ -586,7 +618,7 @@ OL_MAP_APP = {
             overlay.setPosition(coordinate);
         }
     },
-    set_map_layer_and_popup: function(){
+    set_map_layer_and_popup: function(auto_set_region=false){
         var popup_container = document.getElementById('popup'),
             popup_content = document.getElementById('popup-content');
 
@@ -610,7 +642,10 @@ OL_MAP_APP = {
             overlay_type = 'default';
 
         }
-        OL_MAP_APP.zoom_to_layer_extent(window.vectorSource);
+        //Only zoom if auto_set_region is turned off
+        if (!auto_set_region) {
+            OL_MAP_APP.zoom_to_layer_extent(window.vectorSource);
+        }
         //Add the click event to the map
         window.map.on('click', function(evt) {
             OL_MAP_APP.set_popup_window(evt, popup_content, window.popup_layer,  overlay_type);
@@ -647,19 +682,10 @@ var initialize_ol_map = function() {
     if (region == "ee_map"){
         //ajax_get_ee_map();
     }else {
-        OL_MAP_APP.set_map_layer_and_popup();
+        OL_MAP_APP.set_map_layer_and_popup(auto_set_region=true);
     }
-    /* Show different regions at different zoom levels */
-    window.map.on('moveend', function onMoveEnd(evt) {
-        var zoom = window.map.getView().getZoom();
-        if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
-            var region = $('#region').val(),
-                new_region = js_statics.region_by_map_zoom[String(zoom)];
-            if (region != new_region) {
-                change_inRegion(new_region);
-            }
-        }
-     });
+    //Set the map so that it changes region at differnet zoom levels
+    OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }
 
 // Initialize the Google Map and add our custom layer overlay.
@@ -696,7 +722,7 @@ var initialize_map = function() {
             var region = $('#region').val(),
                 new_region = js_statics.region_by_map_zoom[String(zoom)];
             if (region != new_region) {
-                change_inRegion(new_region);
+                change_inRegion(new_region, auto_set_region=true);
             }
         }
     });

@@ -20,10 +20,7 @@
     "all_region":  {
         "US_states_west_500k": "States, Western US",
         "US_counties_west_500k": "Counties, Western US",
-        "HUC4": "HUC 4, Western US",
-        "US_fields": "US Fields",
-        "Mason": "Mason Valley",
-        "ee_map": "Map"
+        "Mason": "Mason Valley"
     },
     "all_aggregation_area": {
         "US_states_west_500k": "States, Western US",

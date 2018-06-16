@@ -10,7 +10,6 @@
     "region_by_map_zoom": {
       "5": "US_states_west_500k",
       "7": "US_counties_west_500k",
-      "8": "HUC4_west",
       "11": "Mason"
     },
     "map_center_by_region": {

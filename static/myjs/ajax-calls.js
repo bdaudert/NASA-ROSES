@@ -105,7 +105,7 @@ function ajax_update_data_and_map(){
     });
 }
 
-function ajax_update_ol_data_and_map(){
+function ajax_update_ol_data_and_map(auto_set_region=false){
     //Only used when single year request
     var tool_action = 'update_data',
         url = clearOut_URL(),
@@ -138,9 +138,10 @@ function ajax_update_ol_data_and_map(){
 
         }
         //Set new map layer
-        OL_MAP_APP.set_map_layer_and_popup();
+        OL_MAP_APP.set_map_layer_and_popup(auto_set_region=auto_set_region);
+        OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
         end_progressbar();
-    }) // successfully got JSON response
+    })
     .fail(function(jqXHR) {
         err_code = jqXHR.status;
         error = 'Server request failed with code ' + String(err_code) + '!'
