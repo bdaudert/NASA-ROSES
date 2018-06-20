@@ -60,12 +60,10 @@ function change_inYears(years){
 	OL_MAP_APP.delete_map_layer(window.main_map_layer);
 	if (years.length != 1){
 		$('#form-statistic').css('display', 'block');
-		//MAP_APP.set_map_overlay();
 		window.main_map_layer = OL_MAP_APP.get_default_map_layer();
 		OL_MAP_APP.set_map_layer(window.main_map_layer);
 	} else{
 		//New map layer is set inside ajax call (async issue)
-	    //ajax_update_data_and_map();
 		ajax_update_ol_data_and_map(auto_set_region=false);
 		$('#form-statistic').css('display', 'none');
 	}

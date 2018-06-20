@@ -1,4 +1,6 @@
 /* MAP Utils*/
+
+// General map utils (google map api and openlayers)
 var MAP_APP = MAP_APP || {};
 MAP_APP = {
     set_start_color: function () {
@@ -37,7 +39,7 @@ MAP_APP = {
             year = $('#year').val(),
             bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color,
             featdata = DATA.etdata[year];
-        val_list = MAP_APP.set_singleYear_allFeat_valList(year, et_var, t_res, time_period, stat, featdata);
+        val_list = MAP_APP.set_singleYear_allFeat_valList(featdata);
         if (!val_list) {
             return cb;
         }
@@ -62,33 +64,6 @@ MAP_APP = {
         cb = {'colors': colors, 'bins': bins}
         return cb;
     },
-    set_feat_styles: function (data, cb, start_color, year) {
-        var feat_colors = cb['colors'], bins = cb['bins'];
-        data.setStyle(function (feature) {
-            var idx = feature.getProperty('idx'),
-                v = $('#variable').val(),
-                t_res = $('#t_res').val(),
-                et_vars = statics.stats_by_var_res[v][t_res],
-                et_var = et_vars[0];
-            var data_val = DATA.etdata[year].features[idx]['properties'][et_var];
-            var color = start_color, i;
-            //Find the right bin
-            for (i = 0; i < bins.length; i++) {
-                if (bins[i][0] <= data_val && data_val <= bins[i][1]) {
-                    color = feat_colors[i];
-                    break;
-                }
-            }
-            props = {
-                fillColor: color,
-                fillOpacity: 0.5,
-                strokeColor: '#000000',
-                stokeOpacity: 0.8,
-                strokeWeight: 0.5
-            };
-            return props;
-        });
-    },
     drawMapColorbar: function (colors, bins) {
         var palette = '', ticks = [], myScale, colorbar, i;
         for (i = 0; i < colors.length; i++) {
@@ -109,63 +84,71 @@ MAP_APP = {
             .scale(myScale);
         colorbarObject = d3.select("#colorbar").call(colorbar);
     },
-    setDrawingManager: function () {
-        var mkrOptions = MAP_APP.setMarkerOptions();
-        var polyOptions = MAP_APP.setPolyOptions();
-        var drawingManager = new google.maps.drawing.DrawingManager({
-            drawingModes: [
-                google.maps.drawing.OverlayType.MARKER,
-                google.maps.drawing.OverlayType.RECTANGLE,
-                google.maps.drawing.OverlayType.POLYGON
-            ],
-            drawingControlOptions: {
-                position: google.maps.ControlPosition.TOP_CENTER,
-                drawingModes: [
-                    google.maps.drawing.OverlayType.MARKER,
-                    google.maps.drawing.OverlayType.RECTANGLE,
-                    google.maps.drawing.OverlayType.POLYGON
-                ]
-            },
-            markerOptions: mkrOptions,
-            rectangleOptions: polyOptions,
-            polygonOptions: polyOptions
-        });
-        return drawingManager;
+    compute_area_averaged_data_single_year: function(featdata){
+        /*
+        Computes area_averaged_data = sum(feat_etdata * feat_area/total area()
+        */
+        var stat= $('#time_period_statistic').val(),
+            t_res = $('#t_res').val(),
+            time_period = $('#time_period').val(),
+            variable = $('#variable').val();
+
+        var prop_names = statics.stats_by_var_res[variable][t_res],
+            prop_name, p_idx, s, tp, val_list = [], feat_areas = [], total_area = 0,
+            f_idx, f_data, temp_val_list = [], val, all_feat_val_lists = []
+            area_param = statics.area_param[$('#region').val()];
+        // Compute total area
+        for (f_idx=0; f_idx < featdata['features'].length; f_idx++) {
+            total_area += featdata['features'][f_idx]['properties'][area_param];
+        }
+        //Loop over properties and features and compute area averaged values
+        for (f_idx=0; f_idx < featdata['features'].length; f_idx++) {
+            f_data = featdata['features'][f_idx];
+            feat_areas.push(featdata['features'][f_idx]['properties'][area_param]);
+            for (p_idx = 0; p_idx < prop_names.length; p_idx++) {
+                prop_name = prop_names[p_idx];
+                if (t_res != 'monthly') {
+                    if (Math.abs(f_data['properties'][prop_name] + 9999) > 0.0001) {
+                        //val = myRound(parseFloat(f_data['properties'][prop_name]) * feat_area / total_area, 4);
+                        val = f_data['properties'][prop_name];
+                        temp_val_list.push(val);
+                    }
+                }else {
+                    s = prop_names[p_idx].split('_');
+                    tp = s[s.length - 1].slice(-2);
+                    if (tp.substring(0, 1) == '0') {
+                        tp = tp.substring(1, 2);
+                    }
+                    if (tp.is_in(time_period)) {
+                        if (Math.abs(f_data['properties'][prop_name] + 9999) > 0.0001) {
+                            //val = myRound(parseFloat(f_data['properties'][prop_name]) * feat_area / total_area, 4);
+                            val = f_data['properties'][prop_name];
+                            temp_val_list.push(val);
+                        }
+                    }
+                }
+            }
+            //Comnputes stats over month for feature
+            temp_val_list = compute_time_period_stat(temp_val_list, stat, time_period);
+            all_feat_val_lists.push(temp_val_list);
+        }
+        //Compute area averaged values
+        for (f_idx=0; f_idx < all_feat_val_lists.length; f_idx++) {
+            temp_val_list = all_feat_val_lists[i];
+        }
+        return val_list;
     },
-    set_dataModalHeader: function(feat_geomdata){
-        var v = $('#variable').val(),
-		    year = $('#year').val(),
-		    years = $('#years').val(),
-		    prop_name, html= '', c_idx,
-		    region = $('#region').val();
-	    //Title
-	    for (c_idx = 0; c_idx < statics.geo_meta_cols[region].length; c_idx++){
-		    prop_name = statics.geo_meta_cols[region][c_idx];
-		    html += '<b>' + prop_name + '</b>'+ ': ';
-		    if (feat_geomdata['properties'][prop_name]) {
-			    html += feat_geomdata['properties'][prop_name];
-		    }
-		    html+= '<br>';
-	    }
-	    html += '<b>Variable</b>: ' + v + '<br>';
-	    return html;
-    },
-    initialize_dataModal: function (feat_idx) {
-        //feat_idx is the feature index in etdata
-        var html;
-        //Clear out old modal content
-        $('#dataModal_title').html('');
-        $('#dataModal_data').html('');
-        html = MAP_APP.set_dataModalHeader(feat_idx);
-        $('#dataModal_title').append(html);
-    },
-    set_singleYear_singleFeat_valList: function(year, variable, t_res, time_period, stat, f_data){
+    set_singleYear_singleFeat_valList: function(f_data){
         /*
         Sets the value list for a single year and single feature with data f_data
         NOTE: stat is computed here, is that rght? FIX ME
         */
-        var prop_names = statics.stats_by_var_res[variable][t_res],
-            prop_name, p_idx, s, tp, val_list = [];
+        var prop_name, p_idx, s, tp, val_list = [],
+            stat  = $('#time_period_statistic').val(),
+            t_res = $('#t_res').val(),
+            time_period = $('#time_period').val(),
+            prop_names = statics.stats_by_var_res[$('#variable').val()][t_res];
+
         for (p_idx = 0; p_idx < prop_names.length; p_idx++) {
             prop_name = prop_names[p_idx];
             if (t_res != 'monthly'){
@@ -185,29 +168,37 @@ MAP_APP = {
                 }
             }
         }
+        //Comnputes stats over month
         val_list = compute_time_period_stat(val_list, stat, time_period);
         return val_list;
     },
-    set_singleYear_allFeat_valList: function(year, variable, t_res, time_period, stat, featdata){
+    set_singleYear_allFeat_valList: function(featdata, area_ave=false){
         /*
         Sets the value list for a single year and multiple features
         NOTE: stat is computed over each feature
         Used to set colorbar
         */
-
         var val_list = [], d;
-        d = $.map(featdata['features'], function (f_data) {
-            return MAP_APP.set_singleYear_singleFeat_valList(year, variable, t_res, time_period, stat, f_data);
-        });
-        val_list = val_list.concat(d);
+        if (!area_ave) {
+            //Return data for each feature separately
+            d = $.map(featdata['features'], function (f_data) {
+                return MAP_APP.set_singleYear_singleFeat_valList(f_data);
+            });
+            val_list = val_list.concat(d);
+        }else{
+            //Compute area weighted averages over the features
+            val_list = MAP_APP.compute_area_averaged_data_single_year(featdata);
+        }
         return val_list;
     },
-    set_dataModalValList_multiYear: function(years, variable, t_res, time_period, stat, featdata, feat_indices){
+    set_dataModalValList_multiYear: function(featdata, area_ave=false){
 	    //Sets the values for the dataModal over muliple years
-        var v_dict_year, val_dict = {}, f_idx, val_list = [], y_idx, year, f_data_list;
+        var v_dict_year, val_dict = {}, f_idx, val_list = [], y_idx, year, f_data_list,
+            years = $('#years').val();
+
         for (y_idx = 0; y_idx < years.length; y_idx++){
             year = years[y_idx];
-            val_list = MAP_APP.set_singleYear_allFeat_valList(year, variable, t_res, time_period, stat, featdata[year]);
+            val_list = MAP_APP.set_singleYear_allFeat_valList(featdata[year], area_ave=area_ave);
             val_dict[year] = val_list;
         }
         return val_dict;
@@ -259,162 +250,37 @@ MAP_APP = {
         html += '</table>';
         return html;
     },
-    add_dataToModal: function(feat_idx, featdata) {
-        var feat_indices = [feat_idx],
-            y_idx, year, years,
-            html, val_list, new_prop_names,
-            et_var = $('#variable').val(),
-            t_res = $('#t_res').val(),
-            time_period = $('#time_period').val(),
-            stat = $('#time_period_statistic').val(), val_dict;
-
-        if ($.type(time_period) == 'string') {
-            time_period = [time_period];
-        }
-        if ($('#years').css('display') != 'none'){
-            years = $('#years').val();
-        }else{
-            years = [$('#year').val()];
-        }
-        //Populate the columnnames
-        val_dict = MAP_APP.set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, featdata, feat_indices);
-        new_prop_names = MAP_APP.set_dataModalPropertyNames(et_var, t_res, time_period, stat);
-        html = MAP_APP.set_dataModalData(val_dict, new_prop_names);
-        $('#dataModal_data').append(html);
-    },
-    set_data_layer: function (data) {
-        function processPoints(geometry, callback, thisArg) {
-            if (geometry instanceof google.maps.LatLng) {
-                callback.call(thisArg, geometry);
-            } else if (geometry instanceof google.maps.Data.Point) {
-                callback.call(thisArg, geometry.get());
-            } else {
-                geometry.getArray().forEach(function (g) {
-                    processPoints(g, callback, thisArg);
-                });
+    set_feature_data: function(years, feats){
+        /*
+        Given feats from dragbox event, we extract the relevant geomdata and featdata from
+        the template variables
+        */
+        var f_idx, y_idx, year, feat_idx,
+            featdata = {}, geomdata = {}, gf_data;
+        for (y_idx = 0; y_idx < years.length; y_idx++) {
+            year = years[y_idx];
+            featdata[year] = {type: 'FeatureCollection', features: []};
+            geomdata[year] = {type: 'FeatureCollection', features: []};
+            for (f_idx = 0; f_idx < feats.length; f_idx++) {
+                feat_idx = feats[f_idx].get('idx');
+                featdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
+                geomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
             }
         }
-
-        /*
-        LOAD THE DATA FROM THE TEMPLATE VARIABLE
-        etdata global var that hold et data and
-        geometry info,  defined in scripts.html
-        */
-        window.map.data = new google.maps.Data({
-            map: window.map
-        });
-
-        window.map.data.addGeoJson(data);
-        /*
-        //Only show data that are in current map bound
-        setTimeout(function () {
-            var msg = 'Adding layers to map';
-            start_progressbar(msg=msg);
-            window.map.data.forEach(function (feature) {
-                var feat_bounds = new google.maps.LatLngBounds();
-                processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
-                var sw = feat_bounds.getSouthWest();
-                var ne = feat_bounds.getNorthEast();
-                if (!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
-                    data.remove(feature);
-                }
-            });
-            end_progressbar();
-        }, 500);
-        */
-
-        /*
-        // zoom to show all the features
-        bounds = new google.maps.LatLngBounds();
-        window.map.data.addListener('addfeature', function(e) {
-            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
-            window.map.fitBounds(bounds);
-        });
-        */
-        window.map.data.addListener('click', function (e) {
-            var feat_idx =  e.feature.getProperty('idx'),
-                y_idx, years = $('#years').val(), year;
-            $('#feat_indices').val(feat_idx);
-
-            if (years.length != 1) {
-                ajax_set_feat_data();
-            }else{
-                MAP_APP.initialize_dataModal(window.DATA.geomdata[years[0]]['features'][feat_idx]);
-                var featdata = {}
-                for (y_idx = 0; y_idx < years.length; y_idx++) {
-                    year = years[y_idx];
-                    featdata[year] = {type: 'FeatureCollection', features: []};
-                    featdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
-                }
-                MAP_APP.add_dataToModal(feat_idx, featdata);
-                $('#dataModal').modal('toggle');
-            }
-        });
-    },
-    set_map_overlay: function(){
-        //Sanity check
-        start_progressbar(mgs='Adding layers to map');
-        if (Object.keys(DATA.geomdata).length == 0) {
-            return;
+        gf_data = {
+            'geomdata': geomdata,
+            'featdata': featdata
         }
-        var region = $('#region').val(),
-            region_zoom = js_statics.map_zoom_by_region[region],
-            year = $('#year').val(),
-            data = DATA.geomdata[year];
-
-        MAP_APP.set_data_layer(data);
-        if (window.map.getZoom() < region_zoom){
-            window.map.setZoom(region_zoom);
-        }
-        end_progressbar();
-    },
-    set_choropleth_layer: function () {
-        //Sanity check
-        start_progressbar(mgs='Adding layers to map');
-        if (Object.keys(DATA.geomdata).length == 0) {
-            return;
-        }
-        //Set styles for chloropleth map
-        var start_color = MAP_APP.set_start_color(),
-            year = $('#years').val()[0],
-            cb = MAP_APP.set_feat_colors(start_color, 'darken', year),
-            region = $('#region').val(),
-            region_zoom = js_statics.map_zoom_by_region[region],
-            data = DATA.geomdata[year];
-
-        MAP_APP.set_data_layer(data);
-        MAP_APP.set_feat_styles(window.map.data, cb, start_color, year);
-        //Draw the colorbar
-        MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
-        //Set the map zoom
-        if (window.map.getZoom() < region_zoom){
-            window.map.setZoom(region_zoom);
-        }
-        end_progressbar();
-    },
-    delete_map_layers: function () {
-        if (window.map.data) {
-            window.map.data.forEach(function (feature) {
-                window.map.data.remove(feature);
-                //window.map.data.setStyle(feature, {});
-            });
-
-            //window.map.data.setStyle({});
-            window.map.data.setMap(null);
-            //window.map.data = new google.maps.Data({});
-        }
+        return gf_data;
     }
 }
 
 var OL_MAP_APP = OL_MAP_APP || {};
 OL_MAP_APP = {
-    set_ol_raster: function(){
-        var raster = new ol.layer.Tile({
-            source: new ol.source.OSM()
-        });
-        return raster;
-    },
     styleFunction: function(feature) {
+        /*
+        Sets the feature styles for Choropleth map
+        */
         var year = $('#years').val()[0],
             idx = feature.get('idx'),
             v = $('#variable').val(),
@@ -429,7 +295,8 @@ OL_MAP_APP = {
                 break;
             }
         }
-        var style = new ol.style.Style({
+        var
+    style = new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: 'black',
                 width: 2
@@ -441,10 +308,14 @@ OL_MAP_APP = {
         return style;
     },
     defaultStyleFunction: function(feature){
+        /*
+        Sets the default feature styles for non-choropleth map layers
+        e.g., mutliple years
+        */
         var style = new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: 'blue',
-                lineDash: [4],
+                color: 'black',
+                // lineDash: [4],
                 width: 2
             }),
             fill: new ol.style.Fill({
@@ -453,15 +324,10 @@ OL_MAP_APP = {
         });
         return style;
     },
-    set_vector_source: function(year){
-        var vectorSource = new ol.source.Vector({
-            features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
-                {featureProjection: window.map.getView().getProjection()})
-        });
-        window.vectorSource = vectorSource;
-    },
     delay : function( timeout, id, callback ){
-        //Need this ro zoom properly
+        /*
+        Delay needed for zooming to work properly
+        */
         this.delays = this.delays || [];
         var delay = this.delays[ id ];
         if ( delay )
@@ -472,7 +338,10 @@ OL_MAP_APP = {
         this.delays[ id ] = delay;
     },
     on_zoom_change_region: function(evt){
-        //Change the region at different zoom levels
+        /*
+        Change the region at different zoom levels
+        when user zooms on map (auto_set_region = true)
+        */
         var zoom = window.map.getView().getZoom();
         if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
             var region = $('#region').val(),
@@ -483,6 +352,11 @@ OL_MAP_APP = {
         }
     },
     set_map_zoom_pan_listener: function(auto_set_region=false) {
+        /*
+        When aut_set_region = true we change region when user changes zoom on map
+        via the moveend listener (detects pan and zoom)
+        else (region was changed in the form), disbale the moveend listener
+        */
         if (!auto_set_region) {
             try {
                 window.map.un('moveend', OL_MAP_APP.on_zoom_change_region);
@@ -498,14 +372,40 @@ OL_MAP_APP = {
         }
     },
     zoom_to_layer_extent: function(vectorSource){
+        /*
+        Zoom to the extent of the current map layer
+        */
         if (vectorSource.getState() === 'ready') {
             OL_MAP_APP.delay(500, "uniqueId", function() {
                 window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
             });
-            //window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
         }
     },
+    set_vector_source: function(year){
+        /*
+        Set global variable vectorSource
+        from geojson
+        */
+        var vectorSource = new ol.source.Vector({
+            features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
+                {featureProjection: window.map.getView().getProjection()})
+        });
+        window.vectorSource = vectorSource;
+    },
+    set_ol_raster: function(){
+        /*
+        Sets default openlayer basemap raster
+        FIX ME: there might be a better looking obne, e.g. satellite base
+        */
+        var raster = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+        return raster;
+    },
     get_choropleth_layer: function(){
+        /*
+        Sets the Choropleth map layer from the vectorSource
+        */
         OL_MAP_APP.set_vector_source($('#years').val()[0]);
         var geojsonLayer = new ol.layer.Vector({
             source: window.vectorSource,
@@ -514,6 +414,9 @@ OL_MAP_APP = {
         return geojsonLayer;
     },
     get_default_map_layer: function(){
+        /*
+        Gets the dafault map layer (not choropleth) for multiple years
+        */
         OL_MAP_APP.set_vector_source($('#years').val()[0]);
         var geojsonLayer = new ol.layer.Vector({
             source: window.vectorSource,
@@ -522,13 +425,19 @@ OL_MAP_APP = {
         return geojsonLayer;
     },
     set_map_layer: function(layer){
+        /*
+        Set the map Layer on the map
+        */
         window.map.addLayer(layer);
     },
     delete_map_layer: function(layer){
+        /*
+        Delete the map layer from the map
+        */
         window.map.removeLayer(layer)
     },
     initialize_popup_window: function(container, closer) {
-        var overlay = new ol.Overlay({
+        var overlay = new ol.Overlay({
             element: container,
             autoPan: true,
             autoPanAnimation: {
@@ -543,7 +452,8 @@ OL_MAP_APP = {
         return overlay;
     },
     set_popup_header: function(geomdata){
-        var geom_meta_cols = statics.geo_meta_cols[$('#region').val()],
+        //var geom_meta_cols = statics.geo_meta_cols[$('#region').val()],
+        var geom_meta_cols = ['NAME'],
             i, j, key, br = '<br>', html = '',
             year = $('#years').val()[0];
         for (j = 0; j < geomdata[year]['features'].length; j++) {
@@ -557,14 +467,13 @@ OL_MAP_APP = {
         }
         return html;
     },
-    set_popup_data: function(featdata){
-        var feat_indices = $('#feat_indices').val().replace(', ', ',').split(','),
-            y_idx, year, years,
-            html, val_list, new_prop_names,
+    set_popup_data: function(featdata, area_ave=false){
+        var y_idx, year, years,
+            html, val_list, new_prop_names, val_dict,
             et_var = $('#variable').val(),
             t_res = $('#t_res').val(),
             time_period = $('#time_period').val(),
-            stat = $('#time_period_statistic').val(), val_dict;
+            stat = $('#time_period_statistic').val();
 
         if ($.type(time_period) == 'string') {
             time_period = [time_period];
@@ -575,13 +484,17 @@ OL_MAP_APP = {
             years = [$('#year').val()];
         }
         //Populate the columnnames
-        val_dict = MAP_APP.set_dataModalValList_multiYear(years, et_var, t_res, time_period, stat, featdata, feat_indices);
+        val_dict = MAP_APP.set_dataModalValList_multiYear(featdata, area_ave=area_ave);
         new_prop_names = MAP_APP.set_dataModalPropertyNames(et_var, t_res, time_period, stat);
         html = MAP_APP.set_dataModalData(val_dict, new_prop_names);
         return html;
     },
-    set_popup_window: function(evt, content, overlay, overlay_type) {
-        var feats = [], feat_idx, feat_indices = [], html = '', featdata = {},
+    set_popup_window_single_feat: function(evt, overlay_type) {
+        /*
+        Sets the popup window when user clicks on a layer
+        */
+        var popup_content = document.getElementById('popup-content'),
+            feats = [], feat_idx, feat_indices = [], html = '', featdata = {},
             i, years = $('#years').val(), year, coordinate, geomdata;
 
         //get the features that where clicked on
@@ -597,30 +510,42 @@ OL_MAP_APP = {
 
         $('#feat_indices').val(feat_indices.join(','));
         if (years.length != 1) {
-            ajax_set_ol_feat_data(evt, content, overlay, overlay_type);
+            //Multiple years, we need to query the database to get data for each year
+            ajax_set_ol_feat_data(evt, popup_content, overlay_type);
         }else{
-            year = years[0];
-            featdata = {}
-            geomdata = {};
-            featdata[year] = {type: 'FeatureCollection', features: []};
-            geomdata[year] = {type: 'FeatureCollection', features: []};
-            for (i = 0; i < feats.length; ++i) {
-                feat_idx = feat_indices[i];
-                featdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
-                geomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
-            }
-            html += OL_MAP_APP.set_popup_header(geomdata);
+            var gf_data = MAP_APP.set_feature_data(years, feats);
+            html += OL_MAP_APP.set_popup_header(gf_data['geomdata']);
             if (overlay_type == 'choropleth') {
-                html += OL_MAP_APP.set_popup_data(featdata);
+                html += OL_MAP_APP.set_popup_data(gf_data['featdata']);
             }
             coordinate = evt.coordinate;
-            content.innerHTML = html;
-            overlay.setPosition(coordinate);
+            popup_content.innerHTML = html;
+            window.popup_layer.setPosition(coordinate);
         }
     },
-    set_map_layer_and_popup: function(auto_set_region=false){
-        var popup_container = document.getElementById('popup'),
-            popup_content = document.getElementById('popup-content');
+    set_multi_feat_popup: function(selectedFeatures) {
+        /*
+        Sets the popup window for multiple features chosen via dragbox
+        */
+
+        var feats = selectedFeatures.getArray(),
+            years = $('#years').val();
+
+        var gf_data = MAP_APP.set_feature_data(years, feats),
+            popup_content = document.getElementById('popup-content'),
+            html = OL_MAP_APP.set_popup_header(gf_data['geomdata']);
+        html += OL_MAP_APP.set_popup_data(gf_data['featdata'], area_ave = true);
+        popup_content.innerHTML = html;
+        var coordinate = feats[0].getGeometry().getCoordinates()[0];
+        while (coordinate.length != 2){
+            coordinate = coordinate[0]
+        }
+        window.popup_layer.setPosition(coordinate);
+    },
+    set_map_layer_and_single_feat_popup: function(auto_set_region=false){
+        /*
+        Updates the map and sets up the popup window for click on single feature
+        */
 
         //Set the choropleth or default layer
         if ($('#years').val().length == 1) {
@@ -648,8 +573,49 @@ OL_MAP_APP = {
         }
         //Add the click event to the map
         window.map.on('click', function(evt) {
-            OL_MAP_APP.set_popup_window(evt, popup_content, window.popup_layer,  overlay_type);
+            OL_MAP_APP.set_popup_window_single_feat(evt, overlay_type);
         });
+    },
+    set_dragbox: function(){
+        /*
+        Allows selection of mutliple features via dragbox
+        Use Ctrl+Drag (Command+Drag on Mac) to draw boxes
+        */
+        // a normal select interaction to handle click
+        var select = new ol.interaction.Select();
+        window.map.addInteraction(select);
+
+        var selectedFeatures = select.getFeatures();
+
+        // a DragBox interaction used to select features by drawing boxes
+        var dragBox = new ol.interaction.DragBox({
+            condition: ol.events.condition.platformModifierKeyOnly
+        });
+        window.map.addInteraction(dragBox);
+
+        dragBox.on('boxend', function() {
+            // features that intersect the box are added to the collection of
+            // selected features
+            var extent = dragBox.getGeometry().getExtent();
+            window.vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
+                selectedFeatures.push(feature);
+            });
+            // Show the popup window with area avearged stats
+            OL_MAP_APP.set_multi_feat_popup(selectedFeatures);
+        });
+
+        // clear selection when drawing a new box and when clicking on the map
+        dragBox.on('boxstart', function() {
+            selectedFeatures.clear();
+        });
+
+        /*
+        selectedFeatures.on(['add', 'remove'], function() {
+            var names = selectedFeatures.getArray().map(function(feature) {
+                return feature.get('name');
+            });
+        });
+        */
     }
 }
 
@@ -682,7 +648,9 @@ var initialize_ol_map = function() {
     if (region == "ee_map"){
         //ajax_get_ee_map();
     }else {
-        OL_MAP_APP.set_map_layer_and_popup(auto_set_region=true);
+        //
+        OL_MAP_APP.set_map_layer_and_single_feat_popup(auto_set_region=true);
+        OL_MAP_APP.set_dragbox();
     }
     //Set the map so that it changes region at differnet zoom levels
     OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);

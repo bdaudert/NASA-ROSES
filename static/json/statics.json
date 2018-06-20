@@ -131,6 +131,16 @@
         "US_HUC8_west": ["AREASQKM", "STATES", "HUC2", "NAME"],
         "US_HUC10_west": ["AREASQKM", "STATES", "HUC2", "NAME"]
     },
+    "area_param": {
+        "Mason": "AREA",
+        "US_states_west_500k": "AWATER",
+        "US_counties_west_500k": "AWATER",
+        "US_HUC2_west": "AREASQKM",
+        "US_HUC4_west": "AREASQKM",
+        "US_HUC6_west": "AREASQKM",
+        "US_HUC8_west": "AREASQKM",
+        "US_HUC10_west": "AREASQKM"
+    },
     "geo_meta_cols_type": {
         "Mason":["int", "str", "str", "str", "str", "str", "str", "int", "float"],
         "US_states_west_500k": ["str", "str", "str", "float", "float"],

@@ -199,6 +199,11 @@ label.form-group-header {
 }
 
 /*Openlayers*/
+.ol-dragbox {
+    background-color: '#ffffff';
+    border-color: '#000000';
+}
+
 .ol-popup {
     position: absolute;
     background-color: white;
