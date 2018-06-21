@@ -46,7 +46,9 @@ function change_inRegion(region, auto_set_region=false){
 }
 
 function change_inYear(year){
-	//Clear the featuer indices
+	//couple years field
+    $('#years').val([year]);
+	//Clear the feature indices
 	$('#feat_indices').val('');
 	// Hide the popup window
 	if (window.popup_layer) {
@@ -62,8 +64,6 @@ function change_inYear(year){
 	ajax_update_etdata_and_map(auto_set_region=false);
 	window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
 	OL_MAP_APP.set_map_layer(window.main_map_layer);
-	//couple years field
-    $('#years').val([$('#year').val()]);
 }
 
 function change_inYears(years){

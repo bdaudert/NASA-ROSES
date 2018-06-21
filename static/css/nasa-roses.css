@@ -23,6 +23,14 @@ body {
 
 }
 
+.large {
+    font-size: x-large;
+}
+
+.error {
+    color: red;
+}
+
 #header-container{
     padding: 2%;
     width: 100%;
