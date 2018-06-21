@@ -130,7 +130,7 @@ MAP_APP = {
         NOTE: stat is computed over each feature
         */
         var val_list = [], d;
-        //Return data for each feature separately
+        // Return data for each feature separately
         d = $.map(featdata['features'], function (f_data) {
             return MAP_APP.set_singleYear_singleFeat_valList(f_data);
         });
@@ -142,19 +142,20 @@ MAP_APP = {
         Sets the value list by area averaging over the features in featdata
         */
         var val_lists = [], d, total_area = 0, f_area, feat_areas = [], feat_vals = [],
-            f_idx, v_idx, val_list = [],d,
+            v_idx, val_list = [],d,
             area_param = statics.area_param[$('#region').val()];
 
-        //Return data for each feature separately
+        // Return data for each feature separately
         $.map(featsdata['features'], function (f_data) {
             val_lists.push(MAP_APP.set_singleYear_singleFeat_valList(f_data));
             f_area = f_data['properties'][area_param]
             feat_areas.push(f_area);
             total_area += f_area;
         });
-        for (f_idx = 0; f_idx < feat_areas.length; f_idx++) {
-            d = $.map(val_lists[f_idx], function (val) {
-                return val * feat_areas[f_idx] / total_area;
+        // Area average over features
+        for (v_idx = 0; v_idx < val_lists[0].length; v_idx ++) {
+            d = $.map(feat_areas, function (feat_area, f_idx) {
+                return val_lists[f_idx][v_idx] * feat_area / total_area;
             });
             val_list.push(myRound(d.sum(), 4));
         }
@@ -592,7 +593,7 @@ OL_MAP_APP = {
             window.popup_layer.setPosition(coordinate);
         }
     },
-    set_map_layer_and_single_feat_popup: function(auto_set_region=false){
+    update_map_layer: function(auto_set_region=false){
         /*
         Updates the map and sets up the popup window for click on single feature
         */
@@ -701,7 +702,7 @@ var initialize_ol_map = function() {
         //ajax_get_ee_map();
     }else {
         //
-        OL_MAP_APP.set_map_layer_and_single_feat_popup(auto_set_region=true);
+        OL_MAP_APP.update_map_layer(auto_set_region=true);
         OL_MAP_APP.set_dragbox();
     }
     //Set the map so that it changes region at differnet zoom levels

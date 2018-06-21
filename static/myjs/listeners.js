@@ -23,4 +23,12 @@ $(document).ready(function () {
     $('#t_res').on('change', function(){
         change_inTRes($(this).val());
     });
+
+    $('#time_period').on('change', function(){
+        change_inTimePeriod($(this).val());
+    });
+
+    $('#time_period_statistic').on('change', function(){
+        change_inTimePeriodStat($(this).val());
+    });
 });

@@ -3,31 +3,37 @@ function change_inRegion(region, auto_set_region=false){
 	auto_set_region = true: we change the region according to zoom level
 	aut_region = false: region is only determiined by region value, not by zoom level
 	*/
-	//Clear the featuer indices
+	// Clear the feature indices
 	$('#feat_indices').val('');
 	// Hide the popup window
 	if (window.popup_layer) {
         window.popup_layer.setPosition(undefined);
     }
 	if (region != $('#region').val()){
-		//Zoom level was changed
-		//We need to change the region value
+		// Zoom level was changed
+		// We need to change the region value
 		$('#region').val(region);
 	}
-    //Delete old layer
-    //MAP_APP.delete_map_layers();
+    // Delete old layer
+    // MAP_APP.delete_map_layers();
 	OL_MAP_APP.delete_map_layer(window.main_map_layer);
 	//Set the new map_layer
 	if (region == "ee_map"){
-		//Generate a dynamic map with EE
-		//ajax_get_ee_map();
+		// Generate a dynamic map with EE
+		// ajax_get_ee_map();
 	}else{
 		// We ned to recompute the template vars
-		//geodata, etdata and set the new map layer
+		// geodata, etdata and set the new map layer
 		ajax_update_etdata_and_map(auto_set_region=auto_set_region);
 	}
+
 	if (region.is_in(['US_fields', 'Mason'])){
-        //Field data
+		// If mutiple years are displayed, switch to single year
+		if ($('#years').val().length != 1){
+			$('#year').val($('#years').val()[0]);
+			$('#years').val([$('#year').val()]);
+		}
+        // Field data
 		$('#form-year').css('display', 'inline');
 		$('#form-years').css('display', 'none');
         //Not clear if/when this will be used
@@ -193,6 +199,26 @@ function change_inTRes(resolution){
     if ($('#region').val() == 'ee_map'){
     	//Get the map from db
     }
+}
+
+function change_inTimePeriod(time_period){
+    // Hide the popup window
+	if (window.popup_layer) {
+        window.popup_layer.setPosition(undefined);
+    }
+    if (window.selectedFeatures){
+		 window.selectedFeatures.clear();
+	}
+}
+
+function change_inTimePeriodStat(time_period_stat){
+    // Hide the popup window
+	if (window.popup_layer) {
+        window.popup_layer.setPosition(undefined);
+    }
+    if (window.selectedFeatures){
+		 window.selectedFeatures.clear();
+	}
 }
 
 function get_feat_index_from_featdata(year) {

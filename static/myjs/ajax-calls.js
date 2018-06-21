@@ -90,7 +90,7 @@ function ajax_update_etdata_and_map(auto_set_region=false){
 
         }
         //Set new map layer
-        OL_MAP_APP.set_map_layer_and_single_feat_popup(auto_set_region=auto_set_region);
+        OL_MAP_APP.update_map_layer(auto_set_region=auto_set_region);
         OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
         end_progressbar();
     })
