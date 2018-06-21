@@ -9,6 +9,10 @@ function change_inRegion(region, auto_set_region=false){
 	if (window.popup_layer) {
         window.popup_layer.setPosition(undefined);
     }
+    if (window.selectedFeatures){
+		 window.selectedFeatures.clear();
+	}
+
 	if (region != $('#region').val()){
 		// Zoom level was changed
 		// We need to change the region value

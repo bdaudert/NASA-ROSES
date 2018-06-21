@@ -338,8 +338,7 @@ OL_MAP_APP = {
                 break;
             }
         }
-        var
-    style = new ol.style.Style({
+        var style = new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: 'black',
                 width: 2
@@ -490,6 +489,9 @@ OL_MAP_APP = {
         closer.onclick = function() {
             overlay.setPosition(undefined);
             closer.blur();
+            if (window.selectedFeatures){
+		        window.selectedFeatures.clear();
+	        }
             return false;
         };
         return overlay;
@@ -630,7 +632,18 @@ OL_MAP_APP = {
         Use Ctrl+Drag (Command+Drag on Mac) to draw boxes
         */
         // a normal select interaction to handle click
-        var select = new ol.interaction.Select();
+        var selectStyle = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                width: 2
+            }),
+            fill: new ol.style.Fill({
+                color: 'rgba(0, 0, 255, 0.1)'
+            })
+        });
+        var select = new ol.interaction.Select({
+            style:selectStyle
+        });
         window.map.addInteraction(select);
 
         window.selectedFeatures = select.getFeatures();
