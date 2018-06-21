@@ -1,7 +1,7 @@
 {
     "form_option_keys": [
-        "tool_action", "region", "aggregation_area",
-        "variable", "dataset", "et_model", "t_res", "time_period_statistic"
+        "tool_action", "region", "aggregation_area", "variable", "dataset", "et_model", "t_res",
+        "years_statistic", "time_period_statistic"
     ],
     "variable_defaults":  {
         "tool_action": "None",
@@ -9,6 +9,7 @@
         "aggregation_area": "",
         "year": "2003",
         "years": ["2003"],
+        "years_statistic": "none",
         "variable": "et",
         "dataset": "MODIS",
         "et_model": "SSEBop",
@@ -57,6 +58,11 @@
     "all_t_res":  {
             "monthly": "Monthly",
             "annual": "Annual"
+    },
+    "all_years_statistic": {
+        "none": "None",
+        "sum": "Sum",
+        "mean": "Mean"
     },
     "all_time_period_statistic": {
         "none": "None",

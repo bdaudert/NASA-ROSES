@@ -3,6 +3,12 @@ function change_inRegion(region, auto_set_region=false){
 	auto_set_region = true: we change the region according to zoom level
 	aut_region = false: region is only determiined by region value, not by zoom level
 	*/
+	//Clear the featuer indices
+	$('#feat_indices').val('');
+	// Hide the popup window
+	if (window.popup_layer) {
+        window.popup_layer.setPosition(undefined);
+    }
 	if (region != $('#region').val()){
 		//Zoom level was changed
 		//We need to change the region value
@@ -18,8 +24,7 @@ function change_inRegion(region, auto_set_region=false){
 	}else{
 		// We ned to recompute the template vars
 		//geodata, etdata and set the new map layer
-		//ajax_update_data_and_map();
-		ajax_update_ol_data_and_map(auto_set_region=auto_set_region);
+		ajax_update_etdata_and_map(auto_set_region=auto_set_region);
 	}
 	if (region.is_in(['US_fields', 'Mason'])){
         //Field data
@@ -41,14 +46,20 @@ function change_inRegion(region, auto_set_region=false){
 }
 
 function change_inYear(year){
+	//Clear the featuer indices
+	$('#feat_indices').val('');
+	// Hide the popup window
+	if (window.popup_layer) {
+        window.popup_layer.setPosition(undefined);
+    }
+    if (window.selectedFeatures){
+		 window.selectedFeatures.clear();
+	}
 	//Delete old layer
-	//MAP_APP.delete_map_layers();
 	OL_MAP_APP.delete_map_layer(window.main_map_layer);
 	// We ned to recompute the template vars
 	//geodata, etdata
-	//ajax_update_data_and_map();
-	ajax_update_ol_data_and_map(auto_set_region=false);
-	//MAP_APP.set_choropleth_layer();
+	ajax_update_etdata_and_map(auto_set_region=false);
 	window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
 	OL_MAP_APP.set_map_layer(window.main_map_layer);
 	//couple years field
@@ -56,16 +67,24 @@ function change_inYear(year){
 }
 
 function change_inYears(years){
-    //MAP_APP.delete_map_layers();
+    //Clear the featuer indices
+	$('#feat_indices').val('');// Hide the popup window
+	if (window.popup_layer) {
+        window.popup_layer.setPosition(undefined);
+    }
+    if (window.selectedFeatures){
+		 window.selectedFeatures.clear();
+	}
+	//Delete old layer
 	OL_MAP_APP.delete_map_layer(window.main_map_layer);
 	if (years.length != 1){
-		$('#form-statistic').css('display', 'block');
+		//$('#form-timeperiod-statistic').css('display', 'block');
 		window.main_map_layer = OL_MAP_APP.get_default_map_layer();
 		OL_MAP_APP.set_map_layer(window.main_map_layer);
 	} else{
 		//New map layer is set inside ajax call (async issue)
-		ajax_update_ol_data_and_map(auto_set_region=false);
-		$('#form-statistic').css('display', 'none');
+		ajax_update_etdata_and_map(auto_set_region=false);
+		//$('#form-timeperiod-statistic').css('display', 'none');
 	}
 	//Couple year field to be first year of selection
     $('#year').val($('#years').val()[0])
@@ -73,7 +92,17 @@ function change_inYears(years){
 
 
 function change_inVariable(variable){
-    if ($('#region').val().is_in(['US_fields', 'Mason'])){
+	//Clear the featuer indices
+	$('#feat_indices').val('');
+	// Hide the popup window
+	if (window.popup_layer) {
+        window.popup_layer.setPosition(undefined);
+    }
+    if (window.selectedFeatures){
+		 window.selectedFeatures.clear();
+	}
+
+	if ($('#region').val().is_in(['US_fields', 'Mason'])){
     	//Set new dataModal
 
     }
@@ -108,16 +137,23 @@ function change_inVariable(variable){
 
 function change_inTRes(resolution){
     var tps, tp, tp_name, option, key, key_list = [];
+
+    //Clear the featuer indices
+	$('#feat_indices').val('');
+    // Hide the popup window
+	if (window.popup_layer) {
+        window.popup_layer.setPosition(undefined);
+    }
+    if (window.selectedFeatures){
+		 window.selectedFeatures.clear();
+	}
+
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');
+        $('#form-timeperiod-statistic').css('display', 'none');
         if ($('#years').css('display') !=  'none'){
         	//Mutiple years
 			var year_list = $('#years').val();
-        	if ($('#years').val().length != 1) {
-				$('#form-statistic').css('display', 'block');
-            }else{
-        		$('#form-statistic').css('display', 'none');
-			}
 			//Set time_period option to the year list
 			tps = {}
 			for (var i=0; i< year_list.length; i++ ){
@@ -126,7 +162,7 @@ function change_inTRes(resolution){
 		}
 		else {
         	//Only one year is displayed
-            $('#form-statistic').css('display', 'none');
+            $('#form-timeperiod-statistic').css('display', 'none');
             $('#time_period').val($('#year').val());
             $('#time_period_statistic').val('none');
             tps = {};
@@ -139,7 +175,7 @@ function change_inTRes(resolution){
     }
     else{
         $('#form-timeperiod').css('display','block');
-        $('#form-statistic').css('display','block');
+        $('#form-timeperiod-statistic').css('display','block');
         tps = statics.time_period_by_res[resolution];
     }
 

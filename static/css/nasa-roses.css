@@ -199,10 +199,7 @@ label.form-group-header {
 }
 
 /*Openlayers*/
-.ol-dragbox {
-    background-color: '#ffffff';
-    border-color: '#000000';
-}
+
 
 .ol-popup {
     position: absolute;
@@ -214,6 +211,10 @@ label.form-group-header {
     border: 1px solid #cccccc;
     bottom: 12px;
     left: -50px;
+    overflow-y: auto;
+    overflow-x: auto;
+    max-width: 700px;
+    max-height:700px;
     min-width: 280px;
 }
 .ol-popup:after, .ol-popup:before {
