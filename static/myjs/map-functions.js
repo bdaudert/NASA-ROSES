@@ -409,9 +409,14 @@ OL_MAP_APP = {
             idx = feature.get('idx'),
             v = $('#variable').val(),
             t_res = $('#t_res').val(),
-            et_var = statics.stats_by_var_res[v][t_res][0], color, i;
+            et_var = statics.stats_by_var_res[v][t_res][0], color = null, i;
 
-        var data_val = DATA.etdata[year].features[idx]['properties'][et_var];
+
+        var f_data = {'properties': DATA.etdata[year].features[idx]['properties']},
+            val_list = MAP_APP.set_singleYear_singleFeat_valList(f_data);
+        // Note: for Choro, val_list is always of length 1
+        var data_val = val_list[0];
+        //var data_val = DATA.etdata[year].features[idx]['properties'][et_var];
         //Find the right bin
         for (i = 0; i < window.bins.length; i++) {
             if (window.bins[i][0] <= data_val && data_val <= window.bins[i][1]) {
