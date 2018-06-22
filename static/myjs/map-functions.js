@@ -284,8 +284,6 @@ MAP_APP = {
                 }
             }
             // Add average
-            console.log(sm)                                       ;
-            console.log(Object.keys(val_dict_list[f_idx]).length);
             var ave = myRound(parseFloat(sm) / parseFloat(Object.keys(val_dict_list[f_idx]).length), 2);
             html += '<td>' + ave + '</td>';
             html += '</tr>';
