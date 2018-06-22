@@ -71,7 +71,7 @@ MAP_APP = {
         }
         mn = Math.floor(Math.min.apply(null, val_list));
         mx = Math.ceil(Math.max.apply(null, val_list));
-        step = (mx - mn) / num_colors;
+        step = myRound((mx - mn) / num_colors, 2);
         if ((mx - mn) % num_colors != 0) {
             mx = mx + step;
         }
@@ -79,7 +79,7 @@ MAP_APP = {
         while (j < mx) {
             new_color = MAP_APP.LightenDarkenColor(start_color, amt);
             colors.push(new_color);
-            bins.push([j, j + step]);
+            bins.push([myRound(j,2), myRound(j + step, 2)]);
             if (DOrL != 'darken') {
                 amt += 10;
             } else {
