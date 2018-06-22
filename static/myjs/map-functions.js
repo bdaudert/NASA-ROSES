@@ -183,7 +183,7 @@ MAP_APP = {
             d = $.map(feat_areas, function (feat_area, f_idx) {
                 return val_lists[f_idx][v_idx] * feat_area / total_area;
             });
-            val_list.push(myRound(d.sum(), 4));
+            val_list.push(myRound(d.sum(), 2));
         }
         return val_list;
     },
@@ -260,23 +260,34 @@ MAP_APP = {
         for (c_idx = 0; c_idx < col_names.length; c_idx++) {
             html += '<th>' + col_names[c_idx] + '</th>';
         }
+        // Add average over cols
+        html += '<th>Temporal Average</th>';
         html += '</tr>';
 
         // Table Body
-        //Features Loop
+        //Features Loop (rows)
         for (f_idx = 0; f_idx < val_dict_list.length; f_idx++) {
+            var ave = 0.0, sm = 0.0, last_key;
             html += '<tr><td>' + row_names[f_idx] + '</td>';
-            // Year or Multi-Year summary Loop
+            // Year or Multi-Year summary Loop (cols)
             for (key in val_dict_list[f_idx]) {
+                last_key = key;
                 if (val_dict_list[f_idx][key].length > 1) {
                     // Monthly Summary
                     for (c_idx = 0; c_idx < col_names.length; c_idx++) {
                         html += '<td>' + val_dict_list[f_idx][key][c_idx] + '</td>';
+                        sm = sm +  parseFloat(val_dict_list[f_idx][key][c_idx]);
                     }
                 }else{
                     html += '<td>' + val_dict_list[f_idx][key] + '</td>';
+                    sm = sm +  parseFloat(val_dict_list[f_idx][key]);
                 }
             }
+            // Add average
+            console.log(sm)                                       ;
+            console.log(Object.keys(val_dict_list[f_idx]).length);
+            var ave = myRound(parseFloat(sm) / parseFloat(Object.keys(val_dict_list[f_idx]).length), 2);
+            html += '<td>' + ave + '</td>';
             html += '</tr>';
         }
         return html;
