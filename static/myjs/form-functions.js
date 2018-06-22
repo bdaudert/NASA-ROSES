@@ -158,8 +158,6 @@ function change_inTRes(resolution){
 		 window.selectedFeatures.clear();
 	}
 
-	OL_MAP_APP.update_mape_layer();
-
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');
         $('#form-timeperiod-statistic').css('display', 'none');
@@ -205,6 +203,8 @@ function change_inTRes(resolution){
     if ($('#region').val() == 'ee_map'){
     	//Get the map from db
     }
+    // Update the map layer
+    OL_MAP_APP.update_map_layer();
 }
 
 function change_inTimePeriod(time_period){
@@ -215,24 +215,16 @@ function change_inTimePeriod(time_period){
     if (window.selectedFeatures){
 		 window.selectedFeatures.clear();
 	}
-	if (time_period.length == 1){
-		// Set monthly summary to none
-		$('#time_period_statistic').val('none');
+	if (time_period.length == 1) {
+        // Set monthly summary to none
+        $('#time_period_statistic').val('none');
+    	$('#form-timeperiod-statistic').css('display', 'none');
 	}else{
-		if ($('#time_period_statistic').val('none') != 'none' && $('#years').val().length == 1) {
-			// Statistic over month is set and we only have a single year --> choropleth
-            //Set Choropleth
-			// Set regular map layer
-			OL_MAP_APP.delete_map_layer(window.main_map_layer);
-			window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
-			OL_MAP_APP.set_map_layer(window.main_map_layer);
-        }else{
-			// Set regular map layer
-			OL_MAP_APP.delete_map_layer(window.main_map_layer);
-			window.main_map_layer = OL_MAP_APP.get_default_map_layer();
-			OL_MAP_APP.set_map_layer(window.main_map_layer);
-		}
+		$('#form-timeperiod-statistic').css('display', 'block');
 	}
+
+    // Update the map layer
+    OL_MAP_APP.update_map_layer();
 }
 
 function change_inTimePeriodStat(time_period_stat){
@@ -243,6 +235,8 @@ function change_inTimePeriodStat(time_period_stat){
     if (window.selectedFeatures){
 		 window.selectedFeatures.clear();
 	}
+	// Update the map layer
+    OL_MAP_APP.update_map_layer();
 }
 
 function get_feat_index_from_featdata(year) {

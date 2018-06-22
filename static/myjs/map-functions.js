@@ -12,8 +12,9 @@ MAP_APP = {
             return 'default';
         }
 
+
         // Single Year
-        if ($('#t_tes').val() == 'annual') {
+        if ($('#t_res').val() == 'annual') {
             return 'Choropleth';
         }
 
@@ -250,9 +251,6 @@ MAP_APP = {
         val_dict may have values for multiple years
         multi-year sumnmaries
         */
-        console.log(val_dict_list);
-        console.log(col_names);
-        console.log(row_names);
         var html = '<table border="1" cellpadding="5">',
             f_idx, r_idx, c_idx, key;
 
@@ -630,13 +628,14 @@ OL_MAP_APP = {
         /*
         Updates the map and sets up the popup window for click on single feature
         */
+        // Delete old layer
+        if (window.main_map_layer) {
+            OL_MAP_APP.delete_map_layer(window.main_map_layer);
+        }
+        // Find the new map type and set the map layer
         var map_type = MAP_APP.determine_map_type();
         //Set the choropleth or default layer
-        if (map_type == 'ee_mnap'){
-            if (window.main_map_layer) {
-                OL_MAP_APP.delete_map_layer(window.main_map_layer);
-            }
-        }else if (map_type == 'Choropleth') {
+        if (map_type == 'Choropleth') {
             //Set the colors for Choropleth map
             var year = $('#years').val()[0],
                 start_color = MAP_APP.set_start_color(),
