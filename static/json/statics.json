@@ -1,24 +1,35 @@
 {
     "form_option_keys": [
-        "tool_action", "region", "aggregation_area", "variable", "dataset", "et_model", "t_res",
-        "years_statistic", "time_period_statistic"
+        "tool_action",
+        "region",
+        "aggregation_area",
+        "variable",
+        "dataset",
+        "et_model",
+        "t_res",
+        "years_statistic",
+        "time_period_statistic"
     ],
-    "variable_defaults":  {
+    "variable_defaults": {
         "tool_action": "None",
         "region": "US_states_west_500k",
         "aggregation_area": "",
         "year": "2003",
-        "years": ["2003"],
+        "years": [
+            "2003"
+        ],
         "years_statistic": "none",
         "variable": "et",
         "dataset": "MODIS",
         "et_model": "SSEBop",
         "t_res": "annual",
-        "time_period": ["2003"],
+        "time_period": [
+            "2003"
+        ],
         "time_period_statistic": "none",
         "feat_indices": ""
     },
-    "all_region":  {
+    "all_region": {
         "US_states_west_500k": "States, Western US",
         "US_counties_west_500k": "Counties, Western US",
         "Mason": "Mason Valley"
@@ -33,31 +44,49 @@
         "HUC10": "HUC 10, Western US"
     },
     "all_year": {
-        "MODIS": ["2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010"]
+        "MODIS": [
+            "2003",
+            "2004",
+            "2005",
+            "2006",
+            "2007",
+            "2008",
+            "2009",
+            "2010"
+        ]
     },
     "all_years": {
-        "MODIS": ["2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010"]
+        "MODIS": [
+            "2003",
+            "2004",
+            "2005",
+            "2006",
+            "2007",
+            "2008",
+            "2009",
+            "2010"
+        ]
     },
-    "all_dataset":  {
+    "all_dataset": {
         "MODIS": "MODIS",
         "Landsat": "Landsat",
         "gridMET": "UI METDATA/gridMET"
     },
-    "all_variable":  {
+    "all_variable": {
         "et": "Actual ET",
         "etrf": "Fractional ET",
         "etr": "Reference ET",
         "pr": "Precipitation"
     },
-    "all_et_model":  {
+    "all_et_model": {
         "SSEBop": "SSEBop",
         "METRIC": "METRIC",
         "SIMS": "SIMS",
         "ensemble": "Ensemble"
     },
-    "all_t_res":  {
-            "monthly": "Monthly",
-            "annual": "Annual"
+    "all_t_res": {
+        "monthly": "Monthly",
+        "annual": "Annual"
     },
     "all_years_statistic": {
         "none": "None",
@@ -69,27 +98,55 @@
         "sum": "Sum",
         "mean": "Mean"
     },
-    "all_tool_action":  {
-        "None": "None",        
+    "all_tool_action": {
+        "None": "None",
         "get_map": "Get Map",
         "get_ts": "Get Time Series",
         "get_value": "Get Value"
     },
-    "dataset_by_var":  {
-        "et": ["MODIS", "Landsat"],
-        "etrf": ["MODIS", "Landsat"],
+    "dataset_by_var": {
+        "et": [
+            "MODIS",
+            "Landsat"
+        ],
+        "etrf": [
+            "MODIS",
+            "Landsat"
+        ],
         "etr": [],
-        "pr": ["gridMET"]
+        "pr": [
+            "gridMET"
+        ]
     },
     "response_vars": {
         "None": [],
-        "update_data": ["geomdata", "etdata"],
-        "get_feat_data": ["featdata", "geomdata", "etdata", "featgeomdata"],
-        "get_map": ["mapid", "token", "sharelink_map", "sharelink_ts"],
-        "get_ts": ["ts_data", "token", "sharelink_map", "sharelink_ts"],
-        "get_value": ["point_value"]
+        "update_data": [
+            "geomdata",
+            "etdata"
+        ],
+        "get_feat_data": [
+            "featsdata",
+            "geomdata",
+            "etdata",
+            "featsgeomdata"
+        ],
+        "get_map": [
+            "mapid",
+            "token",
+            "sharelink_map",
+            "sharelink_ts"
+        ],
+        "get_ts": [
+            "ts_data",
+            "token",
+            "sharelink_map",
+            "sharelink_ts"
+        ],
+        "get_value": [
+            "point_value"
+        ]
     },
-    "time_period_by_res":{
+    "time_period_by_res": {
         "monthly": {
             "1": "January",
             "2": "February",
@@ -118,24 +175,107 @@
         "annual": {}
     },
     "all_data_cols": [
-        "etr_annual", "et_annual", "etrf_annual", "pr_annual", "net_annual",
-        "etr_seasonal", "et_seasonal", "etrf_seasonal", "pr_seasonal", "net_seasonal",
-        "start_mon", "end_mon",
-        "etr_m01", "etr_m02", "etr_m03", "etr_m04", "etr_m05",
-        "etr_m06", "etr_m07", "etr_m08", "etr_m09", "etr_m10", "etr_m11", "etr_m12",
-        "et_m01", "et_m02" , "et_m03" , "et_m04", "et_m05",
-        "et_m06", "et_m07", "et_m08", "et_m09", "et_m10", "et_m11", "et_m12",
+        "etr_annual",
+        "et_annual",
+        "etrf_annual",
+        "pr_annual",
+        "net_annual",
+        "etr_seasonal",
+        "et_seasonal",
+        "etrf_seasonal",
+        "pr_seasonal",
+        "net_seasonal",
+        "start_mon",
+        "end_mon",
+        "etr_m01",
+        "etr_m02",
+        "etr_m03",
+        "etr_m04",
+        "etr_m05",
+        "etr_m06",
+        "etr_m07",
+        "etr_m08",
+        "etr_m09",
+        "etr_m10",
+        "etr_m11",
+        "etr_m12",
+        "et_m01",
+        "et_m02",
+        "et_m03",
+        "et_m04",
+        "et_m05",
+        "et_m06",
+        "et_m07",
+        "et_m08",
+        "et_m09",
+        "et_m10",
+        "et_m11",
+        "et_m12",
         "etrf_m01"
     ],
-    "geo_meta_cols": {
-        "Mason": ["OBJECTID", "STATE", "HUC8", "HUC8_NAME", "PIXELCOUNT", "AREA"],
-        "US_states_west_500k": ["STATEFP", "STUSPS", "NAME", "ALAND", "AWATER"],
-        "US_counties_west_500k": ["STATEFP", "COUNTYFP", "NAME", "ALAND", "AWATER"],
-        "US_HUC2_west": ["AREASQKM", "STATES", "HUC2", "NAME"],
-        "US_HUC4_west": ["AREASQKM", "STATES", "HUC2", "NAME"],
-        "US_HUC6_west": ["AREASQKM", "STATES", "HUC2", "NAME"],
-        "US_HUC8_west": ["AREASQKM", "STATES", "HUC2", "NAME"],
-        "US_HUC10_west": ["AREASQKM", "STATES", "HUC2", "NAME"]
+    "geom_meta_cols": {
+        "Mason": [
+            "OBJECTID",
+            "STATE",
+            "HUC8",
+            "HUC8_NAME",
+            "PIXELCOUNT",
+            "AREA"
+        ],
+        "US_states_west_500k": [
+            "STATEFP",
+            "STUSPS",
+            "NAME",
+            "ALAND",
+            "AWATER"
+        ],
+        "US_counties_west_500k": [
+            "STATEFP",
+            "COUNTYFP",
+            "NAME",
+            "ALAND",
+            "AWATER"
+        ],
+        "US_HUC2_west": [
+            "AREASQKM",
+            "STATES",
+            "HUC2",
+            "NAME"
+        ],
+        "US_HUC4_west": [
+            "AREASQKM",
+            "STATES",
+            "HUC2",
+            "NAME"
+        ],
+        "US_HUC6_west": [
+            "AREASQKM",
+            "STATES",
+            "HUC2",
+            "NAME"
+        ],
+        "US_HUC8_west": [
+            "AREASQKM",
+            "STATES",
+            "HUC2",
+            "NAME"
+        ],
+        "US_HUC10_west": [
+            "AREASQKM",
+            "STATES",
+            "HUC2",
+            "NAME"
+        ]
+    },
+    "geom_name_prop": {
+        "Mason": "OBJECTID",
+        "US_states_west_500k": "NAME",
+        "US_counties_west_500k": "NAME",
+        "US_HUC2_west": "NAME",
+        "US_HUC4_west": "NAME",
+        "US_HUC6_west": "NAME",
+        "US_HUC8_west": "NAME",
+        "US_HUC10_west": "NAME"
     },
     "area_param": {
         "Mason": "AREA",

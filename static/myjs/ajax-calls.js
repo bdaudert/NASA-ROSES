@@ -133,8 +133,8 @@ function ajax_set_featdata_on_feature_click(evt){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            //FIX ME, not sure why featdata do not need to be json parsed
-            if (tv_var.is_in(['featdata', 'featgeomdata'])) {
+            //FIX ME, not sure why featsdata do not need to be json parsed
+            if (tv_var.is_in(['featsdata', 'featsgeomdata'])) {
                 window.DATA[tv_var] = r[tv_var];
             }
             else{
@@ -144,8 +144,8 @@ function ajax_set_featdata_on_feature_click(evt){
         year = $('#years').val()[0];
         feat_idx_list = get_feat_index_from_featdata(year);
         if (feat_idx_list.length != 0){
-            html += OL_MAP_APP.set_popup_header(r['featgeomdata']);
-            html += OL_MAP_APP.set_popup_data(r['featdata'], area_ave=false);
+            html += MAP_APP.set_dataModalHeader();
+            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
             coordinate = evt.coordinate;
             popup_content.innerHTML = html;
             window.popup_layer.setPosition(coordinate);
@@ -192,8 +192,8 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            //FIX ME, not sure why featdata do not need to be json parsed
-            if (tv_var.is_in(['featdata', 'featgeomdata'])) {
+            //FIX ME, not sure why featsdata do not need to be json parsed
+            if (tv_var.is_in(['featsdata', 'featsgeomdata'])) {
                 window.DATA[tv_var] = r[tv_var];
             }
             else{
@@ -204,8 +204,8 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         feat_idx_list = $('#feat_indices').val().replace(', ', ',').split(',');
         if (feat_idx_list.length != 0){
             // Set the popup data
-            html += OL_MAP_APP.set_popup_header(r['featgeomdata']);
-            html += OL_MAP_APP.set_popup_data(r['featdata'], area_ave=true);
+            html += MAP_APP.set_dataModalHeader();
+            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
             // Show the popup
             popup_content.innerHTML = html;
             var feats = selectedFeatures.getArray(),

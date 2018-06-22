@@ -213,6 +213,24 @@ function change_inTimePeriod(time_period){
     if (window.selectedFeatures){
 		 window.selectedFeatures.clear();
 	}
+	if (time_period.length == 1){
+		// Set monthly summary to none
+		$('#time_period_statistic').val('none');
+	}else{
+		if ($('#time_period_statistic').val('none') != 'none' && $('#years').val().length == 1) {
+			// Statistic over month is set and we only have a single year --> choropleth
+            //Set Choropleth
+			// Set regular map layer
+			OL_MAP_APP.delete_map_layer(window.main_map_layer);
+			window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
+			OL_MAP_APP.set_map_layer(window.main_map_layer);
+        }else{
+			// Set regular map layer
+			OL_MAP_APP.delete_map_layer(window.main_map_layer);
+			window.main_map_layer = OL_MAP_APP.get_default_map_layer();
+			OL_MAP_APP.set_map_layer(window.main_map_layer);
+		}
+	}
 }
 
 function change_inTimePeriodStat(time_period_stat){
@@ -228,7 +246,7 @@ function change_inTimePeriodStat(time_period_stat){
 function get_feat_index_from_featdata(year) {
     var f_idx_list = $('#feat_indices').val().replace(', ', ',').split(','), indices = [];
 
-    $.each(window.DATA.featgeomdata[year]['features'], function(idx, feat_data){
+    $.each(window.DATA.featsgeomdata[year]['features'], function(idx, feat_data){
         if (f_idx_list.includes(String(feat_data['properties']['idx']))) {
             indices.push(String(idx));
         }
