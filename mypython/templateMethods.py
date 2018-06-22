@@ -68,6 +68,27 @@ def set_database_util(year, tv):
     DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
     return DU
 
+def set_map_type(tv):
+    if (tv['variables']['region'] == 'ee_map'):
+        return 'ee_map'
+
+    # Multi year
+    if len(tv['variables']['years']) != 1:
+        return 'default'
+
+    # Single Year
+    if tv['variables']['t_res'] == 'annual':
+        return 'Choropleth'
+
+    # Sub Annual
+    if  len(tv['variables']['time_period']) == 1:
+        return 'Choropleth'
+
+    # Multiple time periods
+    if tv['variables']['time_period_statistic'] != 'none':
+        return 'Choropleth'
+
+    return 'default'
 
 def set_template_values(RequestHandler, app_name, method):
     '''
@@ -105,6 +126,9 @@ def set_template_values(RequestHandler, app_name, method):
     tv['variables'].update(dates)
     # Set form options
     tv['form_options'] = set_form_options(tv['variables'])
+
+    # Set the map type
+    tv['variables']['map_type'] = set_map_type(tv)
 
     # Get the etdata and geometry from the geo database
     tv['etdata'] = {}

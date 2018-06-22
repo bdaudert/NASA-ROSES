@@ -148,7 +148,7 @@ function change_inVariable(variable){
 function change_inTRes(resolution){
     var tps, tp, tp_name, option, key, key_list = [];
 
-    //Clear the featuer indices
+    //Clear the featuere indices
 	$('#feat_indices').val('');
     // Hide the popup window
 	if (window.popup_layer) {
@@ -157,6 +157,8 @@ function change_inTRes(resolution){
     if (window.selectedFeatures){
 		 window.selectedFeatures.clear();
 	}
+
+	OL_MAP_APP.update_mape_layer();
 
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');

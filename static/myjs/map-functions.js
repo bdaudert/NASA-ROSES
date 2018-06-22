@@ -3,6 +3,31 @@
 // General map utils (google map api and openlayers)
 var MAP_APP = MAP_APP || {};
 MAP_APP = {
+    determine_map_type: function(){
+        /*
+        Determines map type (choropleth or default)
+        from form inputs
+        */
+        if ($('#years').val().length != 1) {
+            return 'default';
+        }
+
+        // Single Year
+        if ($('#t_tes').val() == 'annual') {
+            return 'Choropleth';
+        }
+
+        // Sub Annual
+        if ($('#time_period').val().length == 1){
+            return 'Choropleth';
+        }
+
+        // Multiple time periods
+        if ($('#time_period_statistic').val() != 'none'){
+            return 'Choropleth';
+        }
+        return 'default';
+    },
     set_start_color: function () {
         return '#9bc2cf';
     },
@@ -605,9 +630,13 @@ OL_MAP_APP = {
         /*
         Updates the map and sets up the popup window for click on single feature
         */
-
+        var map_type = MAP_APP.determine_map_type();
         //Set the choropleth or default layer
-        if ($('#years').val().length == 1) {
+        if (map_type == 'ee_mnap'){
+            if (window.main_map_layer) {
+                OL_MAP_APP.delete_map_layer(window.main_map_layer);
+            }
+        }else if (map_type == 'Choropleth') {
             //Set the colors for Choropleth map
             var year = $('#years').val()[0],
                 start_color = MAP_APP.set_start_color(),
@@ -720,10 +749,8 @@ var initialize_ol_map = function() {
     if (region == "ee_map"){
         //ajax_get_ee_map();
     }else {
-        OL_MAP_APP.delay(500, "uniqueId", function() {
-            OL_MAP_APP.update_map_layer(auto_set_region = true);
-            OL_MAP_APP.set_dragbox();
-        });
+        OL_MAP_APP.update_map_layer(auto_set_region = true);
+        OL_MAP_APP.set_dragbox();
     }
     //Set the map so that it changes region at differnet zoom levels
     OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);

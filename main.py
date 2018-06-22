@@ -148,8 +148,8 @@ class defaultApplication(webapp2.RequestHandler):
             not k.startswith('etdata') and
             not k.startswith('metadata') and
             not k.startswith('geomdata') and
-            not k.startswith('featgeomdata') and
-            not k.startswith('featdata')
+            not k.startswith('featsgeomdata') and
+            not k.startswith('featsdata')
         }
         # Log all values at once
         logging.info('{}'.format(log_values))
