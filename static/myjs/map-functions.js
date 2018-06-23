@@ -274,7 +274,7 @@ MAP_APP = {
                 last_key = key;
                 if (val_dict_list[f_idx][key].length > 1) {
                     // Monthly Summary
-                    for (c_idx = 0; c_idx < col_names.length; c_idx++) {
+                    for (c_idx = 0; c_idx < val_dict_list[f_idx][key].length; c_idx++) {
                         html += '<td>' + val_dict_list[f_idx][key][c_idx] + '</td>';
                         sm = sm +  parseFloat(val_dict_list[f_idx][key][c_idx]);
                     }
