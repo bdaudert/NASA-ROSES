@@ -65,7 +65,7 @@ def set_database_util(year, tv):
     yr = year
     ds = tv['variables']['dataset']
     m = tv['variables']['et_model']
-    DU = databaseMethods.Datatstore_Util(rgn, yr, ds, m)
+    DU = databaseMethods.Datastore_Util(rgn, yr, ds, m)
     return DU
 
 def set_map_type(tv):

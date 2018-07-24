@@ -20,7 +20,24 @@ class DATA(ndb.Expando):
     dataset = ndb.StringProperty()
     et_model = ndb.StringProperty()
 
-class Datatstore_Util(object):
+class cloudSSQL_Util(object):
+    '''
+    reads data from google cloudSQL
+    Method:
+        - The base query is defined from relevant template values
+    Args:
+        :region Unique ID of geojson obbject, e.g. USFields
+        :year year of geojson dataset, might be ALL if not USFields
+            USField geojsons change every year
+        :dataset MODSI, Landsat or gridMET
+        :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
+    '''
+    def __init__(self):
+        pass
+
+
+
+class Datastore_Util(object):
     '''
     Stores and reads data from google DATASTORE
     Method:
