@@ -145,4 +145,35 @@ To update GCloud:
 ```
 gcloud components update
 ```
+loud
+
+After initializing and activating the conda environment, the development server can be started from within the project folder.  The port only needs to be specificied if not using the default value of 8080.
+
+```
+dev_appserver.py --port 8080 app.yaml
+```
+To run in debugging mode:
+```
+dev_appserver.py --port 8080 --log_level=debug app.yaml
+```
+To run in debugging mode with roses-geojson as the default bucket:
+```
+dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name roses-geojson
+```
+
+The app can be then be deployed from within the project folder (the project and version flags may not be necessary).
+```
+gcloud app deploy --project nasa-roses --version 1
+```
+
+To update the cron or queue information, these must be explicitly listed in the DEPLOYABLES section of the gcloud call (see: https://cloud.google.com/sdk/gcloud/reference/app/deploy).
+
+```
+gcloud app deploy app.yaml cron.yaml --project nasa-roses --version 1
+```
+
+To update GCloud:
+```
+gcloud components update
+```
 
