@@ -158,8 +158,8 @@ def set_template_values(RequestHandler, app_name, method):
                 tv['featsdata'][year] = DU.read_feat_data_from_db(feat_index_list)
             else:
                 # Running in development environment
-                # Read data from loca
-                tv['featsdata'][year] = DU.read_feat_data_from_local(feat_index_list)
+                # Read data from bucket
+                tv['featsdata'][year] = DU.read_feat_data_from_bucket(feat_index_list)
             for feat_idx in feat_index_list:
                 tv['featsgeomdata'][year]['features'].append(geomdata['features'][int(feat_idx)])
     # Get all data for the first year in year_list
@@ -168,7 +168,8 @@ def set_template_values(RequestHandler, app_name, method):
         # Running in production environment, read data from db
         etdata = DU.read_data_from_db()
     else:
-        etdata = DU.read_data_from_local()
+        # etdata = DU.read_data_from_local()
+        etdata = DU.read_data_from_bucket()
     # NOTE, need a json.dumps here so we can read data into global js vars in scripts.html
     tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
     tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')

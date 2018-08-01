@@ -8,10 +8,7 @@ import urllib2
 # Needed to read data from datastore within app engine
 from google.appengine.ext import ndb
 
-
-from config import GEO_BUCKET_URL
-from config import LOCAL_DATA_DIR
-
+import config
 
 class DATA(ndb.Expando):
     feat_idx = ndb.IntegerProperty()
@@ -54,7 +51,8 @@ class Datastore_Util(object):
         self.year = int(year)
         self.dataset = dataset
         self.et_model = et_model
-        self.geo_bucket_url = GEO_BUCKET_URL
+        self.geo_bucket_url = config.GEO_BUCKET_URL
+        self.data_bucket_url = config.DATA_BUCKET_URL
         # Used to read geometry data from buckets
         if self.region in ['Mason', 'US_fields']:
             # Field boundaries depend on years
@@ -62,7 +60,8 @@ class Datastore_Util(object):
         else:
             self.geoFName = region + '_GEOM.geojson'
         # Only used to populate local DATASTORE @8000
-        self.local_dataFName = LOCAL_DATA_DIR + self.et_model + '/' +  region + '_' + year + '_DATA'  '.json'
+        self.local_dataFName = config.LOCAL_DATA_DIR + self.et_model + '/' +  region + '_' + year + '_DATA'  '.json'
+        self.bucket_dataFName = region + '_' + year + '_DATA'  '.json'
 
 
     def read_geometries_from_bucket(self):
@@ -79,6 +78,36 @@ class Datastore_Util(object):
         # geomdata = json.dumps(d, ensure_ascii=False).encode('utf8')
         geomdata = d
         return geomdata
+
+    def read_feat_data_from_bucket(self, feat_index_list):
+        '''
+        Reads multiple feature data from roses-data bucket
+        :param feat_index_list:
+        :return:
+        '''
+        url = self.data_bucket_url + self.et_model + '/' + self.bucket_dataFName
+        feature_data = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        try:
+            all_data = json.load(urllib2.urlopen(url))
+        except Exception as e:
+            logging.error(e)
+            raise Exception(e)
+
+        for feat_idx in feat_index_list:
+            try:
+                feature_data['features'].append(all_data['features'][int(feat_idx)])
+            except:
+                continue
+        del all_data
+
+        if not feature_data['features']:
+            logging.error('NO FEATURE DATA IN BUCKET FILE')
+        else:
+            logging.info('SUCCESSFULLY READ FEATURE DATA FROM BUCKET')
+        return feature_data
 
     def read_feat_data_from_db(self, feat_index_list):
         '''
@@ -107,6 +136,11 @@ class Datastore_Util(object):
         return feature_data
 
     def read_feat_data_from_local(self, feat_index_list):
+        '''
+        Reads multiple feature data from local file system
+        :param feat_index_list:
+        :return:
+        '''
         file_name = self.local_dataFName
         feature_data = {
             'type': 'FeatureCollection',
@@ -129,13 +163,36 @@ class Datastore_Util(object):
             logging.info('SUCCESSFULLY READ FEATURE DATA FROM LOCAL FILE')
         return feature_data
 
+    def read_data_from_bucket(self):
+        '''
+        Reads all feature data from rose-data bucket
+        :param feat_index_list:
+        :return:
+        '''
+        url = self.data_bucket_url + self.et_model + '/' + self.bucket_dataFName
+        feature_data = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        try:
+            all_data = json.load(urllib2.urlopen(url))
+        except Exception as e:
+            logging.error(e)
+            raise Exception(e)
+
+        if not all_data['features']:
+            logging.error('NO DATA IN BUCKET FILE')
+        else:
+            logging.info('SUCCESSFULLY READ DATA FROM BUCKET')
+        return all_data
+
     def read_data_from_db(self):
         '''
         Reads all features for region, year, dataset, et_model
         :return:  dict of data for the features
         '''
 
-        feature_data = {
+        all_data = {
             'type': 'FeatureCollection',
             'features': []
         }
@@ -155,11 +212,11 @@ class Datastore_Util(object):
         )
         query_data = qry.fetch()
         if len(query_data) > 0:
-            feature_data['features'] = [{'properties': q.to_dict()} for q in query_data]
+            all_data['features'] = [{'properties': q.to_dict()} for q in query_data]
             logging.info('SUCCESSFULLY READ DATA FROM DB')
         else:
             logging.error('NO DATA FOUND IN DB')
-        return feature_data
+        return all_data
 
     def read_data_from_local(self):
         # Local development server
@@ -167,13 +224,13 @@ class Datastore_Util(object):
         logging.info('READING LOCAL FILE ')
         logging.info(file_name)
         with open(file_name) as f:
-            data = json.load(f)
+            all_data = json.load(f)
             # data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
-        if 'features' in data.keys() and data['features']:
+        if 'features' in all_data.keys() and all_data['features']:
             logging.info('SUCCESSFULLY READ DATA FROM LOCAL FILE')
         else:
             logging.error('NO DATA IN LOCAL FILE')
-        return data
+        return all_data
 
     def add_to_db(self):
         '''
@@ -185,7 +242,8 @@ class Datastore_Util(object):
         we need to run ET_stats_cron.py in nasa-roses-db env
         :return:
         '''
-        etdata = self.read_data_from_local()
+        # etdata = self.read_data_from_local()
+        etdata = self.read_data_from_bucket()
         db_entities = []
         for idx in range(len(etdata['features'])):
             feat = etdata['features'][idx]
