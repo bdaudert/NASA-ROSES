@@ -32,7 +32,8 @@
     "all_region": {
         "US_states_west_500k": "States, Western US",
         "US_counties_west_500k": "Counties, Western US",
-        "Mason": "Mason Valley"
+        "Mason": "Mason Valley Fields",
+        "CentralValley_15": "Central Valley Fields"
     },
     "all_aggregation_area": {
         "US_states_west_500k": "States, Western US",
@@ -223,6 +224,12 @@
             "HUC8_NAME",
             "PIXELCOUNT",
             "AREA"
+        ],
+        "CentralValley_15": [
+            "COUNTY",
+            "AcresMast",
+            "CmdtyMast",
+            "SourceMast"
         ],
         "US_states_west_500k": [
             "STATEFP",

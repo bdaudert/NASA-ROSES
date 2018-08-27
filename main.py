@@ -59,7 +59,6 @@ def runApp(self, app_name, method):
     try:
         tv = templateMethods.set_template_values(
             self, app_name, method)
-        tv['method'] = method
     except Exception as e:
         # This will trigger a hard 500 error
         # We can't set error and load the default page
@@ -82,16 +81,14 @@ class defaultApplication(webapp2.RequestHandler):
         if not self.request.arguments():
             # Initial page load
             tv = runApp(self, self.app_name, 'GET')
-            tv['method'] = 'GET'
-            print('GET EXECUTED')
         else:
             """Loading the main page or a sharelink will trigger a GET"""
             try:
                 tv = runApp(self, self.app_name, 'shareLink')
-                tv['method'] = 'shareLink'
             except Exception as e:
                 tv = runApp(self, self.app_name, 'GET')
                 tv['error'] = str(e)
+                # override method
                 tv['method'] = 'shareLink'
 
         self.tv_logging(tv, 'GET')
@@ -99,11 +96,8 @@ class defaultApplication(webapp2.RequestHandler):
         self.response.out.write(template.render(tv))
 
     def post(self):
-        print('POST EXECUTED')
         """Calling Get Map or Get TimeSeries will trigger a POST"""
         tv = runApp(self, self.app_name, 'POST')
-        if 'method' not in tv.keys():
-            tv['method'] = 'POST'
         self.tv_logging(tv, 'POST')
         self.generateResponse(tv)
 
@@ -114,8 +108,6 @@ class defaultApplication(webapp2.RequestHandler):
         dataobj = {}
         if ('error' in tv.keys() and tv['error']):
             dataobj['error'] = tv['error']
-            if 'method' in tv.keys():
-                dataobj['method'] = tv['method']
         else:
             for var in config.statics['response_vars'][tv['variables']['tool_action']]:
                 try:
@@ -129,9 +121,9 @@ class defaultApplication(webapp2.RequestHandler):
         """
         logging.exception(exception)
         app_name = self.app_name
-        print('RUNNING HANDLE EXCEPTION')
         tv = runApp(self, app_name, 'GET')
         tv['error'] = str(exception)
+        # override method
         tv['method'] = 'POST'
         self.generateResponse(tv)
 
@@ -140,7 +132,6 @@ class defaultApplication(webapp2.RequestHandler):
         These values are will be written to the appEngine logger
           so that we can tracks what page requests are being made
         """
-        tv['method'] = method
         # Skip form values and maxDates
         log_values = {
             k: v for k, v in tv.items()
