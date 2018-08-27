@@ -3,7 +3,7 @@
 Code repository for the NASA ROSES prototype web interface and tool under development by the Desert Research Institute, NASA for NOAA
 ### Links & Resources
 
-You can find the most up-to-date deployments [here](http://open-et-1.appspot.com/).
+You can find the most up-to-date deployments [here](http://nasa-roses.appspot.com/).
 
 - [Earth Engine Documentation](https://sites.google.com/site/earthengineapidocs/)
 - [Earth Engine Access Library](https://code.google.com/p/earthengine-api/wiki/Installation)
@@ -98,7 +98,7 @@ You can find the most up-to-date deployments [here](http://open-et-1.appspot.com
 - media
     -img (Images)
 - templates
-    - open-et-1.html (index html, main html file for open-et-1 project)
+    - nasa-roses.html (index html, main html file for nasa-roses project)
     - all other html files
 
 #### GCloud
@@ -112,9 +112,9 @@ To run in debugging mode:
 ```
 dev_appserver.py --port 8080 --log_level=debug app.yaml
 ```
-To run in debugging mode with nasa-roses-geojson as the default bucket:
+To run in debugging mode with roses-geojson as the default bucket:
 ```
-dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name nasa-roses-geojson
+dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name roses-geojson
 ```
 
 Sometimes windows needs the full path to dev_appserver.py:
@@ -132,13 +132,44 @@ gcloud config set disable_usage_reporting true
 
 The app can be then be deployed from within the project folder (the project and version flags may not be necessary).
 ```
-gcloud app deploy --project open-et-1 --version 1
+gcloud app deploy --project nasa-roses --version 1
 ```
 
 To update the cron or queue information, these must be explicitly listed in the DEPLOYABLES section of the gcloud call (see: https://cloud.google.com/sdk/gcloud/reference/app/deploy).
 
 ```
-gcloud app deploy app.yaml cron.yaml --project open-et-1 --version 1
+gcloud app deploy app.yaml cron.yaml --project nasa-roses --version 1
+```
+
+To update GCloud:
+```
+gcloud components update
+```
+loud
+
+After initializing and activating the conda environment, the development server can be started from within the project folder.  The port only needs to be specificied if not using the default value of 8080.
+
+```
+dev_appserver.py --port 8080 app.yaml
+```
+To run in debugging mode:
+```
+dev_appserver.py --port 8080 --log_level=debug app.yaml
+```
+To run in debugging mode with roses-geojson as the default bucket:
+```
+dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name roses-geojson
+```
+
+The app can be then be deployed from within the project folder (the project and version flags may not be necessary).
+```
+gcloud app deploy --project nasa-roses --version 1
+```
+
+To update the cron or queue information, these must be explicitly listed in the DEPLOYABLES section of the gcloud call (see: https://cloud.google.com/sdk/gcloud/reference/app/deploy).
+
+```
+gcloud app deploy app.yaml cron.yaml --project nasa-roses --version 1
 ```
 
 To update GCloud:

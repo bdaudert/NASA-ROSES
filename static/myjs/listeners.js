@@ -6,15 +6,21 @@ $(document).ready(function () {
     $('.modal-dialog').draggable();
 
     $('#region').on('change', function(){
-        change_inRegion($(this).val());
-
+        change_inRegion($(this).val(), auto_set_region=false);
     });
 
-    $('#field_year').on('change', function(){
+    $('#year').on('change', function(){
         change_inYear($(this).val());
     });
 
+<<<<<<< HEAD
     $('#variable').on('change', function(){
+=======
+    $('#years').on('change', function() {
+        change_inYears($(this).val());
+    });
+     $('#variable').on('change', function(){
+>>>>>>> central
         change_inVariable($(this).val());
     });
 
@@ -22,4 +28,14 @@ $(document).ready(function () {
         change_inTRes($(this).val());
     });
 
+<<<<<<< HEAD
+=======
+    $('#time_period').on('change', function(){
+        change_inTimePeriod($(this).val());
+    });
+
+    $('#time_period_statistic').on('change', function(){
+        change_inTimePeriodStat($(this).val());
+    });
+>>>>>>> central
 });

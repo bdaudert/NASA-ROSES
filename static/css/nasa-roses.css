@@ -23,8 +23,16 @@ body {
 
 }
 
+.large {
+    font-size: x-large;
+}
+
+.error {
+    color: red;
+}
+
 #header-container{
-    padding: 1%;
+    padding: 2%;
     width: 100%;
     height: 5%;
 }
@@ -51,8 +59,9 @@ body {
 }
 
 .form-container{
-    position: relative;
+    position: absolute;
     top: 10%;
+    left: 5%;
     z-index: 10;
     background: #dcdcdc;
     max-width: 20%;
@@ -60,10 +69,37 @@ body {
 
 .form-container-header {
     padding: 0% 1%;
+<<<<<<< HEAD:static/css/open-et-1.css
+=======
     cursor: move;
     z-index: 10;
     background-color: #2196F3;
     color: #fff;
+}
+
+.colorbar-container{
+    position: absolute;
+    padding: 0% 1%;
+    top: 10%;
+    left: 50%;
+    z-index: 10;
+    background: #dcdcdc;
+    width: 40%;
+}
+
+.colorbar {
+    position: relative;
+    width:99%;
+}
+
+.colorbar-container-header {
+    padding: 0% 1%;
+>>>>>>> central:static/css/nasa-roses.css
+    cursor: move;
+    z-index: 10;
+    background-color: #2196F3;
+    color: #fff;
+    width: 95%;
 }
 
 .colorbar-container{
@@ -191,4 +227,54 @@ label.form-group-header {
 /*form stuff*/
 .panel-forms {
     background-color: #878787;
+}
+
+/*Openlayers*/
+
+
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    overflow-y: auto;
+    overflow-x: auto;
+    max-width: 700px;
+    max-height:700px;
+    min-width: 280px;
+}
+.ol-popup:after, .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+.ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+}
+.ol-popup-closer:after {
+    content: "✖";
 }

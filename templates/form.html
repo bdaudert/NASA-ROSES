@@ -4,9 +4,11 @@
         <div class="panel panel-default">
             <div class="panel-body panel-forms">
                 <!--Hidden vars-->
+                <input type="hidden" class="map_type" id="map_type" name="map_type" value="{{ variables.map_type }}">
                 <input type="hidden" class="tool_action" id="tool_action" name="tool_action" value="{{ variables.tool_action }}">
                 <input type="hidden" class="min_date" id="min_date" name="min_date" value="{{ variables.min_date }}">
                 <input type="hidden" class="max_date" id="max_date" name="max_date" value="{{ variables.max_date }}">
+                <input type="hidden" class="feat_indices" id="feat_indices" name="feat_indices" value="{{ variables.feat_indices }}">
                 <div id="form-region">
                     <b><span style="color:blue;font-size:medium">Visualization Layer:</span></b>
                     <select class="region" id="region" name="region">
@@ -69,6 +71,7 @@
         <div class="panel panel-default">
             <div class="panel-body panel-forms">
                 <b><span style="color:blue;font-size:medium">Processing:</span></b><br>
+<<<<<<< HEAD
                  <div id='form-field_year' 
                 {% if variables.region |not_in('Mason, US_fields') %}style="display:none;"{%endif%}>
                     <b>Year: </b><br>
@@ -84,6 +87,31 @@
                     <select class="years" id="field_years" name="field_years" multiple>
                         {% for x in form_options.field_year %}
                         <option value="{{ x }}" {% if x == variables.field_years  %} selected {% endif %}>{{ x }}</option>
+=======
+                 <div id='form-year' 
+                {% if variables.region |not_in('Mason, US_fields') %}style="display:none;"{%endif%}>
+                    <b>Year: </b><br>
+                    <select class="years" id="year" name="year">
+                        {% for x in form_options.year %}
+                        <option value="{{ x }}" {% if x == variables.year  %} selected {% endif %}>{{ x }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id='form-years' 
+                {% if variables.region |is_in('Mason, US_fields') %}style="display:none;"{%endif%}>
+                    <b>Years: </b><br>
+                    <select class="years" id="years" name="years" multiple>
+                        {% for x in form_options.years %}
+                        <option value="{{ x }}" {% if x |is_in(variables.years) %} selected {% endif %}>{{ x }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="form-years-statistic" style="display:none;">
+                    <b>Summary over Years: </b>
+                    <select id="years_statistic" name="years_statistic" class="years_statistic">
+                        {% for x,y in form_options.years_statistic.items() %}
+                        <option value="{{ x }}" {% if x == variables.years_statistic  %} selected {% endif %}>{{ y }}</option>
+>>>>>>> central
                         {% endfor %}
                     </select>
                 </div>
@@ -100,16 +128,27 @@
                 </div> 
                 <div id="form-timeperiod" 
                 {% if variables.t_res == "annual" %} style="display:none;"{% else %} style="display:block;"{% endif %}>
+<<<<<<< HEAD
                     <b>Timeperiod: </b><br>
                     <select id="time_period" name="time_period" class="time_period" multiple >
+=======
+                    <b>Pick Months: </b><br>
+                    <select id="time_period" name="time_period" class="time_period" multiple>
+>>>>>>> central
                         {% for x,y in form_options.time_period.items() %}
                         <option value="{{ x }}" {% if x|is_in(variables.time_period) %} selected {% endif %}>{{ y }}</option>
                         {% endfor %}
                     </select> 
                 </div>
+<<<<<<< HEAD
                 <div id="form-statistic" 
                 {% if variables.t_res == "annual" %} style="display:none;"{% else %} style="display:block;"{% endif %}>
                     <b>Summary Statistic: </b>
+=======
+                <div id="form-timeperiod-statistic" 
+                {% if variables.t_res == "annual" %} style="display:none;"{% else %} style="display:block;"{% endif %}>
+                    <b>Summary over Months: </b>
+>>>>>>> central
                     <select id="time_period_statistic" name="time_period_statistic" class="time_period_statistic">
                         {% for x,y in form_options.time_period_statistic.items() %}
                         <option value="{{ x }}" {% if x == variables.time_period_statistic  %} selected {% endif %}>{{ y }}</option>

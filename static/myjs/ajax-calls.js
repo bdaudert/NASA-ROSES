@@ -57,8 +57,8 @@ function set_error(error, cause, resolution, method) {
 }
 
 
-
-function ajax_update_data(){
+function ajax_update_etdata_and_map(auto_set_region=false){
+    //Only used when single year request
     var tool_action = 'update_data',
         url = clearOut_URL(),
         form_data, jqXHR,
@@ -67,12 +67,14 @@ function ajax_update_data(){
     $('#tool_action').val(tool_action);
     //Get the form data
     form_data = $("#form_all").serialize();
-    start_progressbar();
+    var msg = 'Switching region';
+    start_progressbar(mgs=msg);
     jqXHR = $.ajax({
-            url: url,
-            method: "POST",
-            timeout: 60 * 5 * 1000,
-            data: form_data
+        url: url,
+        method: "POST",
+        timeout: 60 * 5 * 1000,
+        data: form_data,
+
     })
     .done(function(response) {
         r = $.parseJSON(response);
@@ -86,6 +88,132 @@ function ajax_update_data(){
             tv_var = statics.response_vars[tool_action][i];
             window.DATA[tv_var] = $.parseJSON(r[tv_var]);
 
+        }
+        //Set new map layer
+        OL_MAP_APP.update_map_layer(auto_set_region=auto_set_region);
+        OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
+        end_progressbar();
+    })
+    .fail(function(jqXHR) {
+        err_code = jqXHR.status;
+        error = 'Server request failed with code ' + String(err_code) + '!'
+        set_error(error, '', '', method)
+        end_progressbar();
+    });
+}
+
+function ajax_set_featdata_on_feature_click(evt){
+    //Sets feature data on map click single eature
+    var tool_action = 'get_feat_data',
+        url = clearOut_URL(),
+        form_data, jqXHR, f_idx,
+        err_code, r, method = 'ajax', error, cause, i, tv_var,
+        popup_content = document.getElementById('popup-content');
+    //Update the tool_action
+    $('#tool_action').val(tool_action);
+    //Get the form data
+    form_data = $("#form_all").serialize();
+    var msg = 'Obtaining feature data';
+    start_progressbar(mgs=msg);
+    jqXHR = $.ajax({
+        url: url,
+        method: "POST",
+        timeout: 60 * 5 * 1000,
+        data: form_data,
+
+    })
+    .done(function(response) {
+        var r = $.parseJSON(response),
+            feat_idx_list, feat_idx, year, html = '';
+        if (r.hasOwnProperty('error')) {
+            error = r.error;
+            set_error( error, '', '', method);
+            end_progressbar();
+        }
+        //Set the new template variables
+        for (i=0; i < statics.response_vars[tool_action].length; i++){
+            tv_var = statics.response_vars[tool_action][i];
+            //FIX ME, not sure why featsdata do not need to be json parsed
+            if (tv_var.is_in(['featsdata', 'featsgeomdata'])) {
+                window.DATA[tv_var] = r[tv_var];
+            }
+            else{
+                window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+            }
+        }
+        year = $('#years').val()[0];
+        feat_idx_list = get_feat_index_from_featdata(year);
+        if (feat_idx_list.length != 0){
+            html += MAP_APP.set_dataModalHeader();
+            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            coordinate = evt.coordinate;
+            popup_content.innerHTML = html;
+            window.popup_layer.setPosition(coordinate);
+        }
+        end_progressbar();
+    }) // successfully got JSON response
+    .fail(function(jqXHR) {
+        err_code = jqXHR.status;
+        error = 'Server request failed with code ' + String(err_code) + '!'
+        set_error(error, '', '', method)
+        end_progressbar();
+    });
+}
+
+
+function ajax_set_featdata_on_dragbox(selectedFeatures){
+    //Sets feature data on map click single eature
+    var tool_action = 'get_feat_data',
+        url = clearOut_URL(),
+        form_data, jqXHR, f_idx,
+        err_code, r, method = 'ajax', error, cause, i, tv_var,
+        popup_content = document.getElementById('popup-content');
+    //Update the tool_action
+    $('#tool_action').val(tool_action);
+    //Get the form data
+    form_data = $("#form_all").serialize();
+    var msg = 'Obtaining feature data';
+    start_progressbar(mgs=msg);
+    jqXHR = $.ajax({
+        url: url,
+        method: "POST",
+        timeout: 60 * 5 * 1000,
+        data: form_data,
+
+    })
+    .done(function(response) {
+        var r = $.parseJSON(response),
+            feat_idx_list, feat_idx, year, html = '';
+        if (r.hasOwnProperty('error')) {
+            error = r.error;
+            set_error( error, '', '', method);
+            end_progressbar();
+        }
+        //Set the new template variables
+        for (i=0; i < statics.response_vars[tool_action].length; i++){
+            tv_var = statics.response_vars[tool_action][i];
+            //FIX ME, not sure why featsdata do not need to be json parsed
+            if (tv_var.is_in(['featsdata', 'featsgeomdata'])) {
+                window.DATA[tv_var] = r[tv_var];
+            }
+            else{
+                window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+            }
+        }
+        year = $('#years').val()[0];
+        feat_idx_list = $('#feat_indices').val().replace(', ', ',').split(',');
+        if (feat_idx_list.length != 0){
+            // Set the popup data
+            html += MAP_APP.set_dataModalHeader();
+            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            // Show the popup
+            popup_content.innerHTML = html;
+            var feats = selectedFeatures.getArray(),
+                coordinate = feats[0].getGeometry().getCoordinates()[0];
+            while (coordinate.length != 2){
+                coordinate = coordinate[0]
+            }
+            window.popup_layer.setPosition(coordinate);
         }
         end_progressbar();
     }) // successfully got JSON response
