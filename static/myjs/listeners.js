@@ -13,14 +13,10 @@ $(document).ready(function () {
         change_inYear($(this).val());
     });
 
-<<<<<<< HEAD
-    $('#variable').on('change', function(){
-=======
     $('#years').on('change', function() {
         change_inYears($(this).val());
     });
      $('#variable').on('change', function(){
->>>>>>> central
         change_inVariable($(this).val());
     });
 
@@ -28,8 +24,6 @@ $(document).ready(function () {
         change_inTRes($(this).val());
     });
 
-<<<<<<< HEAD
-=======
     $('#time_period').on('change', function(){
         change_inTimePeriod($(this).val());
     });
@@ -37,5 +31,4 @@ $(document).ready(function () {
     $('#time_period_statistic').on('change', function(){
         change_inTimePeriodStat($(this).val());
     });
->>>>>>> central
 });

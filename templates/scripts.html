@@ -30,10 +30,7 @@
 <script src="/static/js/geoxml3.js"></script>
 <!--Progress Bar-->
 <script src="/static/js/progressWindow.js"></script>
-<<<<<<< HEAD
-=======
 <!--Colorbar-->
->>>>>>> central
 <script src="/static/js/d3.v3.min.js"></script>
 <script src="/static/js/colorbar.js"></script>
 
@@ -55,9 +52,9 @@
         async: false,
         dataType: 'json',
         success: function(data) {
-            statics = data; 
+            statics = data;
         }
-    }); 
+    });
     $.ajax({
         url: 'static/json/js_statics.json',
         async: false,
@@ -79,9 +76,8 @@
     $( document ).ready(function() {
         initialize_ol_map();
     });
-
     // Make selected divs draggable, e.g. the form
     $(function(){
         $( ".draggable" ).draggable();
-    }); 
+    });
 </script>

@@ -69,8 +69,6 @@ body {
 
 .form-container-header {
     padding: 0% 1%;
-<<<<<<< HEAD:static/css/open-et-1.css
-=======
     cursor: move;
     z-index: 10;
     background-color: #2196F3;
@@ -94,33 +92,12 @@ body {
 
 .colorbar-container-header {
     padding: 0% 1%;
->>>>>>> central:static/css/nasa-roses.css
     cursor: move;
     z-index: 10;
     background-color: #2196F3;
     color: #fff;
     width: 95%;
 }
-
-.colorbar-container{
-    position: absolute;
-    padding: 0% 1%;
-    top: 10%;
-    left: 50%;
-    z-index: 10;
-    background: #dcdcdc;
-    width: 38%;
-}
-
-.colorbar-container-header {
-    padding: 0% 1%;
-    cursor: move;
-    z-index: 10;
-    background-color: #2196F3;
-    color: #fff;
-    width: 99%;
-}
-
 
 #main-map {
     width: 100%;

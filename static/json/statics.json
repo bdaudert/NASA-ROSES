@@ -1,9 +1,6 @@
+
 {
     "form_option_keys": [
-<<<<<<< HEAD
-        "tool_action", "region", "field_year", "aggregation_area",
-        "variable", "dataset", "et_model", "t_res", "time_period_statistic"
-=======
         "tool_action",
         "region",
         "aggregation_area",
@@ -13,7 +10,6 @@
         "t_res",
         "years_statistic",
         "time_period_statistic"
->>>>>>> central
     ],
     "variable_defaults": {
         "tool_action": "None",
@@ -28,19 +24,6 @@
         "dataset": "MODIS",
         "et_model": "SSEBop",
         "t_res": "annual",
-<<<<<<< HEAD
-        "time_period": "2003",
-        "time_period_statistic": "none"
-    },
-    "all_region":  {
-        "US_fields": "US Fields",
-        "Mason": "Mason Valley",
-        "county": "Counties",
-        "state": "States",
-        "huc6": "HUC 6",
-        "huc8": "HUC 8",
-        "ee_map": "Map"
-=======
         "time_period": [
             "2003"
         ],
@@ -52,7 +35,6 @@
         "US_counties_west_500k": "Counties, Western US",
         "Mason": "Mason Valley Fields",
         "CentralValley_15": "Central Valley Fields"
->>>>>>> central
     },
     "all_aggregation_area": {
         "US_states_west_500k": "States, Western US",
@@ -106,11 +88,6 @@
         "SIMS": "SIMS",
         "ensemble": "Ensemble"
     },
-<<<<<<< HEAD
-    "all_t_res":  {
-            "monthly": "Monthly",
-            "annual": "Annual"
-=======
     "all_t_res": {
         "monthly": "Monthly",
         "annual": "Annual"
@@ -119,20 +96,14 @@
         "none": "None",
         "sum": "Sum",
         "mean": "Mean"
->>>>>>> central
     },
     "all_time_period_statistic": {
         "none": "None",
         "sum": "Sum",
         "mean": "Mean"
     },
-<<<<<<< HEAD
-    "all_tool_action":  {
-        "None": "None",        
-=======
     "all_tool_action": {
         "None": "None",
->>>>>>> central
         "get_map": "Get Map",
         "get_ts": "Get Time Series",
         "get_value": "Get Value"
@@ -153,12 +124,6 @@
     },
     "response_vars": {
         "None": [],
-<<<<<<< HEAD
-        "update_data": ["geomdata", "etdata"],
-        "get_map": ["mapid", "token", "sharelink_map", "sharelink_ts"],
-        "get_ts": ["ts_data", "token", "sharelink_map", "sharelink_ts"],
-        "get_value": ["point_value"]
-=======
         "update_data": [
             "geomdata",
             "etdata"
@@ -184,7 +149,6 @@
         "get_value": [
             "point_value"
         ]
->>>>>>> central
     },
     "time_period_by_res": {
         "monthly": {
@@ -313,11 +277,6 @@
             "NAME"
         ]
     },
-<<<<<<< HEAD
-    "geo_meta_cols": ["OBJECTID","STATE", "HUC8", "HUC8_NAME","PIXELCOUNT", "AREA"],
-    "geo_meta_cols_type": ["int", "str", "str", "str", "str", "str", "str", "int", "float"],
-    "title_cols": ["STATE","HUC8", "HUC8_NAME"],
-=======
     "geom_name_prop": {
         "Mason": "OBJECTID",
         "US_states_west_500k": "NAME",
@@ -348,7 +307,6 @@
         "US_HUC8_west": ["float", "str", "str", "str"],
         "US_HUC10_west": ["float", "str", "str", "str"]
     },
->>>>>>> central
     "stats_by_var_res":{
         "et": {
             "annual": ["et_annual"],
@@ -377,7 +335,7 @@
         "pr": {
             "annual": ["pr_annual"],
             "monthly": [ "pr_m01", "pr_m02", "pr_m03", "pr_m04",
-                "pr_m05", "pr_m06", "pr_m07", "pr_m08", 
+                "pr_m05", "pr_m06", "pr_m07", "pr_m08",
                 "pr_m09", "pr_m10", "pr_m11", "pr_m12"
             ],
             "seasonal": [ "pr_seasonal", "net_seasonal"]

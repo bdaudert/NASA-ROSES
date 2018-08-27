@@ -71,9 +71,6 @@ Array.prototype.mean = function(){
     return myRound(sm / parseFloat(this.length), 4);
 }
 
-<<<<<<< HEAD
-function compute_time_period_stat(val_list, stat, time_period){
-=======
 Array.prototype.median = function() {
     this.sort(function(a,b){
         return a-b;
@@ -92,7 +89,6 @@ Array.prototype.median = function() {
 }
 
 function compute_stat(val_list, stat){
->>>>>>> central
     if (stat == 'none'){
         return val_list;
     }
@@ -102,11 +98,7 @@ function compute_stat(val_list, stat){
     if (stat == 'mean'){
         return [myRound(val_list.mean(), 4)];
     }
-<<<<<<< HEAD
-=======
     if (stat == 'median'){
         return [myRound(val_list.mean(), 4)];
     }
->>>>>>> central
 }
-

@@ -26,25 +26,6 @@ def set_form_options(variables):
     # Override default form options if needed
     var = variables['variable']
     region = variables['region']
-<<<<<<< HEAD
-    # Set field years form option
-    form_options['field_year'] = statics['all_field_year']['US_fields']
-    form_options['field_years'] = statics['all_field_year']['US_fields']
-    # Set the time_period according to t_res
-    if variables['t_res'] == 'annual':
-        periods = {}
-        year = variables['field_year']
-        periods[year] = year
-    else:
-        periods = statics['time_period_by_res'][variables['t_res']]
-    # form_options['time_period'] =  periods
-    keys = sorted(periods.keys())
-    form_options['time_period'] = {}
-    for key in keys:
-        if key not in statics['all_field_year'][region]:
-            continue
-        form_options['time_period'][key] = periods[key]
-=======
     dataset = variables['dataset']
     # Set the year form options
     form_options['year'] = statics['all_year'][dataset]
@@ -58,7 +39,6 @@ def set_form_options(variables):
         form_options['time_period'] = {}
         for key in keys:
             form_options['time_period'][key] = periods[key]
->>>>>>> central
 
     # Set datasets
     form_ds = {}
@@ -119,7 +99,6 @@ def set_template_values(RequestHandler, app_name, method):
     default values are used
     otherwisee we try to get the variable
     values from the request object
-
     Returns:
     tv: a dictionary of template variables
     '''
@@ -152,11 +131,7 @@ def set_template_values(RequestHandler, app_name, method):
     tv['variables']['map_type'] = set_map_type(tv)
 
     # Get the etdata and geometry from the geo database
-<<<<<<< HEAD
-    tv['etdata'] = []
-=======
     tv['etdata'] = {}
->>>>>>> central
     tv['geomdata'] = {}
     tv['featsdata'] = {}
     tv['featsgeomdata'] = {}
@@ -164,12 +139,6 @@ def set_template_values(RequestHandler, app_name, method):
         return tv
     if  tv['variables']['region'] in ['ee_map']:
         return tv
-<<<<<<< HEAD
-    # Get the relevant etdata
-    DU = set_database_util(tv)
-    tv['etdata'] = DU.read_from_db()
-    tv['geomdata'] = DU.read_geometries_from_bucket()
-=======
 
     feat_index_list = []
     if 'feat_indices' in tv['variables'].keys() and tv['variables']['feat_indices']:
@@ -204,6 +173,4 @@ def set_template_values(RequestHandler, app_name, method):
     # NOTE, need a json.dumps here so we can read data into global js vars in scripts.html
     tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
     tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
->>>>>>> central
     return tv
-

@@ -3,12 +3,6 @@
 // General map utils (google map api and openlayers)
 var MAP_APP = MAP_APP || {};
 MAP_APP = {
-<<<<<<< HEAD
-    set_start_color: function(){
-      return '#9bc2cf';
-    },
-    LightenDarkenColor: function(col, amt) {
-=======
     determine_map_type: function(){
         /*
         Determines map type (choropleth or default)
@@ -39,7 +33,6 @@ MAP_APP = {
         return '#9bc2cf';
     },
     LightenDarkenColor: function (col, amt) {
->>>>>>> central
         //Darken amnt = negative number
         var usePound = false;
         if (col[0] == "#") {
@@ -66,18 +59,6 @@ MAP_APP = {
     set_feat_colors: function (start_color, DOrL, year) {
         var et_var = $('#variable').val(),
             t_res = $('#t_res').val(),
-<<<<<<< HEAD
-            et_vars = statics.stats_by_var_res[v][t_res],
-            et_var, i, j, colors = [], data, mn, mx, bins = [], step, amt,
-            num_colors = 10, cb = {'colors':[], 'bins':[]}, new_color ;
-        et_var = et_vars[0];
-        data = $.map(DATA.etdata, function(feat) {
-            if (Math.abs(feat[et_var] + 9999) > 0.0001) {
-                return feat[et_var];
-            }
-        });
-        if (!data) {
-=======
             time_period = $('#time_period').val(),
             stat = $('#time_period_statistic').val(),
             et_stat, i, idx, featsdata, j, colors = [], val_list, d, mn, mx,
@@ -86,7 +67,6 @@ MAP_APP = {
             featsdata = DATA.etdata[year];
         val_list = MAP_APP.set_singleYear_allFeat_valList(featsdata);
         if (!val_list) {
->>>>>>> central
             return cb;
         }
         mn = Math.floor(Math.min.apply(null, val_list));
@@ -110,47 +90,6 @@ MAP_APP = {
         cb = {'colors': colors, 'bins': bins}
         return cb;
     },
-<<<<<<< HEAD
-    set_featureStyle: function(data, cb, start_color){
-        var feat_colors = cb['colors'], bins = cb['bins'];
-
-        data.setStyle(function(feature) {
-            var idx = feature.getProperty('idx'),
-                v = $('#variable').val(),
-                t_res = $('#t_res').val(),
-                et_vars = statics.stats_by_var_res[v][t_res],
-                et_var = et_vars[0],
-                data_val = DATA.etdata[idx][et_var],
-                color = start_color, i;
-            //Find the right bin
-            for (i = 0; i < bins.length; i++){
-                if (bins[i][0] <= data_val && data_val <= bins[i][1]){
-                    color = feat_colors[i];
-                    break;
-                }
-            }
-            props = {
-                fillColor: color,
-                fillOpacity: 0.5,
-                strokeColor: '#000000',
-                stokeOpacity: 0.8,
-                strokeWeight: 0.5
-            };
-            return props;
-        });
-    },
-    drawMapColorbar: function(colors, bins){
-        var palette = '', ticks= [], myScale, colorbar, i;
-        for (i = 0; i < colors.length; i++) {
-            palette += colors[i].replace(/#/g, '');
-            if (i < colors.length - 1){
-                palette += ','
-            }
-            ticks.push(myRound(bins[i][0],1));
-        }
-        ticks.push(myRound(bins[bins.length - 1][1],1))
-        myScale =  d3.scale.quantize().range(colors).domain(d3.range(colors.length + 1));
-=======
     drawMapColorbar: function (colors, bins) {
         var palette = '', ticks = [], myScale, colorbar, i;
         for (i = 0; i < colors.length; i++) {
@@ -162,7 +101,6 @@ MAP_APP = {
         }
         ticks.push(myRound(bins[bins.length - 1][1], 1))
         myScale = d3.scale.quantize().range(colors).domain(d3.range(colors.length + 1));
->>>>>>> central
         myScale.type = 'QUANTIZE';
         myScale.ticks = ticks;
         colorbar = Colorbar()
@@ -171,72 +109,6 @@ MAP_APP = {
             .orient("horizontal")
             .scale(myScale);
         colorbarObject = d3.select("#colorbar").call(colorbar);
-<<<<<<< HEAD
-    },
-    setDrawingManager: function(){
-        var mkrOptions = MAP_APP.setMarkerOptions();
-        var polyOptions = MAP_APP.setPolyOptions();
-        var drawingManager = new google.maps.drawing.DrawingManager({
-            drawingModes: [
-                google.maps.drawing.OverlayType.MARKER,
-                google.maps.drawing.OverlayType.RECTANGLE,
-                google.maps.drawing.OverlayType.POLYGON
-            ],
-            drawingControlOptions: {
-                position: google.maps.ControlPosition.TOP_CENTER,
-                drawingModes: [
-                    google.maps.drawing.OverlayType.MARKER,
-                    google.maps.drawing.OverlayType.RECTANGLE,
-                    google.maps.drawing.OverlayType.POLYGON
-                ]
-            },
-            markerOptions: mkrOptions,
-            rectangleOptions: polyOptions,
-            polygonOptions: polyOptions
-        });
-        return drawingManager;
-    },
-    initialize_dataModal: function(e){
-        // e is the click event
-        //idx is the feature index in etdata
-        var html,
-            idx = e.feature.getProperty('idx');
-        //Clear out old modal content
-        $('#dataModal_title').html('');
-        $('#dataModal_data').html('');
-        html = set_dataModalHeader(idx);
-        $('#dataModal_title').append(html);
-    },
-    add_dataToModal: function(e) {
-        var idx = e.feature.getProperty('idx'),
-            html, val_list, new_prop_names,
-            v = $('#variable').val(),
-            t_res = $('#t_res').val(),
-            time_period = $('#time_period').val(),
-            stat = $('#time_period_statistic').val();
-
-        if ($.type(time_period) == 'string'){
-            time_period = [time_period];
-        }
-        //Populate the columnnames
-        val_list = set_dataModalValList(v, t_res, time_period, stat, idx);
-        new_prop_names = set_dataModalPropertyNames(v, t_res, time_period, stat);
-        html = set_dataModalData(val_list, new_prop_names);
-        $('#dataModal_data').append(html);
-    },
-    set_data_layer: function(){
-        function processPoints(geometry, callback, thisArg) {
-            if (geometry instanceof google.maps.LatLng) {
-                callback.call(thisArg, geometry);
-            } else if (geometry instanceof google.maps.Data.Point) {
-                callback.call(thisArg, geometry.get());
-            } else {
-                geometry.getArray().forEach(function(g) {
-                    processPoints(g, callback, thisArg);
-                });
-            }
-        }
-=======
     },
     set_singleYear_singleFeat_valList: function(featdata){
         /*
@@ -443,47 +315,9 @@ MAP_APP = {
         return html;
     },
     set_dataModalRowNames: function(geomdata) {
->>>>>>> central
         /*
         Each feature is a row, summary stats over feats are listed in the bottom row
         */
-<<<<<<< HEAD
-        var data = new google.maps.Data();
-        data.addGeoJson(DATA.geomdata);
-        //Only show data that are in current map bound
-        setTimeout(function () {
-            data.forEach(function (feature) {
-                var feat_bounds = new google.maps.LatLngBounds();
-                processPoints(feature.getGeometry(), feat_bounds.extend, feat_bounds);
-                var sw = feat_bounds.getSouthWest();
-                var ne = feat_bounds.getNorthEast();
-                if (!window.map.getBounds().contains(sw) || !window.map.getBounds().contains(ne)) {
-                    data.remove(feature);
-                }
-            });
-        }, 500);
-         /*
-        // zoom to show all the features
-        bounds = new google.maps.LatLngBounds();
-        data.addListener('addfeature', function(e) {
-            processPoints(e.feature.getGeometry(), bounds.extend, bounds);
-            window.map.fitBounds(bounds);
-        });
-        */
-         data.addListener('click', function(e) {
-            //Hide old data modal
-            $('#dataModal').modal('hide');
-            MAP_APP.initialize_dataModal(e);
-            MAP_APP.add_dataToModal(e);
-            $('#dataModal').modal('toggle');
-         });
-         return data;
-    },
-    set_map_layer: function(){
-        //Sanity check
-        if ( Object.keys(DATA.geomdata).length == 0 ) {
-            return;
-=======
         var geom_name_prop = statics.geom_name_prop[$('#region').val()],
             j, row_names = ['<b>Area average</b>'];
         for (j = 0; j < geomdata['features'].length; j++) {
@@ -537,7 +371,6 @@ MAP_APP = {
     set_dataModalVals: function(featsdata) {
         /*
         Sets the values for the dataModal over muliple years
-
         */
         var val_dict = {}, val_dict_list = [], val_lists = [], key,
             years = $('#years').val();
@@ -740,7 +573,7 @@ OL_MAP_APP = {
         window.map.removeLayer(layer)
     },
     initialize_popup_window: function(container, closer) {
-        var overlay = new ol.Overlay({
+        var overlay = new ol.Overlay({
             element: container,
             autoPan: true,
             autoPanAnimation: {
@@ -792,7 +625,7 @@ OL_MAP_APP = {
             //Multiple years, we need to query the database to get data for each year
             ajax_set_featdata_on_feature_click(evt);
         }else{
-            var gf_data = MAP_APP.set_feature_data(years, feats);
+            var gf_data = MAP_APP.set_feature_data(years, feats);
             html += MAP_APP.set_dataModalHeader();
             // Only show data if single year
             // Else only show header on click
@@ -802,32 +635,8 @@ OL_MAP_APP = {
             coordinate = evt.coordinate;
             popup_content.innerHTML = html;
             window.popup_layer.setPosition(coordinate);
->>>>>>> central
-        }
-        var data = MAP_APP.set_data_layer();
-        data.setMap(window.map);
-        //Set styles for chloropleth map
-        var start_color = MAP_APP.set_start_color(),
-            cb = MAP_APP.set_feat_colors(start_color, 'darken');
-        MAP_APP.set_featureStyle(data, cb);
-        //Draw the colorbar
-        MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
-    },
-<<<<<<< HEAD
-    set_map_layers: function() {
-        var region = $('#region').val();
-        if (region != 'ee_map') {
-            MAP_APP.set_map_layer();
         }
     },
-    delete_map_layer: function(feature){
-        window.map.data.remove(feature);
-    },
-    delete_map_layers: function() {
-        window.map.data.forEach(function (feature) {
-            window.map.data.remove(feature);
-        });
-=======
     update_map_layer: function(auto_set_region=false){
         /*
         Updates the map and sets up the popup window for click on single feature
@@ -920,7 +729,6 @@ OL_MAP_APP = {
             });
         });
         */
->>>>>>> central
     }
 }
 
@@ -942,12 +750,6 @@ var initialize_ol_map = function() {
             zoom: mapZoom
         })
     });
-<<<<<<< HEAD
-    if (mapZoom >=8){
-        MAP_APP.set_map_layers();
-    }
-=======
->>>>>>> central
 
     var popup_container = document.getElementById('popup'),
         popup_content = document.getElementById('popup-content'),
@@ -956,16 +758,6 @@ var initialize_ol_map = function() {
     window.popup_layer = OL_MAP_APP.initialize_popup_window(popup_container, popup_closer);
     window.map.addOverlay(window.popup_layer);
 
-<<<<<<< HEAD
-    /* Only show fields at certain zoom level */
-    google.maps.event.addListener(window.map, 'zoom_changed', function() {
-        var zoom = window.map.getZoom(),
-            region = $('#region').val();
-        if (zoom >=8 && region.is_in(['US_fields', 'Mason'])){
-            MAP_APP.set_map_layer();
-        }
-    });
-=======
     if (region == "ee_map"){
         //ajax_get_ee_map();
     }else {
@@ -974,7 +766,4 @@ var initialize_ol_map = function() {
     }
     //Set the map so that it changes region at differnet zoom levels
     OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
->>>>>>> central
 }
-
-

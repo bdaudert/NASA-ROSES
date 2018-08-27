@@ -181,20 +181,10 @@ class databaseTasks(webapp2.RequestHandler):
     def get(self):
         ee.Initialize(config.EE_CREDENTIALS)
         ee.data.setDeadline(180000)
-<<<<<<< HEAD
-        tv = templateMethods.set_initial_template_values(
-            self, 'databaseTask', 'GET')
-        tv['json_data'] = {}
-        # FIX ME: only do 2003 for testing
-        # geo_files = filter(os.path.isfile, glob.glob(geo_dir + '*.geojson'))
-        # for geoFName in geo_files:
-        for region in ['Mason']:
-=======
         tv = templateMethods.set_template_values(
             self, 'databaseTask', 'GET')
         tv['json_data'] = {}
         for region in ['US_states_west_500k', 'Mason', 'US_counties_west_500k']:
->>>>>>> central
             for year in ['2003']:
                 logging.info('PROCESSING Region/Year ' + region + '/' + year)
                 for ds in ['MODIS']:
