@@ -6,12 +6,8 @@ function change_inRegion(region, auto_set_region=false){
 	// Clear the feature indices
 	$('#feat_indices').val('');
 	// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	// Hide the popup window
+	window.map.closePopup();
 
 	if (region != $('#region').val()){
 		// Zoom level was changed
@@ -59,15 +55,8 @@ function change_inYear(year){
     $('#years').val([year]);
 	//Clear the feature indices
 	$('#feat_indices').val('');
-	/*
 	// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
-	*/
+	window.map.closePopup();
 	//Delete old layer
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	// We ned to recompute the template vars
@@ -81,26 +70,22 @@ function change_inYear(year){
 function change_inYears(years){
     //Clear the featuer indices
 	$('#feat_indices').val('');// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	// Hide the popup window
+	window.map.closePopup();
 	//Delete old layer
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	var geojsonLayer = DATA.geomdata[$('#years').val()[0]];
 
 	if (years.length != 1){
 		//$('#form-timeperiod-statistic').css('display', 'block')
-		var styleFunct = LF_MAP_APP.chorostyleFunction;
+		var styleFunct = LF_MAP_APP.defaultStyleFunction;
 	} else{
 		//New map layer is set inside ajax call (async issue)
 		ajax_update_etdata_and_map(auto_set_region=false);
 		//$('#form-timeperiod-statistic').css('display', 'none');
 		var styleFunct = LF_MAP_APP.chorostyleFunction;
 	}
-	LF_MAP_APP.set_mapLayer(geosonLayer, styleFunc);
+	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
 	//Couple year field to be first year of selection
     $('#year').val($('#years').val()[0])
 }
@@ -110,12 +95,7 @@ function change_inVariable(variable){
 	//Clear the featuer indices
 	$('#feat_indices').val('');
 	// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	window.map.closePopup();
 
 	if ($('#region').val().is_in(['US_fields', 'Mason'])){
     	//Set new dataModal
@@ -155,13 +135,8 @@ function change_inTRes(resolution){
 
     //Clear the featuere indices
 	$('#feat_indices').val('');
-    // Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	// Hide the popup window
+	window.map.closePopup();
 
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');
@@ -214,12 +189,7 @@ function change_inTRes(resolution){
 
 function change_inTimePeriod(time_period){
     // Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	window.map.closePopup();
 	if (time_period.length == 1) {
         // Set monthly summary to none
         $('#time_period_statistic').val('none');
@@ -234,12 +204,7 @@ function change_inTimePeriod(time_period){
 
 function change_inTimePeriodStat(time_period_stat){
     // Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	window.map.closePopup();
 	// Update the map layer
     LF_MAP_APP.update_mapLayer();
 }

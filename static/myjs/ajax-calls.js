@@ -102,8 +102,9 @@ function ajax_update_etdata_and_map(auto_set_region=false){
     });
 }
 
-function ajax_set_featdata_on_feature_click(evt){
-    //Sets feature data on map click of single feature
+function ajax_set_featdata_on_feature_click(feat, layer){
+    // Sets feature data on map click of single feature for
+    // multiple years
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,
@@ -144,9 +145,9 @@ function ajax_set_featdata_on_feature_click(evt){
         feat_idx_list = get_feat_index_from_featdata(year);
         if (feat_idx_list.length != 0){
             html += MAP_APP.set_dataModalHeader();
-            html += LF_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            html += MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
         }
-        window.popup_html = html;
+        layer.bindPopup(html).openPopup();
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {
@@ -210,7 +211,6 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
             while (coordinate.length != 2){
                 coordinate = coordinate[0]
             }
-            window.popup_layer.setPosition(coordinate);
         }
         end_progressbar();
     }) // successfully got JSON response

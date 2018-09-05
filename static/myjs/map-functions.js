@@ -500,40 +500,40 @@ LF_MAP_APP = {
         this.delays = this.delays || [];
         var delay = this.delays[ id ];
         if (delay){
-            clearTimeout ( delay );
+            clearTimeout(delay);
         }
-        delay = setTimeout ( callback, timeout );
+        delay = setTimeout(callback, timeout);
         this.delays[id] = delay;
     },
     zoomToFeature: function(e) {
         window.map.fitBounds(e.target.getBounds());
     },
-    initialize_popupWindow: function(){
-        window.info = new LF_MAP_APP.popupControl();
-        window.popup_layer = info.addTo(window.map);
+    set_popup_window_single_feat: function(e, feat, layer){
+        /*
+        Sets popup window when user clicks on a single feature
+        e click event
+        feat geosjon feature
+        layer leaflet layer
+         */
+        // Close all open popups
+        window.map.closePopup();
 
-    },
-    set_popup_window_single_feat: function(feat, layer){
         var years = $('#years').val(),
             feats = [feat];
         // Get the html content for the popup
         if (years.length != 1) {
             //Multiple years, we need to query the database to get data for each year
             //Sets window.popup_html global var
-            ajax_set_featdata_on_feature_click(e);
+            $('#feat_indices').val(String(feat.properties['idx']));
+            ajax_set_featdata_on_feature_click(feat, layer);
         }else {
             var gf_data = MAP_APP.set_feature_data(years, feats);
             window.popup_html = MAP_APP.set_dataModalHeader();
             // Only show data if single year
             // Else only show header on click
-            if (years.length == 1) {
-                window.popup_html += MAP_APP.set_popup_data(gf_data['featsdata'], gf_data['featsgeomdata']);
-            }
+            window.popup_html += MAP_APP.set_popup_data(gf_data['featsdata'], gf_data['featsgeomdata']);
+            layer.bindPopup(window.popup_html).openPopup();
         }
-        // Close all open popups
-        window.map.closePopup();
-        // Open the current popup
-        layer.bindPopup(window.popup_html).openPopup();
     },
     onEachFeature: function(feature, layer) {
         layer.on({
@@ -542,7 +542,7 @@ LF_MAP_APP = {
         });
         layer.on("click", function (e) {
             LF_MAP_APP.zoomToFeature(e);
-            LF_MAP_APP.set_popup_window_single_feat(feature, layer);
+            LF_MAP_APP.set_popup_window_single_feat(e, feature, layer);
         });
     },
     set_mapLayer: function(geojson, styleFunct) {
@@ -672,15 +672,6 @@ var initialize_lf_map = function() {
         zoom: mapZoom
     });
     LF_MAP_APP.set_lfRaster().addTo(window.map);
-
-    /*
-    var popup_container = document.getElementById('popup'),
-        popup_content = document.getElementById('popup-content'),
-        popup_closer = document.getElementById('popup-closer');
-    //Initialize popover
-    window.popup_layer = LF_MAP_APP.initialize_popup_window(popup_container, popup_closer);
-    window.map.addOverlay(window.popup_layer);
-    */
 
     if (region == "ee_map"){
         //API call to CE
