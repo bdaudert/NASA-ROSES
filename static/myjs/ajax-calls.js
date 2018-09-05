@@ -203,14 +203,8 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         if (feat_idx_list.length != 0){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();
-            html += LF_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
-            // Show the popup
-            popup_content.innerHTML = html;
-            var feats = selectedFeatures.getArray(),
-                coordinate = feats[0].getGeometry().getCoordinates()[0];
-            while (coordinate.length != 2){
-                coordinate = coordinate[0]
-            }
+            html += MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            selectedFeatures[0].bindPopup(html).openPopup();
         }
         end_progressbar();
     }) // successfully got JSON response

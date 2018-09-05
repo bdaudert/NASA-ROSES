@@ -678,7 +678,29 @@ var initialize_lf_map = function() {
     }else {
         LF_MAP_APP.update_mapLayer(auto_set_region = true);
     }
+    window.map.on("boxzoomend", function(e) {
+        var bounds, feat_indices = [], layers = [], feat_idx;
+        window.map.eachLayer(function(layer) {
+            try {
+                bounds = layer.getBounds();
+            }catch(e){
+                return;
+            }
+            if (e.boxZoomBounds.intersects(bounds)) {
+                try {
+                   feat_idx =  layer.feature.properties['idx'];
+                }catch(e){
+                    return;
+                }
+                feat_indices.push(feat_idx);
+                layers.push(layer);
+            }
+        });
+        $('#feat_indices').val(feat_indices.join(','));
+        if (feat_indices.length > 0){
+            ajax_set_featdata_on_dragbox(layers);
+        }
+    });
     //Set the map so that it changes region at different zoom levels
     //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
-
 }
