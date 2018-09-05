@@ -90,8 +90,8 @@ function ajax_update_etdata_and_map(auto_set_region=false){
 
         }
         //Set new map layer
-        OL_MAP_APP.update_map_layer(auto_set_region=auto_set_region);
-        OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
+        LF_MAP_APP.update_mapLayer(auto_set_region=auto_set_region);
+        //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
         end_progressbar();
     })
     .fail(function(jqXHR) {
@@ -145,7 +145,7 @@ function ajax_set_featdata_on_feature_click(evt){
         feat_idx_list = get_feat_index_from_featdata(year);
         if (feat_idx_list.length != 0){
             html += MAP_APP.set_dataModalHeader();
-            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            html += LF_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
             coordinate = evt.coordinate;
             popup_content.innerHTML = html;
             window.popup_layer.setPosition(coordinate);
@@ -205,7 +205,7 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         if (feat_idx_list.length != 0){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();
-            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            html += LF_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
             // Show the popup
             popup_content.innerHTML = html;
             var feats = selectedFeatures.getArray(),
