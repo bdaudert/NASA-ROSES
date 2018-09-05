@@ -103,12 +103,11 @@ function ajax_update_etdata_and_map(auto_set_region=false){
 }
 
 function ajax_set_featdata_on_feature_click(evt){
-    //Sets feature data on map click single eature
+    //Sets feature data on map click of single feature
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,
-        err_code, r, method = 'ajax', error, cause, i, tv_var,
-        popup_content = document.getElementById('popup-content');
+        err_code, r, method = 'ajax', error, cause, i, tv_var;
     //Update the tool_action
     $('#tool_action').val(tool_action);
     //Get the form data
@@ -146,10 +145,8 @@ function ajax_set_featdata_on_feature_click(evt){
         if (feat_idx_list.length != 0){
             html += MAP_APP.set_dataModalHeader();
             html += LF_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
-            coordinate = evt.coordinate;
-            popup_content.innerHTML = html;
-            window.popup_layer.setPosition(coordinate);
         }
+        window.popup_html = html;
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {

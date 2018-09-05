@@ -394,7 +394,7 @@ MAP_APP = {
             featsdata[year] = {type: 'FeatureCollection', features: []};
             featsgeomdata[year] = {type: 'FeatureCollection', features: []};
             for (f_idx = 0; f_idx < feats.length; f_idx++) {
-                feat_idx = feats[f_idx].get('idx');
+                feat_idx = feats[f_idx].properties['idx'];
                 featsdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
                 featsgeomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
             }
@@ -420,6 +420,16 @@ MAP_APP = {
 
 var LF_MAP_APP = LF_MAP_APP || {};
 LF_MAP_APP = {
+    set_lfRaster: function(){
+        /*
+        Sets default openlayer basemap raster
+        FIX ME: there might be a better looking obne, e.g. satellite base
+        */
+        var layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+        return layer;
+    },
     choroStyleFunction: function(feature) {
         /*
         Sets the feature styles for Choropleth map
@@ -498,28 +508,58 @@ LF_MAP_APP = {
     zoomToFeature: function(e) {
         window.map.fitBounds(e.target.getBounds());
     },
-    set_lfRaster: function(){
-        /*
-        Sets default openlayer basemap raster
-        FIX ME: there might be a better looking obne, e.g. satellite base
-        */
-        var layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        });
-        return layer;
+    initialize_popupWindow: function(){
+        window.info = new LF_MAP_APP.popupControl();
+        window.popup_layer = info.addTo(window.map);
+
     },
-    set_mapLayer: function(geojsonLayer, styleFunct, map){
+    set_popup_window_single_feat: function(feat, layer){
+        var years = $('#years').val(),
+            feats = [feat];
+        // Get the html content for the popup
+        if (years.length != 1) {
+            //Multiple years, we need to query the database to get data for each year
+            //Sets window.popup_html global var
+            ajax_set_featdata_on_feature_click(e);
+        }else {
+            var gf_data = MAP_APP.set_feature_data(years, feats);
+            window.popup_html = MAP_APP.set_dataModalHeader();
+            // Only show data if single year
+            // Else only show header on click
+            if (years.length == 1) {
+                window.popup_html += MAP_APP.set_popup_data(gf_data['featsdata'], gf_data['featsgeomdata']);
+            }
+        }
+        // Close all open popups
+        window.map.closePopup();
+        // Open the current popup
+        layer.bindPopup(window.popup_html).openPopup();
+    },
+    onEachFeature: function(feature, layer) {
+        layer.on({
+            mouseover: LF_MAP_APP.highlightFeature,
+            mouseout: LF_MAP_APP.resetHighlight
+        });
+        layer.on("click", function (e) {
+            LF_MAP_APP.zoomToFeature(e);
+            LF_MAP_APP.set_popup_window_single_feat(feature, layer);
+        });
+    },
+    set_mapLayer: function(geojson, styleFunct) {
         /*
         Set the map layer (geojson object) on the map
         */
-        window.main_map_layer = L.geoJson(geojsonLayer, {style: styleFunct}).addTo(map);
+        window.main_map_layer = L.geoJson(geojson, {
+            style: styleFunct,
+            onEachFeature: LF_MAP_APP.onEachFeature
+        }).addTo(window.map);
     },
-    delete_mapLayer: function(geojsonLayer, map){
+    delete_mapLayer: function(geojsonLayer){
         /*
         Delete the map layer (geojson layer) from the map
         */
-        map.removeLayer(geojsonLayer);
-        window.main_map_layer = null;
+        window.map.removeLayer(geojsonLayer);
+        window.map.main_map_layer = null;
     },
     update_mapLayer: function(auto_set_region=false){
         /*
@@ -533,7 +573,7 @@ LF_MAP_APP = {
         var map_type = MAP_APP.determine_map_type(),
             styleFunct = LF_MAP_APP.defaultStyleFunction;
         //Set the choropleth or default layer
-        var geojsonLayer = DATA.geomdata[$('#years').val()[0]];
+        var geojson = DATA.geomdata[$('#years').val()[0]];
         if (map_type == 'Choropleth') {
             styleFunct = LF_MAP_APP.choroStyleFunction;
             //Set the colors for Choropleth map, draw colorbar
@@ -544,7 +584,7 @@ LF_MAP_APP = {
             window.bins = cb['bins'];
             MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
         }
-        LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct, window.map);
+        LF_MAP_APP.set_mapLayer(geojson, styleFunct);
 
         /*
         //Only zoom if auto_set_region is turned off

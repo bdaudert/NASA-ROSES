@@ -75,7 +75,7 @@ function change_inYear(year){
 	ajax_update_etdata_and_map(auto_set_region=false);
 	var geojsonLayer = DATA.geomdata[$('#years').val()[0]],
 		styleFunct = LF_MAP_APP.chorostyleFunction;
-	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct, window.map);
+	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
 }
 
 function change_inYears(years){
@@ -100,7 +100,7 @@ function change_inYears(years){
 		//$('#form-timeperiod-statistic').css('display', 'none');
 		var styleFunct = LF_MAP_APP.chorostyleFunction;
 	}
-	LF_MAP_APP.set_mapLayer(geosonLayer, styleFunc, window.map);
+	LF_MAP_APP.set_mapLayer(geosonLayer, styleFunc);
 	//Couple year field to be first year of selection
     $('#year').val($('#years').val()[0])
 }
