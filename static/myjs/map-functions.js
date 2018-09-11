@@ -600,62 +600,34 @@ LF_MAP_APP = {
         });
         */
     },
-    set_dragbox: function(){
+    on_zoom_change_region: function(){
         /*
-        Allows selection of mutliple features via dragbox
-        Use Ctrl+Drag (Command+Drag on Mac) to draw boxes
+        Change the region at different zoom levels
+        when user zooms on map (auto_set_region = true)
         */
-        // a normal select interaction to handle click
-        var selectStyle = new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'blue',
-                width: 2
-            }),
-            fill: new ol.style.Fill({
-                color: 'rgba(0, 0, 255, 0.1)'
-            })
-        });
-        var select = new ol.interaction.Select({
-            style:selectStyle
-        });
-        window.map.addInteraction(select);
-
-        window.selectedFeatures = select.getFeatures();
-
-        // a DragBox interaction used to select features by drawing boxes
-        var dragBox = new ol.interaction.DragBox({
-            condition: ol.events.condition.platformModifierKeyOnly
-        });
-        window.map.addInteraction(dragBox);
-
-        dragBox.on('boxend', function() {
-            // features that intersect the box are added to the collection of
-            // selected features
-            var extent = dragBox.getGeometry().getExtent(),
-                feat_index_list = [];
-            window.vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
-                window.selectedFeatures.push(feature);
-                feat_index_list.push(feature.get('idx'));
-            });
-            //Update feat_indices hidden template variable
-            $('#feat_indices').val(feat_index_list.join(','));
-            // Update the fetadata and featgeomdata template variables
-            // And set the popup box
-            ajax_set_featdata_on_dragbox(window.selectedFeatures);
-        });
-
-        // clear selection when drawing a new box and when clicking on the map
-        dragBox.on('boxstart', function() {
-            window.selectedFeatures.clear();
-        });
-
+        var zoom = window.map.getZoom();
+        if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
+            var region = $('#region').val(),
+                new_region = js_statics.region_by_map_zoom[String(zoom)];
+            if (region != new_region) {
+                change_inRegion(new_region, auto_set_region=true);
+            }
+        }
+    },
+    set_map_zoom_pan_listener: function(auto_set_region=false) {
         /*
-        selectedFeatures.on(['add', 'remove'], function() {
-            var names = window.selectedFeatures.getArray().map(function(feature) {
-                return feature.get('name');
-            });
-        });
+        When aut_set_region = true we change region when user changes zoom on map
+        via the moveend listener (detects pan and zoom)
+        else (region was changed in the form), disbale the moveend listener
         */
+        if (!auto_set_region) {
+            try {
+                window.map.un('moveend', LF_MAP_APP.on_zoom_change_region);
+            }catch(e){}
+        }else{
+            // Show different regions at different zoom levels
+            window.map.on('moveend', LF_MAP_APP.on_zoom_change_region);
+        }
     }
 }
 
@@ -702,5 +674,5 @@ var initialize_lf_map = function() {
         }
     });
     //Set the map so that it changes region at different zoom levels
-    //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
+    LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }

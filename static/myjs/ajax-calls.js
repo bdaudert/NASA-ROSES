@@ -91,7 +91,7 @@ function ajax_update_etdata_and_map(auto_set_region=false){
         }
         //Set new map layer
         LF_MAP_APP.update_mapLayer(auto_set_region=auto_set_region);
-        //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
+        LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
         end_progressbar();
     })
     .fail(function(jqXHR) {
