@@ -102,4 +102,3 @@ function compute_stat(val_list, stat){
         return [myRound(val_list.mean(), 4)];
     }
 }
-

@@ -90,8 +90,8 @@ function ajax_update_etdata_and_map(auto_set_region=false){
 
         }
         //Set new map layer
-        OL_MAP_APP.update_map_layer(auto_set_region=auto_set_region);
-        OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
+        LF_MAP_APP.update_mapLayer(auto_set_region=auto_set_region);
+        LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
         end_progressbar();
     })
     .fail(function(jqXHR) {
@@ -102,13 +102,13 @@ function ajax_update_etdata_and_map(auto_set_region=false){
     });
 }
 
-function ajax_set_featdata_on_feature_click(evt){
-    //Sets feature data on map click single eature
+function ajax_set_featdata_on_feature_click(feat, layer){
+    // Sets feature data on map click of single feature for
+    // multiple years
     var tool_action = 'get_feat_data',
         url = clearOut_URL(),
         form_data, jqXHR, f_idx,
-        err_code, r, method = 'ajax', error, cause, i, tv_var,
-        popup_content = document.getElementById('popup-content');
+        err_code, r, method = 'ajax', error, cause, i, tv_var;
     //Update the tool_action
     $('#tool_action').val(tool_action);
     //Get the form data
@@ -145,11 +145,9 @@ function ajax_set_featdata_on_feature_click(evt){
         feat_idx_list = get_feat_index_from_featdata(year);
         if (feat_idx_list.length != 0){
             html += MAP_APP.set_dataModalHeader();
-            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
-            coordinate = evt.coordinate;
-            popup_content.innerHTML = html;
-            window.popup_layer.setPosition(coordinate);
+            html += MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
         }
+        layer.bindPopup(html).openPopup();
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {
@@ -205,15 +203,8 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         if (feat_idx_list.length != 0){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();
-            html += OL_MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
-            // Show the popup
-            popup_content.innerHTML = html;
-            var feats = selectedFeatures.getArray(),
-                coordinate = feats[0].getGeometry().getCoordinates()[0];
-            while (coordinate.length != 2){
-                coordinate = coordinate[0]
-            }
-            window.popup_layer.setPosition(coordinate);
+            html += MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            selectedFeatures[0].bindPopup(html).openPopup();
         }
         end_progressbar();
     }) // successfully got JSON response

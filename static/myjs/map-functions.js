@@ -371,7 +371,6 @@ MAP_APP = {
     set_dataModalVals: function(featsdata) {
         /*
         Sets the values for the dataModal over muliple years
-
         */
         var val_dict = {}, val_dict_list = [], val_lists = [], key,
             years = $('#years').val();
@@ -395,7 +394,7 @@ MAP_APP = {
             featsdata[year] = {type: 'FeatureCollection', features: []};
             featsgeomdata[year] = {type: 'FeatureCollection', features: []};
             for (f_idx = 0; f_idx < feats.length; f_idx++) {
-                feat_idx = feats[f_idx].get('idx');
+                feat_idx = feats[f_idx].properties['idx'];
                 featsdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
                 featsgeomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
             }
@@ -405,27 +404,46 @@ MAP_APP = {
             'featsdata': featsdata
         }
         return gf_data;
-    }
+    },
+    set_popup_data: function(featsdata, featsgeomdata){
+        var y_idx, year, years, html, val_dict_list, row_names, col_names,
+            years = $('#years').val();
+
+        //Populate the data modal
+        val_dict_list = MAP_APP.set_dataModalVals(featsdata);
+        row_names = MAP_APP.set_dataModalRowNames(featsgeomdata[years[0]]);
+        col_names = MAP_APP.set_dataModalColNames();
+        html = MAP_APP.set_dataModalTable(val_dict_list, row_names, col_names);
+        return html;
+    },
 }
 
-var OL_MAP_APP = OL_MAP_APP || {};
-OL_MAP_APP = {
-    styleFunction: function(feature) {
+var LF_MAP_APP = LF_MAP_APP || {};
+LF_MAP_APP = {
+    set_lfRaster: function(){
+        /*
+        Sets default openlayer basemap raster
+        FIX ME: there might be a better looking obne, e.g. satellite base
+        */
+        var layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+        return layer;
+    },
+    choroStyleFunction: function(feature) {
         /*
         Sets the feature styles for Choropleth map
         */
         var year = $('#years').val()[0],
-            idx = feature.get('idx'),
+            idx = feature.properties['idx'],
             v = $('#variable').val(),
             t_res = $('#t_res').val(),
             et_var = statics.stats_by_var_res[v][t_res][0], color = null, i;
-
 
         var f_data = {'properties': DATA.etdata[year].features[idx]['properties']},
             val_list = MAP_APP.set_singleYear_singleFeat_valList(f_data);
         // Note: for Choro, val_list is always of length 1
         var data_val = val_list[0];
-        //var data_val = DATA.etdata[year].features[idx]['properties'][et_var];
         //Find the right bin
         for (i = 0; i < window.bins.length; i++) {
             if (window.bins[i][0] <= data_val && data_val <= window.bins[i][1]) {
@@ -433,15 +451,14 @@ OL_MAP_APP = {
                 break;
             }
         }
-        var style = new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'black',
-                width: 2
-            }),
-            fill: new ol.style.Fill({
-                color: color
-            })
-        });
+        var style = {
+            fillColor: color,
+            weight: 2,
+            opacity: 1,
+            color: 'black',
+            dashArray: '3',
+            fillOpacity: 0.7
+        }
         return style;
     },
     defaultStyleFunction: function(feature){
@@ -449,37 +466,146 @@ OL_MAP_APP = {
         Sets the default feature styles for non-choropleth map layers
         e.g., mutliple years
         */
-        var style = new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'black',
-                // lineDash: [4],
-                width: 2
-            }),
-            fill: new ol.style.Fill({
-                color: 'rgba(0, 0, 255, 0.1)'
-            })
-        });
+        var style = {
+            fillColor: 'rgba(0, 0, 255, 0.1)',
+            weight: 2,
+            opacity: 1,
+            color: 'black',
+            dashArray: '3',
+            fillOpacity: 0.7
+        };
         return style;
     },
-    delay : function( timeout, id, callback ){
+    highlightFeature: function(e) {
+        /*highlights feature on mouse over*/
+        var layer = e.target;
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
+    },
+    resetHighlight: function(e) {
+        /*Resets featue on mouseout*/
+        window.main_map_layer.resetStyle(e.target);
+    },
+    delay: function(timeout, id, callback){
         /*
         Delay needed for zooming to work properly
         */
         this.delays = this.delays || [];
         var delay = this.delays[ id ];
-        if ( delay )
-        {
-                clearTimeout ( delay );
+        if (delay){
+            clearTimeout(delay);
         }
-        delay = setTimeout ( callback, timeout );
-        this.delays[ id ] = delay;
+        delay = setTimeout(callback, timeout);
+        this.delays[id] = delay;
     },
-    on_zoom_change_region: function(evt){
+    zoomToFeature: function(e) {
+        window.map.fitBounds(e.target.getBounds());
+    },
+    set_popup_window_single_feat: function(e, feat, layer){
+        /*
+        Sets popup window when user clicks on a single feature
+        e click event
+        feat geosjon feature
+        layer leaflet layer
+         */
+        // Close all open popups
+        window.map.closePopup();
+
+        var years = $('#years').val(),
+            feats = [feat];
+        // Get the html content for the popup
+        if (years.length != 1) {
+            //Multiple years, we need to query the database to get data for each year
+            //Sets window.popup_html global var
+            $('#feat_indices').val(String(feat.properties['idx']));
+            ajax_set_featdata_on_feature_click(feat, layer);
+        }else {
+            var gf_data = MAP_APP.set_feature_data(years, feats);
+            window.popup_html = MAP_APP.set_dataModalHeader();
+            // Only show data if single year
+            // Else only show header on click
+            window.popup_html += MAP_APP.set_popup_data(gf_data['featsdata'], gf_data['featsgeomdata']);
+            layer.bindPopup(window.popup_html).openPopup();
+        }
+    },
+    onEachFeature: function(feature, layer) {
+        layer.on({
+            mouseover: LF_MAP_APP.highlightFeature,
+            mouseout: LF_MAP_APP.resetHighlight
+        });
+        layer.on("click", function (e) {
+            LF_MAP_APP.zoomToFeature(e);
+            LF_MAP_APP.set_popup_window_single_feat(e, feature, layer);
+        });
+    },
+    set_mapLayer: function(geojson, styleFunct) {
+        /*
+        Set the map layer (geojson object) on the map
+        */
+        window.main_map_layer = L.geoJson(geojson, {
+            style: styleFunct,
+            onEachFeature: LF_MAP_APP.onEachFeature
+        }).addTo(window.map);
+    },
+    delete_mapLayer: function(geojsonLayer){
+        /*
+        Delete the map layer (geojson layer) from the map
+        */
+        window.map.removeLayer(geojsonLayer);
+        window.map.main_map_layer = null;
+    },
+    update_mapLayer: function(auto_set_region=false){
+        /*
+        Updates the map and sets up the popup window for click on single feature
+        */
+        // Delete old layer
+        if (window.main_map_layer) {
+            LF_MAP_APP.delete_mapLayer(window.main_map_layer);
+        }
+        // Find the new map type and set the map layer
+        var map_type = MAP_APP.determine_map_type(),
+            styleFunct = LF_MAP_APP.defaultStyleFunction;
+        //Set the choropleth or default layer
+        var geojson = DATA.geomdata[$('#years').val()[0]];
+        if (map_type == 'Choropleth') {
+            styleFunct = LF_MAP_APP.choroStyleFunction;
+            //Set the colors for Choropleth map, draw colorbar
+            var year = $('#years').val()[0],
+                start_color = MAP_APP.set_start_color(),
+                cb = MAP_APP.set_feat_colors(start_color, 'darken', year);
+            window.feat_colors = cb['colors'];
+            window.bins = cb['bins'];
+            MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
+        }
+        LF_MAP_APP.set_mapLayer(geojson, styleFunct);
+
+        /*
+        //Only zoom if auto_set_region is turned off
+        if (!auto_set_region) {
+            LF_MAP_APP.zoom_to_layer_extent(window.vectorSource);
+        }
+        */
+
+        /*
+        //Add the click event to the map
+        window.map.on('click', function(evt) {
+            LF_MAP_APP.set_popup_window_single_feat(evt);
+        });
+        */
+    },
+    on_zoom_change_region: function(){
         /*
         Change the region at different zoom levels
         when user zooms on map (auto_set_region = true)
         */
-        var zoom = window.map.getView().getZoom();
+        var zoom = window.map.getZoom();
         if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
             var region = $('#region').val(),
                 new_region = js_statics.region_by_map_zoom[String(zoom)];
@@ -496,277 +622,57 @@ OL_MAP_APP = {
         */
         if (!auto_set_region) {
             try {
-                window.map.un('moveend', OL_MAP_APP.on_zoom_change_region);
+                window.map.un('moveend', LF_MAP_APP.on_zoom_change_region);
             }catch(e){}
         }else{
             // Show different regions at different zoom levels
-            window.map.on('moveend', OL_MAP_APP.on_zoom_change_region);
-            /*
-            window.map.on('moveend', function onMoveEnd(evt) {
-                OL_MAP_APP.on_zoom_change_region(evt);
-            });
-            */
+            window.map.on('moveend', LF_MAP_APP.on_zoom_change_region);
         }
-    },
-    zoom_to_layer_extent: function(vectorSource){
-        /*
-        Zoom to the extent of the current map layer
-        */
-        if (vectorSource.getState() === 'ready') {
-            OL_MAP_APP.delay(500, "uniqueId", function() {
-                window.map.getView().fit(vectorSource.getExtent(), window.map.getSize());
-            });
-        }
-    },
-    set_vector_source: function(year){
-        /*
-        Set global variable vectorSource
-        from geojson
-        */
-        var vectorSource = new ol.source.Vector({
-            features: (new ol.format.GeoJSON()).readFeatures(DATA.geomdata[year],
-                {featureProjection: window.map.getView().getProjection()})
-        });
-        window.vectorSource = vectorSource;
-    },
-    set_ol_raster: function(){
-        /*
-        Sets default openlayer basemap raster
-        FIX ME: there might be a better looking obne, e.g. satellite base
-        */
-        var raster = new ol.layer.Tile({
-            source: new ol.source.OSM()
-        });
-        return raster;
-    },
-    get_choropleth_layer: function(){
-        /*
-        Sets the Choropleth map layer from the vectorSource
-        */
-        OL_MAP_APP.set_vector_source($('#years').val()[0]);
-        var geojsonLayer = new ol.layer.Vector({
-            source: window.vectorSource,
-            style: OL_MAP_APP.styleFunction,
-        });
-        return geojsonLayer;
-    },
-    get_default_map_layer: function(){
-        /*
-        Gets the dafault map layer (not choropleth) for multiple years
-        */
-        OL_MAP_APP.set_vector_source($('#years').val()[0]);
-        var geojsonLayer = new ol.layer.Vector({
-            source: window.vectorSource,
-            style: OL_MAP_APP.defaultStyleFunction,
-        });
-        return geojsonLayer;
-    },
-    set_map_layer: function(layer){
-        /*
-        Set the map Layer on the map
-        */
-        window.map.addLayer(layer);
-    },
-    delete_map_layer: function(layer){
-        /*
-        Delete the map layer from the map
-        */
-        window.map.removeLayer(layer)
-    },
-    initialize_popup_window: function(container, closer) {
-        var overlay = new ol.Overlay({
-            element: container,
-            autoPan: true,
-            autoPanAnimation: {
-                duration: 250
-            }
-        });
-        closer.onclick = function() {
-            overlay.setPosition(undefined);
-            closer.blur();
-            if (window.selectedFeatures){
-		        window.selectedFeatures.clear();
-	        }
-            return false;
-        };
-        return overlay;
-    },
-    set_popup_data: function(featsdata, featsgeomdata){
-        var y_idx, year, years, html, val_dict_list, row_names, col_names,
-            years = $('#years').val();
-
-        //Populate the data modal
-        val_dict_list = MAP_APP.set_dataModalVals(featsdata);
-        row_names = MAP_APP.set_dataModalRowNames(featsgeomdata[years[0]]);
-        col_names = MAP_APP.set_dataModalColNames();
-        html = MAP_APP.set_dataModalTable(val_dict_list, row_names, col_names);
-        return html;
-    },
-    set_popup_window_single_feat: function(evt) {
-        /*
-        Sets the popup window when user clicks on a layer
-        */
-        var popup_content = document.getElementById('popup-content'),
-            feats = [], feat_idx, feat_indices = [], html = '', featdata = {},
-            i, years = $('#years').val(), year, coordinate, geomdata;
-
-        //get the features that where clicked on
-        window.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-            feats.push(feature);
-            feat_indices.push(feature.get('idx'));
-        });
-
-        if (feats.length == 0) {
-            $('#feat_indices').val('');
-            return;
-        }
-
-        $('#feat_indices').val(feat_indices.join(','));
-        if (years.length != 1) {
-            //Multiple years, we need to query the database to get data for each year
-            ajax_set_featdata_on_feature_click(evt);
-        }else{
-            var gf_data = MAP_APP.set_feature_data(years, feats);
-            html += MAP_APP.set_dataModalHeader();
-            // Only show data if single year
-            // Else only show header on click
-            if ($('#years').val().length == 1) {
-                html += OL_MAP_APP.set_popup_data(gf_data['featsdata'], gf_data['featsgeomdata']);
-            }
-            coordinate = evt.coordinate;
-            popup_content.innerHTML = html;
-            window.popup_layer.setPosition(coordinate);
-        }
-    },
-    update_map_layer: function(auto_set_region=false){
-        /*
-        Updates the map and sets up the popup window for click on single feature
-        */
-        // Delete old layer
-        if (window.main_map_layer) {
-            OL_MAP_APP.delete_map_layer(window.main_map_layer);
-        }
-        // Find the new map type and set the map layer
-        var map_type = MAP_APP.determine_map_type();
-        //Set the choropleth or default layer
-        if (map_type == 'Choropleth') {
-            //Set the colors for Choropleth map
-            var year = $('#years').val()[0],
-                start_color = MAP_APP.set_start_color(),
-                cb = MAP_APP.set_feat_colors(start_color, 'darken', year),
-                geojsonLayer;
-            window.feat_colors = cb['colors'];
-            window.bins = cb['bins'];
-            //Add the geojson layer
-            window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
-            OL_MAP_APP.set_map_layer(window.main_map_layer);
-            MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
-        }else{
-            window.main_map_layer = OL_MAP_APP.get_default_map_layer();
-            OL_MAP_APP.set_map_layer(window.main_map_layer);
-        }
-        //Only zoom if auto_set_region is turned off
-        if (!auto_set_region) {
-            OL_MAP_APP.zoom_to_layer_extent(window.vectorSource);
-        }
-        //Add the click event to the map
-        window.map.on('click', function(evt) {
-            OL_MAP_APP.set_popup_window_single_feat(evt);
-        });
-    },
-    set_dragbox: function(){
-        /*
-        Allows selection of mutliple features via dragbox
-        Use Ctrl+Drag (Command+Drag on Mac) to draw boxes
-        */
-        // a normal select interaction to handle click
-        var selectStyle = new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: 'blue',
-                width: 2
-            }),
-            fill: new ol.style.Fill({
-                color: 'rgba(0, 0, 255, 0.1)'
-            })
-        });
-        var select = new ol.interaction.Select({
-            style:selectStyle
-        });
-        window.map.addInteraction(select);
-
-        window.selectedFeatures = select.getFeatures();
-
-        // a DragBox interaction used to select features by drawing boxes
-        var dragBox = new ol.interaction.DragBox({
-            condition: ol.events.condition.platformModifierKeyOnly
-        });
-        window.map.addInteraction(dragBox);
-
-        dragBox.on('boxend', function() {
-            // features that intersect the box are added to the collection of
-            // selected features
-            var extent = dragBox.getGeometry().getExtent(),
-                feat_index_list = [];
-            window.vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
-                window.selectedFeatures.push(feature);
-                feat_index_list.push(feature.get('idx'));
-            });
-            //Update feat_indices hidden template variable
-            $('#feat_indices').val(feat_index_list.join(','));
-            // Update the fetadata and featgeomdata template variables
-            // And set the popup box
-            ajax_set_featdata_on_dragbox(window.selectedFeatures);
-        });
-
-        // clear selection when drawing a new box and when clicking on the map
-        dragBox.on('boxstart', function() {
-            window.selectedFeatures.clear();
-        });
-
-        /*
-        selectedFeatures.on(['add', 'remove'], function() {
-            var names = window.selectedFeatures.getArray().map(function(feature) {
-                return feature.get('name');
-            });
-        });
-        */
     }
 }
 
 
-var initialize_ol_map = function() {
+var initialize_lf_map = function() {
     var region = $('#region').val();
     //Set the map zoom dependent on region
     var mapZoom = js_statics.map_zoom_by_region[region],
         mapCenter = js_statics.map_center_by_region[region];
 
     //Set the basic map
-    var raster = OL_MAP_APP.set_ol_raster();
-    window.map = new ol.Map({
-        target: 'main-map',
-        projection:"EPSG:4326",
-        layers: [raster],
-        view: new ol.View({
-            center: ol.proj.fromLonLat([mapCenter.lng, mapCenter.lat]),
-            zoom: mapZoom
-        })
+    window.map = L.map('main-map', {
+        center: [mapCenter.lat, mapCenter.lng],
+        zoom: mapZoom
     });
-
-    var popup_container = document.getElementById('popup'),
-        popup_content = document.getElementById('popup-content'),
-        popup_closer = document.getElementById('popup-closer');
-    //Initialize popover
-    window.popup_layer = OL_MAP_APP.initialize_popup_window(popup_container, popup_closer);
-    window.map.addOverlay(window.popup_layer);
+    LF_MAP_APP.set_lfRaster().addTo(window.map);
 
     if (region == "ee_map"){
-        //ajax_get_ee_map();
+        //API call to CE
     }else {
-        OL_MAP_APP.update_map_layer(auto_set_region = true);
-        OL_MAP_APP.set_dragbox();
+        LF_MAP_APP.update_mapLayer(auto_set_region = true);
     }
-    //Set the map so that it changes region at differnet zoom levels
-    OL_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
+    window.map.on("boxzoomend", function(e) {
+        var bounds, feat_indices = [], layers = [], feat_idx;
+        window.map.eachLayer(function(layer) {
+            try {
+                bounds = layer.getBounds();
+            }catch(e){
+                return;
+            }
+            if (e.boxZoomBounds.intersects(bounds)) {
+                try {
+                   feat_idx =  layer.feature.properties['idx'];
+                }catch(e){
+                    return;
+                }
+                feat_indices.push(feat_idx);
+                layers.push(layer);
+            }
+        });
+        $('#feat_indices').val(feat_indices.join(','));
+        if (feat_indices.length > 0){
+            ajax_set_featdata_on_dragbox(layers);
+        }
+    });
+    //Set the map so that it changes region at different zoom levels
+    LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }
-
-

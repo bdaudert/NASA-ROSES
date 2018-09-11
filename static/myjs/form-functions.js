@@ -6,12 +6,8 @@ function change_inRegion(region, auto_set_region=false){
 	// Clear the feature indices
 	$('#feat_indices').val('');
 	// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	// Hide the popup window
+	window.map.closePopup();
 
 	if (region != $('#region').val()){
 		// Zoom level was changed
@@ -19,12 +15,11 @@ function change_inRegion(region, auto_set_region=false){
 		$('#region').val(region);
 	}
     // Delete old layer
-    // MAP_APP.delete_map_layers();
-	OL_MAP_APP.delete_map_layer(window.main_map_layer);
+	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	//Set the new map_layer
 	if (region == "ee_map"){
 		// Generate a dynamic map with EE
-		// ajax_get_ee_map();
+		// API call to CE
 	}else{
 		// We ned to recompute the template vars
 		// geodata, etdata and set the new map layer
@@ -61,41 +56,36 @@ function change_inYear(year){
 	//Clear the feature indices
 	$('#feat_indices').val('');
 	// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	window.map.closePopup();
 	//Delete old layer
-	OL_MAP_APP.delete_map_layer(window.main_map_layer);
+	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	// We ned to recompute the template vars
-	//geodata, etdata
+	//geodata, etdata for choropleth map
 	ajax_update_etdata_and_map(auto_set_region=false);
-	window.main_map_layer = OL_MAP_APP.get_choropleth_layer();
-	OL_MAP_APP.set_map_layer(window.main_map_layer);
+	var geojsonLayer = DATA.geomdata[$('#years').val()[0]],
+		styleFunct = LF_MAP_APP.chorostyleFunction;
+	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
 }
 
 function change_inYears(years){
     //Clear the featuer indices
 	$('#feat_indices').val('');// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	// Hide the popup window
+	window.map.closePopup();
 	//Delete old layer
-	OL_MAP_APP.delete_map_layer(window.main_map_layer);
+	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
+	var geojsonLayer = DATA.geomdata[$('#years').val()[0]];
+
 	if (years.length != 1){
-		//$('#form-timeperiod-statistic').css('display', 'block');
-		window.main_map_layer = OL_MAP_APP.get_default_map_layer();
-		OL_MAP_APP.set_map_layer(window.main_map_layer);
+		//$('#form-timeperiod-statistic').css('display', 'block')
+		var styleFunct = LF_MAP_APP.defaultStyleFunction;
 	} else{
 		//New map layer is set inside ajax call (async issue)
 		ajax_update_etdata_and_map(auto_set_region=false);
 		//$('#form-timeperiod-statistic').css('display', 'none');
+		var styleFunct = LF_MAP_APP.chorostyleFunction;
 	}
+	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
 	//Couple year field to be first year of selection
     $('#year').val($('#years').val()[0])
 }
@@ -105,12 +95,7 @@ function change_inVariable(variable){
 	//Clear the featuer indices
 	$('#feat_indices').val('');
 	// Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	window.map.closePopup();
 
 	if ($('#region').val().is_in(['US_fields', 'Mason'])){
     	//Set new dataModal
@@ -121,7 +106,7 @@ function change_inVariable(variable){
     }
 
 	//Set dataset
-	var datasets = statics.dataset_by_var[variable], 
+	var datasets = statics.dataset_by_var[variable],
 		ds, option;
 	$('#dataset > option').remove();
 	if (datasets.length == 0){
@@ -150,13 +135,8 @@ function change_inTRes(resolution){
 
     //Clear the featuere indices
 	$('#feat_indices').val('');
-    // Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	// Hide the popup window
+	window.map.closePopup();
 
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');
@@ -204,17 +184,12 @@ function change_inTRes(resolution){
     	//Get the map from db
     }
     // Update the map layer
-    OL_MAP_APP.update_map_layer();
+    LF_MAP_APP.update_mapLayer();
 }
 
 function change_inTimePeriod(time_period){
     // Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	window.map.closePopup();
 	if (time_period.length == 1) {
         // Set monthly summary to none
         $('#time_period_statistic').val('none');
@@ -224,19 +199,14 @@ function change_inTimePeriod(time_period){
 	}
 
     // Update the map layer
-    OL_MAP_APP.update_map_layer();
+    LF_MAP_APP.update_mapLayer();
 }
 
 function change_inTimePeriodStat(time_period_stat){
     // Hide the popup window
-	if (window.popup_layer) {
-        window.popup_layer.setPosition(undefined);
-    }
-    if (window.selectedFeatures){
-		 window.selectedFeatures.clear();
-	}
+	window.map.closePopup();
 	// Update the map layer
-    OL_MAP_APP.update_map_layer();
+    LF_MAP_APP.update_mapLayer();
 }
 
 function get_feat_index_from_featdata(year) {
@@ -249,5 +219,3 @@ function get_feat_index_from_featdata(year) {
     });
     return indices;
 }
-
-

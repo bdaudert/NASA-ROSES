@@ -260,12 +260,3 @@ class Datastore_Util(object):
             db_entity.key = ndb.Key('DATA', UNIQUE_ID)
             db_entities.append(db_entity)
         db_keys = ndb.put_multi(db_entities)
-
-
-
-
-
-
-
-
-

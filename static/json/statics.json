@@ -1,3 +1,4 @@
+
 {
     "form_option_keys": [
         "tool_action",
@@ -32,7 +33,8 @@
     "all_region": {
         "US_states_west_500k": "States, Western US",
         "US_counties_west_500k": "Counties, Western US",
-        "Mason": "Mason Valley"
+        "Mason": "Mason Valley Fields",
+        "CentralValley_15": "Central Valley Fields"
     },
     "all_aggregation_area": {
         "US_states_west_500k": "States, Western US",
@@ -224,6 +226,12 @@
             "PIXELCOUNT",
             "AREA"
         ],
+        "CentralValley_15": [
+            "COUNTY",
+            "AcresMast",
+            "CmdtyMast",
+            "SourceMast"
+        ],
         "US_states_west_500k": [
             "STATEFP",
             "STUSPS",
@@ -327,7 +335,7 @@
         "pr": {
             "annual": ["pr_annual"],
             "monthly": [ "pr_m01", "pr_m02", "pr_m03", "pr_m04",
-                "pr_m05", "pr_m06", "pr_m07", "pr_m08", 
+                "pr_m05", "pr_m06", "pr_m07", "pr_m08",
                 "pr_m09", "pr_m10", "pr_m11", "pr_m12"
             ],
             "seasonal": [ "pr_seasonal", "net_seasonal"]

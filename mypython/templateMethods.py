@@ -99,13 +99,13 @@ def set_template_values(RequestHandler, app_name, method):
     default values are used
     otherwisee we try to get the variable
     values from the request object
-
     Returns:
     tv: a dictionary of template variables
     '''
 
     tv = {
         'GMAP_API_KEY': GMAP_API_KEY,
+        'method': method,
         'app_name': app_name,
         'variables': statics['variable_defaults'],
         'form_options': {},
@@ -174,4 +174,3 @@ def set_template_values(RequestHandler, app_name, method):
     tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
     tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
     return tv
-
