@@ -6,7 +6,6 @@ import json
 import logging
 import operator
 from config import statics
-from config import GMAP_API_KEY as GMAP_API_KEY
 import databaseMethods
 
 
@@ -104,7 +103,6 @@ def set_template_values(RequestHandler, app_name, method):
     '''
 
     tv = {
-        'GMAP_API_KEY': GMAP_API_KEY,
         'method': method,
         'app_name': app_name,
         'variables': statics['variable_defaults'],
