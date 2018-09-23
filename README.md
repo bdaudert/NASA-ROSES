@@ -58,7 +58,7 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     
     You will need to tell app engine to add the lib folder to the third party libraries as follows:
     ```
-    # appengine_config.py
+    # config.py
     from google.appengine.ext import vendor
 
     # Add any libraries install in the "lib" folder.
