@@ -91,24 +91,14 @@ MAP_APP = {
         return cb;
     },
     drawMapColorbar: function (colors, bins) {
-        var palette = '', ticks = [], myScale, colorbar, i;
-        for (i = 0; i < colors.length; i++) {
-            palette += colors[i].replace(/#/g, '');
-            if (i < colors.length - 1) {
-                palette += ','
-            }
-            ticks.push(myRound(bins[i][0], 1));
+        var domain = [];
+
+        for (var i = 0; i < bins.length; i++) {
+            var midTick = (bins[i][1] - bins[i][0])/2 + bins[i][0];
+            domain.push(myRound(midTick,1));
         }
-        ticks.push(myRound(bins[bins.length - 1][1], 1))
-        myScale = d3.scale.quantize().range(colors).domain(d3.range(colors.length + 1));
-        myScale.type = 'QUANTIZE';
-        myScale.ticks = ticks;
-        colorbar = Colorbar()
-            .thickness(35)
-            .barlength(800)
-            .orient("horizontal")
-            .scale(myScale);
-        colorbarObject = d3.select("#colorbar").call(colorbar);
+
+        colorScale(domain, colors, '#colorbar');
     },
     set_singleYear_singleFeat_valList: function(featdata){
         /*
