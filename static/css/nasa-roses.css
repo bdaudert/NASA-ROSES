@@ -82,12 +82,11 @@ body {
 
 .colorbar-container{
     position: absolute;
-    padding: 0% 1%;
     top: 10%;
-    left: 50%;
+    right: 10px;
     z-index: 10;
     background: #dcdcdc;
-    width: auto;
+    width: 130px;
 }
 
 .colorbar-container-header {

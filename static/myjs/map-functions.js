@@ -91,14 +91,7 @@ MAP_APP = {
         return cb;
     },
     drawMapColorbar: function (colors, bins) {
-        var domain = [];
-
-        for (var i = 0; i < bins.length; i++) {
-            var midTick = (bins[i][1] - bins[i][0])/2 + bins[i][0];
-            domain.push(myRound(midTick,1));
-        }
-
-        colorScale(domain, colors, '#colorbar');
+        colorScale(bins, colors, '#colorbar');
     },
     set_singleYear_singleFeat_valList: function(featdata){
         /*

@@ -7,15 +7,13 @@
 */
 
 
-function colorScale(dom, ran, divID) {
+function colorScale(bins, colors, divID) {
+    var rectWidth = 25;
     var rectHeight = 20;
-    var rectWidth = 35;
-    var svgHeight = 40;
-    var svgWidth = dom.length*(rectWidth+3) - 3;
+    var svgWidth = 110;
+    var svgHeight = bins.length*(rectHeight+3) - 3;
 
-    var colors = d3.scaleLinear()
-       .domain(dom)
-       .range(ran);
+    var ran = d3.range(bins.length);
 
     d3.select('#colorbarSvg').remove();
 
@@ -26,14 +24,16 @@ function colorScale(dom, ran, divID) {
         .attr('height', svgHeight);
 
     var rects = svg.selectAll('.rects')
-        .data(dom)
+        .data(ran)
         .enter()
         .append('rect')
-        .attr('y', 0)
+        .attr('y', (d,i)=>i*(rectHeight+3))
         .attr('height', rectHeight)
-        .attr('x', (d,i)=>i*38)
+        .attr('x', 0)
         .attr('width', rectWidth)
-        .attr('fill', d=>colors(d));
+        .attr('fill', function (d,i) {
+            return colors[i];
+        });
 
     var rectBox = [];
 
@@ -41,14 +41,12 @@ function colorScale(dom, ran, divID) {
         rectBox[i] = this.getBBox();
     });
 
-
     rectBox.forEach(function(value, index) {
         svg.append('text')
-        .attr('x', value.x + value.width/2)
-        .attr('y', value.y + value.height+14)
-        .attr('text-anchor', 'middle')
-        .style('font-size', 12)
+        .attr('x', value.x + value.width + 5)
+        .attr('y', value.y + 14)
+        .style('font-size', 14)
         .style('font', 'bold')
-        .text(function(d, i) { return dom[index]; });
+        .text(function(d, i) { return bins[index][0] + " to " + bins[index][1]; });
      });
 }
