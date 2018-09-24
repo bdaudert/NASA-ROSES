@@ -17,6 +17,8 @@ function colorScale(dom, ran, divID) {
        .domain(dom)
        .range(ran);
 
+    d3.select('#colorbarSvg').remove();
+
     var svg = d3.select(divID)
         .append('svg')
         .attr('id', 'colorbarSvg')
