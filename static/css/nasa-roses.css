@@ -75,19 +75,18 @@ body {
     color: #fff;
 }
 
-.colorbar-container{
-    position: absolute;
-    padding: 0% 1%;
-    top: 10%;
-    left: 50%;
-    z-index: 10;
-    background: #dcdcdc;
-    width: 40%;
-}
-
 .colorbar {
     position: relative;
-    width:99%;
+    margin: 5px;
+}
+
+.colorbar-container{
+    position: absolute;
+    top: 10%;
+    right: 10px;
+    z-index: 10;
+    background: #dcdcdc;
+    width: 130px;
 }
 
 .colorbar-container-header {
@@ -96,7 +95,12 @@ body {
     z-index: 10;
     background-color: #2196F3;
     color: #fff;
-    width: 95%;
+    width: auto;
+}
+
+#colorbarSvg {
+    display: block;
+    margin: auto;
 }
 
 #main-map {
