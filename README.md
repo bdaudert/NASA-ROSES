@@ -20,25 +20,28 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     The preferred tooling for managing your App Engine applications in Python is Google Cloud SDK. Install it. 
     - https://cloud.google.com/sdk/docs/
 
-    To create the "ee-python" conda environment, execute the following:
+    To create the "nasa-roses" conda environment, execute the following:
     ```
-    conda remove --name ee-python --all
-    conda create --name ee-python python=2.7
+    conda remove --name nasa-roses --all
+    conda create --name nasa-roses python=3.7
     ```
 
-    To activate the "ee-python" environement on MacOS:
+    To activate the "nasa-roses" environement on MacOS:
     ```
-    source activate ee-python
+    source activate nasa-roses
     ```
-    To activate the "ee-python" environment on Windows:
+    To activate the "nasa-roses" environment on Windows:
     ```
-    activate ee-python
+    activate nasa-roses
     ```
 
     To install the necessary external Python modules:
     ```
-    conda install numpy=1.6.2=py27_4 oauth2client=2.2.0 httplib2 cryptography pyOpenSSL cffi
-    pip install earthengine-api
+    conda install -c anaconda numpy oauth2client httplib2 cryptography pyOpenSSL cffi sqlalchemy psycopg2
+    
+    conda-forge earthengine-api shapely geoalchemy2 psycopg2
+    
+    pip install gunicorn
     ```
 
     Create the requirements.txt file.
@@ -47,10 +50,16 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     earthengine-api >= 0.1.100
     httplib2
     Jinja2 == 2.6
-    numpy == 1.6.2
+    numpy
     oauth2client
     six
+    geoalchemy2
+    shapely
+    geojson
+    gunicorn
+    psycopg2
     ```
+    
     The following command will install the the external Python modules listed in the requirements.txt file into the lib folder for upload to AppEngine.
     ```
     pip install -r requirements.txt -t lib
@@ -81,9 +90,55 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
 
     `python -c "import os; import ee; EE_ACCOUNT = os.environ.get('EE_ACCOUNT'); EE_PRIVATE_KEY_FILE = os.environ.get('EE_PRIVATE_KEY_FILE'); ee.Initialize(ee.ServiceAccountCredentials(EE_ACCOUNT, EE_PRIVATE_KEY_FILE)); print(ee.Image('srtm90_v4').getThumbUrl())"`
 
-- Configuring App Engine to use the conda Environment:
-    Install Google App Engine for Python and clone Earth Engine API repository.
-    `~/Development/google_appengine/dev_appserver.py .`
+
+### Local Development Server
+
+The dev_appserver.py tool is being deprecated in the Python 3.7 standard environment (see: https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app).
+
+Instead, a local WGSI development server can be started from within the project folder using either waitress (windows) or gunicorn (mac/linux).  After starting the server (and assuming a port of 8080), the page can be viewed at the URL [http://localhost:8080/](http://localhost:8080/).
+
+#### Windows
+
+Install the waitress python module (if needed):
+```
+pip install waitress
+```
+
+Start the local server:
+```
+waitress-serve --listen=*:8080 main:app
+```
+
+#### Linux/Mac
+
+Install the gunicorn python module (if needed):
+```
+pip install gunicorn
+```
+
+Start the local server:
+```
+gunicorn -b :8080 main:app
+```
+
+#### GCloud
+
+
+The app can be then be deployed from within the project folder (the project and version flags may not be necessary).
+```
+gcloud app deploy --project nasa-roses --version 1
+```
+
+To update the cron or queue information, these must be explicitly listed in the DEPLOYABLES section of the gcloud call (see: https://cloud.google.com/sdk/gcloud/reference/app/deploy).
+
+```
+gcloud app deploy app.yaml cron.yaml --project nasa-roses --version 1
+```
+
+To update GCloud:
+```
+gcloud components update
+```
 
 ### Repository Organization:
 - app.yaml (configuration file for webapp2 templating)
@@ -100,80 +155,4 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
 - templates
     - nasa-roses.html (index html, main html file for nasa-roses project)
     - all other html files
-
-#### GCloud
-
-After initializing and activating the conda environment, the development server can be started from within the project folder.  The port only needs to be specificied if not using the default value of 8080.
-
-```
-dev_appserver.py --port 8080 app.yaml
-```
-To run in debugging mode:
-```
-dev_appserver.py --port 8080 --log_level=debug app.yaml
-```
-To run in debugging mode with roses-geojson as the default bucket:
-```
-dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name roses-geojson
-```
-
-Sometimes windows needs the full path to dev_appserver.py:
-```
-python "c:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\dev_appserver.py" --port 8080 app.yaml
-```
-
-After installing GCloud, if you see this error message,
-  File "/Users/katherine/google-cloud-sdk/platform/google_appengine/google/appengine/tools/devappserver2/metrics.py", line 117, in Stop
-    total_run_time = int((Now() - self._start_time).total_seconds())
-run this.. to fix metrics (recently added to Cloud SDK)
-
-do this:
-gcloud config set disable_usage_reporting true
-
-The app can be then be deployed from within the project folder (the project and version flags may not be necessary).
-```
-gcloud app deploy --project nasa-roses --version 1
-```
-
-To update the cron or queue information, these must be explicitly listed in the DEPLOYABLES section of the gcloud call (see: https://cloud.google.com/sdk/gcloud/reference/app/deploy).
-
-```
-gcloud app deploy app.yaml cron.yaml --project nasa-roses --version 1
-```
-
-To update GCloud:
-```
-gcloud components update
-```
-loud
-
-After initializing and activating the conda environment, the development server can be started from within the project folder.  The port only needs to be specificied if not using the default value of 8080.
-
-```
-dev_appserver.py --port 8080 app.yaml
-```
-To run in debugging mode:
-```
-dev_appserver.py --port 8080 --log_level=debug app.yaml
-```
-To run in debugging mode with roses-geojson as the default bucket:
-```
-dev_appserver.py --port 8080 --log_level=debug app.yaml --default_gcs_bucket_name roses-geojson
-```
-
-The app can be then be deployed from within the project folder (the project and version flags may not be necessary).
-```
-gcloud app deploy --project nasa-roses --version 1
-```
-
-To update the cron or queue information, these must be explicitly listed in the DEPLOYABLES section of the gcloud call (see: https://cloud.google.com/sdk/gcloud/reference/app/deploy).
-
-```
-gcloud app deploy app.yaml cron.yaml --project nasa-roses --version 1
-```
-
-To update GCloud:
-```
-gcloud components update
-```
 
