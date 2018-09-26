@@ -90,8 +90,12 @@ MAP_APP = {
         cb = {'colors': colors, 'bins': bins}
         return cb;
     },
-    drawMapColorbar: function (colors, bins) {
-        colorScale(bins, colors, '#colorbar');
+    drawMapColorbar: function (bins, colors, div_id) {
+        $(div_id).css('display', 'block');
+        colorScale(bins, colors, div_id);
+    },
+    hideMapColorbar: function(div_id){
+        $(div_id).css('display', 'none');
     },
     set_singleYear_singleFeat_valList: function(featdata){
         /*
@@ -555,9 +559,9 @@ LF_MAP_APP = {
         // Find the new map type and set the map layer
         var map_type = MAP_APP.determine_map_type(),
             styleFunct = LF_MAP_APP.defaultStyleFunction;
+        MAP_APP.hideMapColorbar('#colorbar');
         //Set the choropleth or default layer
         var geojson = DATA.geomdata[$('#years').val()[0]];
-        console.log(geojson);
         if (map_type == 'Choropleth') {
             styleFunct = LF_MAP_APP.choroStyleFunction;
             //Set the colors for Choropleth map, draw colorbar
@@ -566,7 +570,7 @@ LF_MAP_APP = {
                 cb = MAP_APP.set_feat_colors(start_color, 'darken', year);
             window.feat_colors = cb['colors'];
             window.bins = cb['bins'];
-            MAP_APP.drawMapColorbar(cb['colors'], cb['bins'], start_color);
+            MAP_APP.drawMapColorbar(cb['bins'], cb['colors'], '#colorbar');
         }
         LF_MAP_APP.set_mapLayer(geojson, styleFunct);
 
