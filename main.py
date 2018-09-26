@@ -100,9 +100,19 @@ def home():
         return flask.render_template('nasa-roses.html', **tv)
     else:
         # Ajax requests
-        # return str(tv)
-        return json.dumps(tv, ensure_ascii=False)
+        response = {}
+        # Only pick the relevant template variables
+        if ('error' in tv.keys() and tv['error']):
+            response['error'] = tv['error']
+        else:
+            for var in config.statics['response_vars'][tv['variables']['tool_action']]:
+                try:
+                    response[var] = tv[var]
+                except KeyError:
+                    response[var] = []
+        return json.dumps(response, ensure_ascii=False)
 
+        #return json.dumps(tv, ensure_ascii=False)
 
     def handle_exception(exception, debug):
         """This catches unhandled Python exceptions in GET requests

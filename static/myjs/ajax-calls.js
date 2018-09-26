@@ -67,7 +67,7 @@ function ajax_update_etdata_and_map(auto_set_region=false){
     $('#tool_action').val(tool_action);
     //Get the form data
     form_data = $("#form_all").serialize();
-    var msg = 'Switching region';
+    var msg = 'Obtaining data';
     start_progressbar(mgs=msg);
     jqXHR = $.ajax({
         url: url,

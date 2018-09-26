@@ -90,11 +90,11 @@ MAP_APP = {
         cb = {'colors': colors, 'bins': bins}
         return cb;
     },
-    drawMapColorbar: function (bins, colors, div_id) {
+    draw_mapColorbar: function (bins, colors, div_id) {
         $(div_id).css('display', 'block');
         colorScale(bins, colors, div_id);
     },
-    hideMapColorbar: function(div_id){
+    hide_mapColorbar: function(div_id){
         $(div_id).css('display', 'none');
     },
     set_singleYear_singleFeat_valList: function(featdata){
@@ -454,7 +454,7 @@ LF_MAP_APP = {
         e.g., mutliple years
         */
         var style = {
-            fillColor: 'rgba(0, 0, 255, 0.1)',
+            fillColor: '#ddd1e7',
             weight: 2,
             opacity: 1,
             color: 'black',
@@ -492,7 +492,7 @@ LF_MAP_APP = {
         delay = setTimeout(callback, timeout);
         this.delays[id] = delay;
     },
-    zoomToFeature: function(e) {
+    zoom_toFeature: function(e) {
         window.map.fitBounds(e.target.getBounds());
     },
     set_popup_window_single_feat: function(e, feat, layer){
@@ -528,7 +528,8 @@ LF_MAP_APP = {
             mouseout: LF_MAP_APP.resetHighlight
         });
         layer.on("click", function (e) {
-            LF_MAP_APP.zoomToFeature(e);
+            // FIX ME: this will cause region change
+            //LF_MAP_APP.zoom_toFeature(e);
             LF_MAP_APP.set_popup_window_single_feat(e, feature, layer);
         });
     },
@@ -547,6 +548,7 @@ LF_MAP_APP = {
         */
         window.map.removeLayer(geojsonLayer);
         window.map.main_map_layer = null;
+        MAP_APP.hide_mapColorbar('#colorbar');
     },
     update_mapLayer: function(auto_set_region=false){
         /*
@@ -559,7 +561,6 @@ LF_MAP_APP = {
         // Find the new map type and set the map layer
         var map_type = MAP_APP.determine_map_type(),
             styleFunct = LF_MAP_APP.defaultStyleFunction;
-        MAP_APP.hideMapColorbar('#colorbar');
         //Set the choropleth or default layer
         var geojson = DATA.geomdata[$('#years').val()[0]];
         if (map_type == 'Choropleth') {
@@ -570,7 +571,7 @@ LF_MAP_APP = {
                 cb = MAP_APP.set_feat_colors(start_color, 'darken', year);
             window.feat_colors = cb['colors'];
             window.bins = cb['bins'];
-            MAP_APP.drawMapColorbar(cb['bins'], cb['colors'], '#colorbar');
+            MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
         }
         LF_MAP_APP.set_mapLayer(geojson, styleFunct);
 
