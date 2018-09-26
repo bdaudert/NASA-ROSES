@@ -3,7 +3,7 @@ import os, sys, socket
 import logging
 import json
 import hashlib
-import urllib2
+import urllib.request as urllib2
 
 # Needed to read data from datastore within app engine
 # from google.appengine.ext import ndb

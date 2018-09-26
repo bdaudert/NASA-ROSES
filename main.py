@@ -32,7 +32,7 @@ from mypython import JinjaFilters
 # SET STATICS
 httplib2.Http(timeout=180000)
 
-
+'''
 # Set the JINJA_ENVIRONMENT
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -46,8 +46,15 @@ JINJA_ENVIRONMENT.filters['not_in'] = JinjaFilters.not_in
 JINJA_ENVIRONMENT.filters['make_string_range'] = JinjaFilters.make_string_range
 JINJA_ENVIRONMENT.filters['make_int_range'] = JinjaFilters.make_int_range
 JINJA_ENVIRONMENT.filters['divisibleby'] = JinjaFilters.divisibleby
+'''
 
 app = flask.Flask(__name__)
+# Set the template filters
+from inspect import getmembers, isfunction
+template_filters = {name: function
+                for name, function in getmembers(JinjaFilters)
+                if isfunction(function)}
+app.jinja_env.filters.update(template_filters)
 
 #####################################################
 #   RUN APP - RUNS THE APPLICATION AND SETS WEBPAGE
@@ -172,13 +179,6 @@ def databaseTasks():
             logging.info(region + '/' + year + ' PROCESSED!')
     return flask.render_template('databaseTasks.html', **tv)
 
-
-app = webapp2.WSGIApplication([
-    # ('/admin', AdminPage),
-    # ('/login', LogInPage),
-    # ('/databaseTasks', databaseTasks),
-    ('/', NASA_ROSES)
-], debug=True)
 
 if __name__ == '__main__':
     # This is used when running locally. Gunicorn is used to run the

@@ -9,3 +9,5 @@ shapely
 geojson
 gunicorn
 psycopg2
+google-cloud-datastore
+numpy

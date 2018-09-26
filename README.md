@@ -41,9 +41,9 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     
     conda install -c anaconda jinja2 flask
     
-    conda install -c mutirri webapp2
-    
     conda install -c conda-forge earthengine-api shapely geoalchemy2 psycopg2
+    
+    pip install --upgrade google-cloud-datastore
     ```
 
     Create the requirements.txt file.

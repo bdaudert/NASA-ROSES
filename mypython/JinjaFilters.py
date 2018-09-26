@@ -7,7 +7,7 @@ Custom jinja template filters
 def is_in(var, args):
     if args is None:
         return False
-    if isinstance(args, basestring):
+    if isinstance(args, str):
         arg_list = [str(arg).strip() for arg in args.split(',')]
     else:
         arg_list = [str(arg).strip() for arg in args]
@@ -16,7 +16,7 @@ def is_in(var, args):
 def not_in(var, args):
     if args is None:
         return False
-    if isinstance(args, basestring):
+    if isinstance(args, str):
         arg_list = [str(arg).strip() for arg in args.split(',')]
     else:
         arg_list = [str(arg).strip() for arg in args]

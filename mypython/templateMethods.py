@@ -11,7 +11,7 @@ from mypython import databaseMethods
 
 def set_form_options(variables):
     form_options = {}
-    for var_key, dflt in variables.iteritems():
+    for var_key, dflt in variables.items():
         if var_key in statics['form_option_keys']:
             # form_options[var_key] = statics['all_' + var_key]
             fo = statics['all_' + var_key]
@@ -112,7 +112,7 @@ def set_template_values(req_args, app_name, method):
     }
     # Overrode default variables if not GET
     if method == 'POST' or method == 'shareLink':
-        for var_key, dflt in tv['variables'].iteritems():
+        for var_key, dflt in tv['variables'].items():
             if isinstance(dflt, list):
                 # LAME: can't enter default list as with get
                 form_val = req_args.getList(var_key)
@@ -171,7 +171,12 @@ def set_template_values(req_args, app_name, method):
     else:
         # etdata = DU.read_data_from_local()
         etdata = DU.read_data_from_bucket()
+        
     # NOTE, need a json.dumps here so we can read data into global js vars in scripts.html
+    '''
     tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
     tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
+    '''
+    tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False)
+    tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False)
     return tv
