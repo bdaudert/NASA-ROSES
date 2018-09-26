@@ -80,7 +80,7 @@ class Datastore_Util(object):
         except Exception as e:
             logging.error(e)
             raise Exception(e)
-        # geomdata = json.dumps(d, ensure_ascii=False).encode('utf8')
+        # geomdata = json.dumps(d, ensure_ascii=False)
         geomdata = d
         return geomdata
 
@@ -231,7 +231,7 @@ class Datastore_Util(object):
         logging.info(file_name)
         with open(file_name) as f:
             all_data = json.load(f)
-            # data = json.dumps(json.load(f), ensure_ascii=False).encode('utf8')
+            # all_data = json.dumps(json.load(f), ensure_ascii=False)
         if 'features' in all_data.keys() and all_data['features']:
             logging.info('SUCCESSFULLY READ DATA FROM LOCAL FILE')
         else:

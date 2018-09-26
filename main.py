@@ -96,8 +96,12 @@ def home():
         tv = runApp(req_args, app_name, 'GET')
         tv['error'] = str(e)
 
-    return flask.render_template('nasa-roses.html', **tv)
-
+    if method in ['GET', 'shareLink']:
+        return flask.render_template('nasa-roses.html', **tv)
+    else:
+        # Ajax requests
+        # return str(tv)
+        return json.dumps(tv, ensure_ascii=False)
 
 
     def handle_exception(exception, debug):

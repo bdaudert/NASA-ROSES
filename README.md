@@ -66,16 +66,7 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     ```
     pip install -r requirements.txt -t lib
     ```
-    
-    You will need to tell app engine to add the lib folder to the third party libraries as follows:
-    ```
-    # config.py
-    from google.appengine.ext import vendor
-
-    # Add any libraries install in the "lib" folder.
-    vendor.add('lib')
-    ```
-    
+     
     In config.py set your google account settings
     ```
     # The service account email address authorized by your Google contact.
@@ -118,8 +109,9 @@ Install the gunicorn python module (if needed):
 pip install gunicorn
 ```
 
-Start the local server:
+Set the application credentials and start the local server:
 ```
+export GOOGLE_APPLICATION_CREDENTIALS=<file path of the JSON file that contains your service account key>
 gunicorn -b :8080 main:app
 ```
 

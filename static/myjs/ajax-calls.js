@@ -87,7 +87,6 @@ function ajax_update_etdata_and_map(auto_set_region=false){
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
             window.DATA[tv_var] = $.parseJSON(r[tv_var]);
-
         }
         //Set new map layer
         LF_MAP_APP.update_mapLayer(auto_set_region=auto_set_region);

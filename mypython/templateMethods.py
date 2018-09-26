@@ -115,7 +115,7 @@ def set_template_values(req_args, app_name, method):
         for var_key, dflt in tv['variables'].items():
             if isinstance(dflt, list):
                 # LAME: can't enter default list as with get
-                form_val = req_args.getList(var_key)
+                form_val = req_args.getlist(var_key)
                 if not form_val:
                    form_val = dflt
             else:
@@ -173,10 +173,8 @@ def set_template_values(req_args, app_name, method):
         etdata = DU.read_data_from_bucket()
         
     # NOTE, need a json.dumps here so we can read data into global js vars in scripts.html
-    '''
-    tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
-    tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
-    '''
+    # tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
+    # tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
     tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False)
     tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False)
     return tv

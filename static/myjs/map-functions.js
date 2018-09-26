@@ -557,6 +557,7 @@ LF_MAP_APP = {
             styleFunct = LF_MAP_APP.defaultStyleFunction;
         //Set the choropleth or default layer
         var geojson = DATA.geomdata[$('#years').val()[0]];
+        console.log(geojson);
         if (map_type == 'Choropleth') {
             styleFunct = LF_MAP_APP.choroStyleFunction;
             //Set the colors for Choropleth map, draw colorbar
