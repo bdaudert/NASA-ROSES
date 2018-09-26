@@ -537,10 +537,30 @@ LF_MAP_APP = {
         /*
         Set the map layer (geojson object) on the map
         */
+
+        /*
+        FIX ME: attempt to use marker cluster on geojson data
+        https://gis.stackexchange.com/questions/197882/is-it-possible-to-cluster-polygons-in-leaflet
+        gives error:
+        L.markerClusterGroup is not a function
+        */
+        /*
+        var markers = L.markerClusterGroup();
+        var geoJsonLayer = L.geoJson(geojson, {
+            style: styleFunct,
+            onEachFeature: LF_MAP_APP.onEachFeature
+        });
+        markers.addLayer(geoJsonLayer);
+        window.map.addLayer(markers);
+        window.map.fitBounds(markers.getBounds());
+        */
+
         window.main_map_layer = L.geoJson(geojson, {
             style: styleFunct,
             onEachFeature: LF_MAP_APP.onEachFeature
         }).addTo(window.map);
+        window.map.fitBounds(window.main_map_layer.getBounds());
+        LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
     },
     delete_mapLayer: function(geojsonLayer){
         /*
@@ -574,20 +594,6 @@ LF_MAP_APP = {
             MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
         }
         LF_MAP_APP.set_mapLayer(geojson, styleFunct);
-
-        /*
-        //Only zoom if auto_set_region is turned off
-        if (!auto_set_region) {
-            LF_MAP_APP.zoom_to_layer_extent(window.vectorSource);
-        }
-        */
-
-        /*
-        //Add the click event to the map
-        window.map.on('click', function(evt) {
-            LF_MAP_APP.set_popup_window_single_feat(evt);
-        });
-        */
     },
     on_zoom_change_region: function(){
         /*
@@ -610,8 +616,9 @@ LF_MAP_APP = {
         else (region was changed in the form), disbale the moveend listener
         */
         if (!auto_set_region) {
+            //Disable the map listener that changes region on zoom
             try {
-                window.map.un('moveend', LF_MAP_APP.on_zoom_change_region);
+                window.map.off('moveend', LF_MAP_APP.on_zoom_change_region);
             }catch(e){}
         }else{
             // Show different regions at different zoom levels
@@ -663,5 +670,5 @@ var initialize_lf_map = function() {
         }
     });
     //Set the map so that it changes region at different zoom levels
-    LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
+    //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }

@@ -188,7 +188,8 @@ class Datastore_Util(object):
             raise Exception(e)
 
         if not all_data['features']:
-            logging.error('NO DATA IN BUCKET FILE')
+            logging.error('NO DATA IN BUCKET FILE ' + url)
+            raise Exception('NO DATA IN BUCKET FILE ' + url)
         else:
             logging.info('SUCCESSFULLY READ DATA FROM BUCKET')
         return all_data
