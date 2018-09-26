@@ -1,6 +1,11 @@
 earthengine-api >= 0.1.100
 httplib2
-Jinja2 == 2.6
-numpy == 1.6.2
+jinja2
+flask
 oauth2client
 six
+geoalchemy2
+shapely
+geojson
+gunicorn
+psycopg2

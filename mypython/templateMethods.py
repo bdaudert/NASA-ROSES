@@ -6,7 +6,7 @@ import json
 import logging
 import operator
 from config import statics
-import databaseMethods
+from mypython import databaseMethods
 
 
 def set_form_options(variables):
@@ -89,10 +89,10 @@ def set_map_type(tv):
 
     return 'default'
 
-def set_template_values(RequestHandler, app_name, method):
+def set_template_values(req_args, app_name, method):
     '''
     Args:
-    RequestHandler: webapp2.RequestHandler object
+    req_args: request arguments
     app_name: application name, e.g. OpenET-1
     dOn: default or not; if dOn =  default
     default values are used
@@ -113,11 +113,14 @@ def set_template_values(RequestHandler, app_name, method):
     # Overrode default variables if not GET
     if method == 'POST' or method == 'shareLink':
         for var_key, dflt in tv['variables'].iteritems():
-            if var_key in RequestHandler.request.arguments():
-                if isinstance(dflt, list):
-                    tv['variables'][var_key] = RequestHandler.request.get_all(var_key, dflt)
-                else:
-                    tv['variables'][var_key] = RequestHandler.request.get(var_key, dflt)
+            if isinstance(dflt, list):
+                # LAME: can't enter default list as with get
+                form_val = req_args.getList(var_key)
+                if not form_val:
+                   form_val = dflt
+            else:
+                form_val = req_args.get(var_key, dflt)
+            tv['variables'][var_key] = form_val
 
     # Set dates
     dates = set_dates()

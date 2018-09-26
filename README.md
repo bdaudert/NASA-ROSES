@@ -37,11 +37,13 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
 
     To install the necessary external Python modules:
     ```
-    conda install -c anaconda numpy oauth2client httplib2 cryptography pyOpenSSL cffi sqlalchemy psycopg2
+    conda install -c anaconda numpy oauth2client httplib2 cryptography pyOpenSSL cffi sqlalchemy psycopg2 gunicorn
     
-    conda-forge earthengine-api shapely geoalchemy2 psycopg2
+    conda install -c anaconda jinja2 flask
     
-    pip install gunicorn
+    conda install -c mutirri webapp2
+    
+    conda install -c conda-forge earthengine-api shapely geoalchemy2 psycopg2
     ```
 
     Create the requirements.txt file.
@@ -49,8 +51,8 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     ```
     earthengine-api >= 0.1.100
     httplib2
-    Jinja2 == 2.6
-    numpy
+    jinja2
+    flask
     oauth2client
     six
     geoalchemy2

@@ -17,21 +17,19 @@ import os
 
 
 import ee
-from google.appengine.api import urlfetch
-from google.appengine.api import users
 import jinja2
-import webapp2
+import flask
 
-import templateMethods
-import databaseMethods
-import JinjaFilters
+
+from mypython import templateMethods
+from mypython import databaseMethods
+from mypython import JinjaFilters
 
 
 
 
 
 # SET STATICS
-urlfetch.set_default_fetch_deadline(180000)
 httplib2.Http(timeout=180000)
 
 
@@ -49,24 +47,24 @@ JINJA_ENVIRONMENT.filters['make_string_range'] = JinjaFilters.make_string_range
 JINJA_ENVIRONMENT.filters['make_int_range'] = JinjaFilters.make_int_range
 JINJA_ENVIRONMENT.filters['divisibleby'] = JinjaFilters.divisibleby
 
+app = flask.Flask(__name__)
 
 #####################################################
 #   RUN APP - RUNS THE APPLICATION AND SETS WEBPAGE
 ####################################################
 
 
-def runApp(self, app_name, method):
+def runApp(req_args, app_name, method):
     try:
-        tv = templateMethods.set_template_values(
-            self, app_name, method)
+        tv = templateMethods.set_template_values(req_args, app_name, method)
     except Exception as e:
         # This will trigger a hard 500 error
         # We can't set error and load the default page
         raise
     return tv
 
-
-class defaultApplication(webapp2.RequestHandler):
+@app.route('/', methods=['GET', 'POST'])
+def home():
     '''
     defaultApplication, defines:
         - get and post responses
@@ -76,58 +74,36 @@ class defaultApplication(webapp2.RequestHandler):
     '''
     ee.Initialize(config.EE_CREDENTIALS)
     ee.data.setDeadline(180000)
+    app_name = 'main'
+    method = flask.request.method
+    if method == 'POST':
+        req_args = flask.request.form
+    if method == 'GET':
+        req_args = flask.request.args
+        if req_args:
+            method =  'shareLink'
 
-    def get(self):
-        if not self.request.arguments():
-            # Initial page load
-            tv = runApp(self, self.app_name, 'GET')
-        else:
-            """Loading the main page or a sharelink will trigger a GET"""
-            try:
-                tv = runApp(self, self.app_name, 'shareLink')
-            except Exception as e:
-                tv = runApp(self, self.app_name, 'GET')
-                tv['error'] = str(e)
-                # override method
-                tv['method'] = 'shareLink'
+    try:
+        tv = runApp(req_args, app_name, method)
+    except Exception as e:
+        tv = runApp(req_args, app_name, 'GET')
+        tv['error'] = str(e)
 
-        self.tv_logging(tv, 'GET')
-        template = JINJA_ENVIRONMENT.get_template(self.appHTML)
-        self.response.out.write(template.render(tv))
+    return flask.render_template('nasa-roses.html', **tv)
 
-    def post(self):
-        """Calling Get Map or Get TimeSeries will trigger a POST"""
-        tv = runApp(self, self.app_name, 'POST')
-        self.tv_logging(tv, 'POST')
-        self.generateResponse(tv)
 
-    def generateResponse(self, tv):
-        """Extract the template values associated with each response variable
-        If an error was set in the template_values, generate an error response
-        """
-        dataobj = {}
-        if ('error' in tv.keys() and tv['error']):
-            dataobj['error'] = tv['error']
-        else:
-            for var in config.statics['response_vars'][tv['variables']['tool_action']]:
-                try:
-                    dataobj[var] = tv[var]
-                except KeyError:
-                    dataobj[var] = []
-        self.response.out.write(json.dumps(dataobj))
 
-    def handle_exception(self, exception, debug):
+    def handle_exception(exception, debug):
         """This catches unhandled Python exceptions in GET requests
         """
         logging.exception(exception)
-        app_name = self.app_name
-        tv = runApp(self, app_name, 'GET')
+        tv = runApp(None, app_name, 'GET')
         tv['error'] = str(exception)
         # override method
         tv['method'] = 'POST'
-        self.generateResponse(tv)
+        return flask.render_template('nasa-roses.html', **tv)
 
-    def tv_logging(self, tv, method):
+    def tv_logging(tv, method):
         """Log important template values
         These values are will be written to the appEngine logger
           so that we can tracks what page requests are being made
@@ -146,10 +122,10 @@ class defaultApplication(webapp2.RequestHandler):
         logging.info('{}'.format(log_values))
 
 
-class NASA_ROSES(defaultApplication):
-    app_name = 'NASA-ROSES'
-    appHTML = 'nasa-roses.html'
-
+'''
+# FIX ME: we need to replace the users module withsomething that
+# is supported with Python 3.7
+from google.appengine.api import users
 class AdminPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
@@ -176,29 +152,35 @@ class LogInPage(webapp2.RequestHandler):
         # [END user_details]
         self.response.write(
             '<html><body>{}</body></html>'.format(greeting))
-
-class databaseTasks(webapp2.RequestHandler):
-    def get(self):
-        ee.Initialize(config.EE_CREDENTIALS)
-        ee.data.setDeadline(180000)
-        tv = templateMethods.set_template_values(
-            self, 'databaseTask', 'GET')
-        tv['json_data'] = {}
-        for region in ['US_states_west_500k', 'Mason', 'US_counties_west_500k']:
-            for year in ['2003']:
-                logging.info('PROCESSING Region/Year ' + region + '/' + year)
-                for ds in ['MODIS']:
-                    for et_model in ['SSEBop']:
-                        DU = databaseMethods.Datatstore_Util(region, year, ds, et_model)
-                        DU.add_to_db()
-                logging.info(region + '/' + year + ' PROCESSED!')
-        template = JINJA_ENVIRONMENT.get_template('databaseTasks.html')
-        self.response.out.write(template.render(tv))
+'''
+@app.route('/databaseTasks', methods=['GET'])
+def databaseTasks():
+    app_name = 'databaseTask'
+    ee.Initialize(config.EE_CREDENTIALS)
+    ee.data.setDeadline(180000)
+    req_args = flask.request.args
+    tv = templateMethods.set_template_values(
+        req_args, 'databaseTask', 'GET')
+    tv['json_data'] = {}
+    for region in ['US_states_west_500k', 'Mason', 'US_counties_west_500k']:
+        for year in ['2003']:
+            logging.info('PROCESSING Region/Year ' + region + '/' + year)
+            for ds in ['MODIS']:
+                for et_model in ['SSEBop']:
+                    DU = databaseMethods.Datatstore_Util(region, year, ds, et_model)
+                    DU.add_to_db()
+            logging.info(region + '/' + year + ' PROCESSED!')
+    return flask.render_template('databaseTasks.html', **tv)
 
 
 app = webapp2.WSGIApplication([
-    ('/', NASA_ROSES),
-    ('/admin', AdminPage),
-    ('/login', LogInPage),
-    ('/databaseTasks', databaseTasks)
+    # ('/admin', AdminPage),
+    # ('/login', LogInPage),
+    # ('/databaseTasks', databaseTasks),
+    ('/', NASA_ROSES)
 ], debug=True)
+
+if __name__ == '__main__':
+    # This is used when running locally. Gunicorn is used to run the
+    # application on Google App Engine. See entrypoint in app.yaml.
+    app.run(host='127.0.0.1', port=8080, debug=True, use_reloader=False)

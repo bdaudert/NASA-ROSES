@@ -6,16 +6,20 @@ import hashlib
 import urllib2
 
 # Needed to read data from datastore within app engine
-from google.appengine.ext import ndb
+# from google.appengine.ext import ndb
+from google.cloud import datastore
+
 
 import config
 
+'''
 class DATA(ndb.Expando):
     feat_idx = ndb.IntegerProperty()
     region = ndb.StringProperty()
     year = ndb.IntegerProperty()
     dataset = ndb.StringProperty()
     et_model = ndb.StringProperty()
+'''
 
 class cloudSSQL_Util(object):
     '''
@@ -51,6 +55,7 @@ class Datastore_Util(object):
         self.year = int(year)
         self.dataset = dataset
         self.et_model = et_model
+        self.DATASTORE_CLIENT = datastore.Client(project=config.PROJECT_ID)
         self.geo_bucket_url = config.GEO_BUCKET_URL
         self.data_bucket_url = config.DATA_BUCKET_URL
         # Used to read geometry data from buckets
@@ -123,7 +128,9 @@ class Datastore_Util(object):
         for feat_idx in feat_index_list:
             unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(feat_idx)])
             UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
-            query_data = ndb.Key('DATA', UNIQUE_ID).get()
+            # query_data = ndb.Key('DATA', UNIQUE_ID).get()
+            key = self.DATASTORE_CLIENT.key('DATA', UNIQUE_ID)
+            query_data = self.DATASTORE_CLIENT.get(key)
             if not query_data:
                 continue
             featdata = {'properties': query_data.to_dict()}
@@ -196,13 +203,11 @@ class Datastore_Util(object):
             'type': 'FeatureCollection',
             'features': []
         }
-        '''
-        qry = ndb.Query(kind='DATA').filter(
-            DATA.year == self.year,
-            DATA.region == self.region,
-            DATA.dataset == self.dataset,
-            DATA.et_model == self.et_model
-        )
+        qry = self.DATASTORE_CLIENT.query(kind='DATA')
+        qry.add_filter('region', '=', self.region)
+        qry.add_filter('year', '=', int(self.year))
+        qry.add_filter('dataset', '=', self.dataset)
+        qry.add_filter('et_model', '=', self.et_model)
         '''
         qry = DATA.query(
             DATA.region == self.region,
@@ -210,6 +215,7 @@ class Datastore_Util(object):
             DATA.dataset == self.dataset,
             DATA.et_model == self.et_model
         )
+        '''
         query_data = qry.fetch()
         if len(query_data) > 0:
             all_data['features'] = [{'properties': q.to_dict()} for q in query_data]
@@ -249,6 +255,17 @@ class Datastore_Util(object):
             feat = etdata['features'][idx]
             unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(idx)])
             UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
+            key = self.DATASTORE_CLIENT.key('DATA', UNIQUE_ID)
+            db_entity = datastore.Entity(key = key)
+            db_entity.update({
+                'feat_idx': idx,
+                'region': self.region,
+                'year': self.year,
+                'dataset': self.dataset,
+                'et_model': self.et_model
+            })
+            db_entity.update(feat)
+            '''
             db_entity = DATA(
                 feat_idx = idx,
                 region = self.region,
@@ -257,6 +274,9 @@ class Datastore_Util(object):
                 et_model = self.et_model
             )
             db_entity.populate(**feat)
-            db_entity.key = ndb.Key('DATA', UNIQUE_ID)
+            '''
+            # db_entity.key = ndb.Key('DATA', UNIQUE_ID)
             db_entities.append(db_entity)
-        db_keys = ndb.put_multi(db_entities)
+
+        # db_keys = ndb.put_multi(db_entities)
+        self.DATASTORE_CLIENT.put_multi(db_entities)
