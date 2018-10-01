@@ -555,9 +555,9 @@ LF_MAP_APP = {
             onEachFeature: LF_MAP_APP.onEachFeature
         })
 
-        window.geoJson = geoJsonStructure._layers;
+        window.geojson = geoJsonStructure._layers;
 
-        window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 8}).addTo(window.map);
+        window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 12}).addTo(window.map);
         window.geojson_map_layer = L.geoJson(
             {
                 "type": "FeatureCollection",
@@ -576,9 +576,15 @@ LF_MAP_APP = {
     },
     filter_mapLayer: function() {
         var bounds = window.map.getBounds();
-        for (polygon in window.geoJson) {
-            if (bounds.contains(window.geoJson[polygon]._bounds.getNorthEast()) || bounds.contains(window.geoJson[polygon]._bounds.getNorthWest()) || bounds.contains(window.geoJson[polygon]._bounds.getSouthEast()) || bounds.contains(window.geoJson[polygon]._bounds.getSouthWest())) {
-                window.geojson_map_layer.addLayer(window.geoJson[polygon]);
+        for (polygon in window.geojson) {
+            if (bounds.contains(window.geojson[polygon].getLatLng())
+              || window.geojson[polygon]._bounds.contains(bounds)
+              || bounds.contains(window.geojson[polygon]._bounds.getNorthEast())
+              || bounds.contains(window.geojson[polygon]._bounds.getNorthWest())
+              || bounds.contains(window.geojson[polygon]._bounds.getSouthEast())
+              || bounds.contains(window.geojson[polygon]._bounds.getSouthWest())) {
+
+                window.geojson_map_layer.addLayer(window.geojson[polygon]);
             }
         }
     },
