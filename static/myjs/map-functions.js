@@ -478,7 +478,7 @@ LF_MAP_APP = {
     },
     resetHighlight: function(e) {
         /*Resets featue on mouseout*/
-        window.geoJson_map_layer.resetStyle(e.target);
+        window.geojson_map_layer.resetStyle(e.target);
     },
     delay: function(timeout, id, callback){
         /*
@@ -550,16 +550,37 @@ LF_MAP_APP = {
             setLatLng: function () {}
         });
 
+        geoJsonStructure = L.geoJson(geojson, {
+            style: styleFunct,
+            onEachFeature: LF_MAP_APP.onEachFeature
+        })
+
+        window.geoJson = geoJsonStructure._layers;
+
         window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 8}).addTo(window.map);
-        window.geoJson_map_layer = L.geoJson(geojson, {
+        window.geojson_map_layer = L.geoJson(
+            {
+                "type": "FeatureCollection",
+                "features": []
+            },
+            {
             style: styleFunct,
             onEachFeature: LF_MAP_APP.onEachFeature
         });
+        LF_MAP_APP.filter_mapLayer();
 
-        window.main_map_layer.addLayer(window.geoJson_map_layer);
-        window.map.fitBounds(window.geoJson_map_layer.getBounds());
+        window.main_map_layer.addLayer(window.geojson_map_layer);
+        window.map.fitBounds(window.geojson_map_layer.getBounds());
 
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
+    },
+    filter_mapLayer: function() {
+        var bounds = window.map.getBounds();
+        for (polygon in window.geoJson) {
+            if (bounds.contains(window.geoJson[polygon]._bounds.getNorthEast()) || bounds.contains(window.geoJson[polygon]._bounds.getNorthWest()) || bounds.contains(window.geoJson[polygon]._bounds.getSouthEast()) || bounds.contains(window.geoJson[polygon]._bounds.getSouthWest())) {
+                window.geojson_map_layer.addLayer(window.geoJson[polygon]);
+            }
+        }
     },
     delete_mapLayer: function(geojsonLayer){
         /*
@@ -608,6 +629,12 @@ LF_MAP_APP = {
             }
         }
     },
+    on_zoom_filter_data: function(){
+        window.main_map_layer.clearLayers();
+        window.geojson_map_layer._layers = {};
+        LF_MAP_APP.filter_mapLayer();
+        window.main_map_layer.addLayer(window.geojson_map_layer);
+    },
     set_map_zoom_pan_listener: function(auto_set_region=false) {
         /*
         When aut_set_region = true we change region when user changes zoom on map
@@ -619,6 +646,7 @@ LF_MAP_APP = {
             try {
                 window.map.off('moveend', LF_MAP_APP.on_zoom_change_region);
             }catch(e){}
+            window.map.on('moveend', LF_MAP_APP.on_zoom_filter_data);
         }else{
             // Show different regions at different zoom levels
             window.map.on('moveend', LF_MAP_APP.on_zoom_change_region);
@@ -672,11 +700,3 @@ var initialize_lf_map = function() {
     //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }
 
-function filterGeoJson (map, polygons, filteredGeoJson) {
-    var bounds = map.getBounds();
-    for (poly in polygons) {
-        if (bounds.contains(polygons[poly]._bounds.getNorthEast()) || bounds.contains(polygons[poly]._bounds.getNorthWest()) || bounds.contains(polygons[poly]._bounds.getSouthEast()) || bounds.contains(polygons[poly]._bounds.getSouthWest())) {
-          filteredGeoJson.addLayer(polygons[poly]);
-        }
-    }
-}
