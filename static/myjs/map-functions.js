@@ -577,13 +577,7 @@ LF_MAP_APP = {
     filter_mapLayer: function() {
         var bounds = window.map.getBounds();
         for (polygon in window.geojson) {
-            if (bounds.contains(window.geojson[polygon].getLatLng())
-              || window.geojson[polygon]._bounds.contains(bounds)
-              || bounds.contains(window.geojson[polygon]._bounds.getNorthEast())
-              || bounds.contains(window.geojson[polygon]._bounds.getNorthWest())
-              || bounds.contains(window.geojson[polygon]._bounds.getSouthEast())
-              || bounds.contains(window.geojson[polygon]._bounds.getSouthWest())) {
-
+            if (bounds.overlaps(window.geojson[polygon].getBounds())) {
                 window.geojson_map_layer.addLayer(window.geojson[polygon]);
             }
         }
