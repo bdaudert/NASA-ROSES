@@ -478,7 +478,7 @@ LF_MAP_APP = {
     },
     resetHighlight: function(e) {
         /*Resets featue on mouseout*/
-        window.main_map_layer.resetStyle(e.target);
+        window.geojson_map_layer.resetStyle(e.target);
     },
     delay: function(timeout, id, callback){
         /*
@@ -538,29 +538,49 @@ LF_MAP_APP = {
         Set the map layer (geojson object) on the map
         */
 
-        /*
-        FIX ME: attempt to use marker cluster on geojson data
-        https://gis.stackexchange.com/questions/197882/is-it-possible-to-cluster-polygons-in-leaflet
-        gives error:
-        L.markerClusterGroup is not a function
-        */
-        /*
-        var markers = L.markerClusterGroup();
-        var geoJsonLayer = L.geoJson(geojson, {
+        // Add latlng function to polygons
+        L.Polygon.addInitHook(function () {
+            this._latlng = this._bounds.getCenter();
+        });
+
+        L.Polygon.include({
+            getLatLng: function () {
+                return this._latlng;
+            },
+            setLatLng: function () {}
+        });
+
+        geoJsonStructure = L.geoJson(geojson, {
+            style: styleFunct,
+            onEachFeature: LF_MAP_APP.onEachFeature
+        })
+
+        window.geojson = geoJsonStructure._layers;
+
+        window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 12}).addTo(window.map);
+        window.geojson_map_layer = L.geoJson(
+            {
+                "type": "FeatureCollection",
+                "features": []
+            },
+            {
             style: styleFunct,
             onEachFeature: LF_MAP_APP.onEachFeature
         });
-        markers.addLayer(geoJsonLayer);
-        window.map.addLayer(markers);
-        window.map.fitBounds(markers.getBounds());
-        */
+        LF_MAP_APP.filter_mapLayer();
 
-        window.main_map_layer = L.geoJson(geojson, {
-            style: styleFunct,
-            onEachFeature: LF_MAP_APP.onEachFeature
-        }).addTo(window.map);
-        window.map.fitBounds(window.main_map_layer.getBounds());
+        window.main_map_layer.addLayer(window.geojson_map_layer);
+        window.map.fitBounds(window.geojson_map_layer.getBounds());
+
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
+    },
+    filter_mapLayer: function() {
+        var bounds = window.map.getBounds();
+        for (polygon in window.geojson) {
+            if (bounds.overlaps(window.geojson[polygon].getBounds())) {
+                window.geojson_map_layer.addLayer(window.geojson[polygon]);
+            }
+        }
     },
     delete_mapLayer: function(geojsonLayer){
         /*
@@ -609,6 +629,12 @@ LF_MAP_APP = {
             }
         }
     },
+    on_zoom_filter_data: function(){
+        window.main_map_layer.clearLayers();
+        window.geojson_map_layer._layers = {};
+        LF_MAP_APP.filter_mapLayer();
+        window.main_map_layer.addLayer(window.geojson_map_layer);
+    },
     set_map_zoom_pan_listener: function(auto_set_region=false) {
         /*
         When aut_set_region = true we change region when user changes zoom on map
@@ -620,6 +646,7 @@ LF_MAP_APP = {
             try {
                 window.map.off('moveend', LF_MAP_APP.on_zoom_change_region);
             }catch(e){}
+            window.map.on('moveend', LF_MAP_APP.on_zoom_filter_data);
         }else{
             // Show different regions at different zoom levels
             window.map.on('moveend', LF_MAP_APP.on_zoom_change_region);
@@ -672,3 +699,4 @@ var initialize_lf_map = function() {
     //Set the map so that it changes region at different zoom levels
     //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }
+
