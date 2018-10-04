@@ -5,6 +5,8 @@ import os
 import json
 import logging
 import operator
+from copy import deepcopy
+
 from config import statics
 from mypython import databaseMethods
 
@@ -89,15 +91,91 @@ def set_map_type(tv):
 
     return 'default'
 
-def set_template_values(req_args, app_name, method):
+def set_etdata_from_datastore(template_variables, feat_index_list):
+    '''
+    Sets geomdata, etdata, featsgeomdata, featsdata from datastore (prodction)
+    or local folder (local host developmet)
+    :param template_variables:
+    :param feat_index_list:
+    :return: tv: updated template variables
+    '''
+    tv = deepcopy(template_variables)
+    # Load the data from the database
+    rgn = tv['variables']['region']
+    ds = tv['variables']['dataset']
+    m = tv['variables']['et_model']
+    tv['etdata'] = {}
+    tv['geomdata'] = {}
+    tv['featsdata'] = {}
+    tv['featsgeomdata'] = {}
+    for year in tv['variables']['years']:
+        DU = databaseMethods.Datastore_Util(rgn, year, ds, m)
+        # Get the feature data by index
+        geomdata = DU.read_geometries_from_bucket()
+        tv['featsgeomdata'][year] = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        if feat_index_list:
+            if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+                # Running in production environment, read data from db
+                tv['featsdata'][year] = DU.read_feat_data_from_db(feat_index_list)
+            else:
+                # Running in development environment
+                # Read data from bucket
+                tv['featsdata'][year] = DU.read_feat_data_from_bucket(feat_index_list)
+            for feat_idx in feat_index_list:
+                tv['featsgeomdata'][year]['features'].append(geomdata['features'][int(feat_idx)])
+    # Get all data for the first year in year_list
+    year = tv['variables']['years'][0]
+    DU = databaseMethods.Datastore_Util(rgn, year, ds, m)
+    if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+        # Running in production environment, read data from db
+        etdata = DU.read_data_from_db()
+    else:
+        # etdata = DU.read_data_from_local()
+        etdata = DU.read_data_from_bucket()
+
+    # NOTE, need a json.dumps here so we can read data into global js vars in scripts.html
+    # tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
+    # tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
+    tv['etdata'] = json.dumps({year: etdata}, ensure_ascii=False)
+    tv['geomdata'] = json.dumps({year: geomdata}, ensure_ascii=False)
+    return tv
+
+def set_etdata_from_cloudSQL(template_variables, feat_index_list):
+    # FIX ME: develop code for cloudSQL
+    tv = deepcopy(template_variables)
+    return tv
+
+def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
+    '''
+    Sets geondata, etdata, featsgeomdata, featsdata from Jordan's db
+    :param template_variablesv: dict of template variables
+    :param feat_index_list: list of feature indices to to be displayed on map
+    :return: tv: updated template variables
+    '''
+    tv = deepcopy(template_variables)
+    DU = databaseMethods.postgis_Util(tv['variables'], db_engine)
+    if feat_index_list:
+        tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
+
+    if len(tv['variables']['years']) == 1:
+        tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
+
+    return tv
+
+def set_template_values(req_args, app_name, method, db_type, db_engine):
     '''
     Args:
     req_args: request arguments
     app_name: application name, e.g. OpenET-1
-    dOn: default or not; if dOn =  default
-    default values are used
-    otherwisee we try to get the variable
-    values from the request object
+    method: GET, shareLink or POTS (ajax call)
+    db_engine: database engine, options
+               None
+               DATASTORE
+               cloudSQL
+               <db engine object>: sqlaalchemy engine hooked up to Jordan's db
     Returns:
     tv: a dictionary of template variables
     '''
@@ -131,11 +209,6 @@ def set_template_values(req_args, app_name, method):
     # Set the map type
     tv['variables']['map_type'] = set_map_type(tv)
 
-    # Get the etdata and geometry from the geo database
-    tv['etdata'] = {}
-    tv['geomdata'] = {}
-    tv['featsdata'] = {}
-    tv['featsgeomdata'] = {}
     if app_name == 'dataBaseTasks':
         return tv
     if  tv['variables']['region'] in ['ee_map']:
@@ -145,36 +218,13 @@ def set_template_values(req_args, app_name, method):
     if 'feat_indices' in tv['variables'].keys() and tv['variables']['feat_indices']:
         feat_index_list = tv['variables']['feat_indices'].replace(', ', ',').split(',')
 
-    for year in tv['variables']['years']:
-        DU = set_database_util(year, tv)
-        # Get the feature data by index
-        geomdata = DU.read_geometries_from_bucket()
-        tv['featsgeomdata'][year] = {
-            'type': 'FeatureCollection',
-            'features': []
-        }
-        if feat_index_list:
-            if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-                # Running in production environment, read data from db
-                tv['featsdata'][year] = DU.read_feat_data_from_db(feat_index_list)
-            else:
-                # Running in development environment
-                # Read data from bucket
-                tv['featsdata'][year] = DU.read_feat_data_from_bucket(feat_index_list)
-            for feat_idx in feat_index_list:
-                tv['featsgeomdata'][year]['features'].append(geomdata['features'][int(feat_idx)])
-    # Get all data for the first year in year_list
-    yr = tv['variables']['years'][0]
-    if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-        # Running in production environment, read data from db
-        etdata = DU.read_data_from_db()
+    if db_type == 'DATASTORE':
+        tv = set_etdata_from_datastore(tv, feat_index_list)
+    elif db_engine == 'cloudSQL':
+        tv = set_etdata_from_cloudSQL(tv, feat_index_list)
+    elif db_engine == 'TEST_SERVER':
+        tv = set_etdata_from_test_server(tv, feat_index_list, db_engine)
     else:
-        # etdata = DU.read_data_from_local()
-        etdata = DU.read_data_from_bucket()
-        
-    # NOTE, need a json.dumps here so we can read data into global js vars in scripts.html
-    # tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False).encode('utf8')
-    # tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False).encode('utf8')
-    tv['etdata'] = json.dumps({yr: etdata}, ensure_ascii=False)
-    tv['geomdata'] = json.dumps({yr: geomdata}, ensure_ascii=False)
+        pass
+
     return tv

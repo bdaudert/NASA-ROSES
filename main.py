@@ -13,17 +13,18 @@ import config
 import httplib2
 import json
 import logging
-import os
-
 
 import ee
-import jinja2
 import flask
 
+# Jordan's db
+from sqlalchemy import create_engine
 
 from mypython import templateMethods
 from mypython import databaseMethods
 from mypython import JinjaFilters
+
+import config
 
 # SET STATICS
 httplib2.Http(timeout=180000)
@@ -43,9 +44,20 @@ app.jinja_env.filters.update(template_filters)
 ####################################################
 
 
-def runApp(req_args, app_name, method):
+def runApp(req_args, app_name, method, db_type=None):
+    # Set the database engine
+    if db_type == 'TEST_SERVER':
+        # Set up database
+        db_string = "postgresql+psycopg2://" + config.DB_USER + ":" + config.DB_PASSWORD
+        db_string += "@" + config.DB_HOST + ":" + str(config.DB_PORT) + '/' + config.DB_NAME
+        engine = create_engine(db_string, pool_size=20, max_overflow=0)
+    elif db_type == 'cloudSQL':
+        db_engine = None # FIX ME: what is db engine for cloudSQL?
+    else:
+        db_engine = None
+
     try:
-        tv = templateMethods.set_template_values(req_args, app_name, method)
+        tv = templateMethods.set_template_values(req_args, app_name, method, db_type,  db_engine)
     except Exception as e:
         # This will trigger a hard 500 error
         # We can't set error and load the default page
@@ -61,8 +73,12 @@ def home():
         - logging
     tv: template_variables
     '''
+    # Initialize Earth Engine
     ee.Initialize(config.EE_CREDENTIALS)
     ee.data.setDeadline(180000)
+
+    # db_type= 'TEST_SERVER' # Jordan's db
+    db_type = 'DATASTORE'
     app_name = 'main'
     method = flask.request.method
     if method == 'POST':
@@ -73,9 +89,9 @@ def home():
             method =  'shareLink'
 
     try:
-        tv = runApp(req_args, app_name, method)
+        tv = runApp(req_args, app_name, method, db_type=db_type)
     except Exception as e:
-        tv = runApp(req_args, app_name, 'GET')
+        tv = runApp(req_args, app_name, 'GET', db_type=db_type)
         tv['error'] = str(e)
 
     if method in ['GET', 'shareLink']:
@@ -97,6 +113,13 @@ def home():
 
 @app.route('/databaseTasks', methods=['GET'])
 def databaseTasks():
+    '''
+    Populates DATASTORE
+    FIX ME: depriciated??
+    Currently we use Jordan's database and populate it standalone
+    see SANDBOX/POSTGIS
+    :return:
+    '''
     app_name = 'databaseTask'
     ee.Initialize(config.EE_CREDENTIALS)
     ee.data.setDeadline(180000)

@@ -3,23 +3,174 @@ import os, sys, socket
 import logging
 import json
 import hashlib
+import datetime as dt
 import urllib.request as urllib2
+from copy import deepcopy
 
 # Needed to read data from datastore within app engine
 # from google.appengine.ext import ndb
 from google.cloud import datastore
 
+# Needed to query Jordan's postgreSQL + postgis
+import sqlalchemy as db
+from sqlalchemy.orm import session as session_module
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import inspect
+from shapely.geometry import asShape
+from shapely.geometry import mapping
+from shapely.geometry.multipolygon import MultiPolygon
+from geoalchemy2.shape import from_shape, to_shape
+from geoalchemy2.types import Geometry
+import geojson
 
 import config
 
-'''
-class DATA(ndb.Expando):
-    feat_idx = ndb.IntegerProperty()
-    region = ndb.StringProperty()
-    year = ndb.IntegerProperty()
-    dataset = ndb.StringProperty()
-    et_model = ndb.StringProperty()
-'''
+# TEST SERVER MODELS
+Base = declarative_base()
+#######################################
+# OpenET database tables
+#######################################
+class User(Base):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    email = db.Column(db.String())
+    last_login = db.Column(db.DateTime())
+    joined =  db.Column(db.DateTime())
+    ip = db.Column(db.String())
+    password = db.Column(db.String())
+    notes = db.Column(db.String())
+    active = db.Column(db.String())
+    role = db.Column(db.String())
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+class Region(Base):
+    # States, Counties, HUCs or fields or custom
+    __tablename__ = 'region'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class Dataset(Base):
+    __tablename__ = 'dataset'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    ee_collection = db.Column(db.String())
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+class Variable(Base):
+    __tablename__ = 'variable'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    units = db.Column(db.String())
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+class Geom(Base):
+    __tablename__ = 'geom'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer())
+    region_id = db.Column(db.Integer())
+    name = db.Column(db.String())
+    type = db.Column(db.String())
+    coords = db.Column(Geometry(geometry_type='MULTIPOLYGON'))
+    '''
+    FIX ME: I don't know how to implement that in dbSCHEMA or pgADMIN
+    meta = relationship('GeomMetadata', backref='geom', lazy=True)
+    data = relationship('Data', backref='data', lazy=True)
+    '''
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+class GeomMetadata(Base):
+    __tablename__ = 'geom_metadata'
+    id = db.Column(db.Integer(), primary_key=True)
+    geom_id = db.Column(db.Integer(), db.ForeignKey('geom.id'), nullable=False)
+    name = db.Column(db.String())
+    properties = db.Column(db.String())
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+class Parameter(Base):
+    __tablename__ = 'parameter'
+    id = db.Column(db.Integer(), primary_key=True)
+    dataset_id = db.Column(db.Integer(), db.ForeignKey('dataset.id'), nullable=False)
+    name = db.Column(db.String())
+    properties =  db.Column(db.String())
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class Data(Base):
+    __tablename__ = 'data'
+    id = db.Column(db.Integer(), primary_key=True)
+    geom_id = db.Column(db.Integer(), db.ForeignKey('geom.id'), nullable=False)
+    dataset_id =  db.Column(db.Integer(), db.ForeignKey('dataset.id'), nullable=False)
+    variable_id =  db.Column(db.Integer(), db.ForeignKey('variable.id'), nullable=False)
+    temporal_resolution = db.Column(db.String())
+    data_date = db.Column(db.DateTime())
+    data_value = db.Column(db.Float(precision=4))
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+#######################################
+# END OpenET database tables
+#######################################
+class date_Util(object):
+
+    def get_month(self, t_res, data_var):
+        '''
+        :param t_res: temporal resolution
+        :param data_var:  data variable found in data files: for monthly m01, m02, ect.
+        :return:
+        '''
+        if t_res == 'annual':
+            m = 12
+        elif t_res == 'seasonal':
+            m = 10
+        elif t_res == 'monthly':
+            try:
+                m = int(data_var.split('m')[1])
+            except:
+                m = int(data_var)
+        else:
+            m = 12
+        return m
+
+    def set_datetime_dates_list(self, year, tv):
+        dates_list = []
+        data_vars = []
+        t_res = tv['temporal_resolution']
+        yr = int(year)
+        if t_res == 'annual':
+            data_vars = ['annual']
+        if t_res == 'seasonal':
+            data_vars = ['seasonal']
+        if t_res == 'monthly':
+            months = tv['months']
+            if len(months) == 1 and months[0] == 'all':
+                months = deepcopy(config.statics['all_months'])
+                del months['all']
+                months = sorted(months.keys())
+            data_vars = ['m' + str(m) for m in months]
+
+        for data_var in data_vars:
+            m = self.get_month(t_res, data_var)
+            d = int(config.statics['mon_len'][m - 1])
+            dates_list.append(dt.datetime(yr, m, d))
+
+        return dates_list
+
 
 class cloudSSQL_Util(object):
     '''
@@ -36,6 +187,148 @@ class cloudSSQL_Util(object):
     def __init__(self):
         pass
 
+class postgis_Util(object):
+    '''
+    Reads data from google Jordan's database "openet"
+    Method:
+        - The base query is defined from relevant template values
+    Args:
+        :region Unique ID of geojson obbject, e.g. USFields
+        :year year of geojson dataset, might be ALL if not USFields
+            USField geojsons change every year
+        :dataset MODSI, Landsat or gridMET
+        :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
+    '''
+    def __init__(self, tv, db_engine):
+        self.tv = tv
+        self.db_engine = db_engine
+
+    def start_session(self):
+        # Set up the db session
+        Session = session_module.sessionmaker()
+        Session.configure(bind=self.db_engine)
+        self.session = Session()
+
+    def end_session(self):
+        self.session.close()
+
+    def object_as_dict(self, obj):
+        '''
+        Converts single db query object to dict
+        :param obj:
+        :return: query dict
+        '''
+        return {c.key: getattr(obj, c.key)
+                for c in inspect(obj).mapper.column_attrs}
+
+
+
+    def read_data_from_db(self, feature_index_list=['all']):
+        '''
+
+        :param feature_index_list: list of feature indices;
+               if feature_index_list is all, all features for the year will be queried
+        :return: geojson: etdata for features in feat_index_list,
+                 geojson: geomdata for feaures in feat_index_list
+        '''
+        # Set the geom_names from region and feature index
+        region = self.tv['region']
+        geom_names = [region + '_' + str(f_idx) for f_idx in feature_index_list]
+        rgn_id = config.statics['db_id_region'][region]
+
+        # Set the dates list from temporal_resolution
+        DateUtil = date_Util()
+        
+        geomdata = {}
+        etdata = {}
+        self.start_session()
+        for year in self.tv['years']:
+            geomdata[year] = {
+                'type': 'FeatureCollection',
+                'features': []
+            }
+            etdata[year] = {
+                'type': 'FeatureCollection',
+                'features': []
+            }
+            # Set the dates list from temporal_resolution
+            dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
+            '''
+             # Not working
+             data_query = self.session.query(Data).join(Geom).\
+                 filter(
+                     Geom.user_id == 0,
+                     Geom.region_id == rgn_id,
+                     Geom.name.in_(geom_names)
+                 ).\
+                 filter(
+                     Data.dataset_id == config.statics['db_id_dataset'][self.tv['dataset']],
+                     Data.variable_id == config.statics['db_id_variable'][self.tv['variable']],
+                     Data.temporal_resolution == self.tv['temporal_resolution'],
+                     Data.data_date.in_(dates_list)
+                 )
+             print('LOOOK')
+             print(data_query)
+             '''
+
+            '''
+            # Not Working
+            data_query = self.session.query(Geom, Data). \
+                filter(
+                Geom.user_id == 0,
+                Geom.region_id == rgn_id,
+                Geom.name.in_(geom_names)
+            ). \
+                filter(
+                Data.dataset_id == config.statics['db_id_dataset'][self.tv['dataset']],
+                Data.variable_id == config.statics['db_id_variable'][self.tv['variable']],
+                Data.temporal_resolution == self.tv['temporal_resolution'],
+                Data.data_date.in_(dates_list)
+            )
+
+            json_data = []
+            for g, d in data_query.all():
+                json_data.append(self.object_as_dict(d))
+                # Convert datetime time stamp to datestring
+                json_data[-1]['data_date'] = json_data[-1]['data_date'].strftime('%Y-%m-%d')
+            '''
+
+            # Working!
+            # Query geometry table
+            if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
+                geom_query = self.session.query(Geom).filter(
+                    Geom.user_id == 0,
+                    Geom.region_id == rgn_id
+                )
+            else:
+                geom_names = [region + '_' + str(f_idx) for f_idx in feature_index_list]
+                geom_query = self.session.query(Geom).filter(
+                    Geom.user_id == 0,
+                    Geom.region_id == rgn_id,
+                    Geom.name.in_(geom_names)
+                )
+            # get the relevant geom_ids
+            geom_id_list = [q.id for q in geom_query.all()]
+
+            # Query data table
+            data_query = self.session.query(Data).filter(
+                Data.geom_id.in_(geom_id_list),
+                Data.dataset_id == config.statics['db_id_dataset'][self.tv['dataset']],
+                Data.variable_id == config.statics['db_id_variable'][self.tv['variable']],
+                Data.temporal_resolution == self.tv['temporal_resolution'],
+                Data.data_date.in_(dates_list)
+            )
+
+            # Complile results as list of dicts
+            json_data = []
+            for q in data_query.all():
+                json_data.append(self.object_as_dict(q))
+                # Convert datetime time stamp to datestring
+                json_data[-1]['data_date'] = json_data[-1]['data_date'].strftime('%Y-%m-%d')
+            etdata[year]['features'] = json.dumps(json_data, ensure_ascii=False).encode('utf8')
+
+        self.end_session()
+        return etdata, geomdata
 
 
 class Datastore_Util(object):
@@ -65,7 +358,7 @@ class Datastore_Util(object):
         else:
             self.geoFName = region + '_GEOM.geojson'
         # Only used to populate local DATASTORE @8000
-        self.local_dataFName = config.LOCAL_DATA_DIR + self.et_model + '/' +  region + '_' + year + '_DATA'  '.json'
+        self.local_dataFName = config.LOCAL_DATA_DIR + et_model + '/' +  region + '_' + year + '_DATA'  '.json'
         self.bucket_dataFName = region + '_' + year + '_DATA'  '.json'
 
 
@@ -281,3 +574,5 @@ class Datastore_Util(object):
 
         # db_keys = ndb.put_multi(db_entities)
         self.DATASTORE_CLIENT.put_multi(db_entities)
+
+

@@ -4,6 +4,7 @@ jinja2
 flask
 oauth2client
 six
+sqlalchemy
 geoalchemy2
 shapely
 geojson

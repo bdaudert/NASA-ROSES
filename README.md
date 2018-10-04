@@ -41,7 +41,7 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     
     conda install -c anaconda jinja2 flask
     
-    conda install -c conda-forge earthengine-api shapely geoalchemy2 psycopg2
+    conda install -c conda-forge earthengine-api shapely geoalchemy2 psycopg2 geojsony
     
     pip install --upgrade google-cloud-datastore
     ```
@@ -55,6 +55,7 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
     flask
     oauth2client
     six
+    sqlalchemy
     geoalchemy2
     shapely
     geojson
