@@ -113,7 +113,7 @@ pip install gunicorn
 Set the application credentials and start the local server:
 ```
 export GOOGLE_APPLICATION_CREDENTIALS=<file path of the JSON file that contains your service account key>
-gunicorn -b :8080 main:app
+gunicorn -b :8080 main:app --reload
 ```
 
 #### GCloud

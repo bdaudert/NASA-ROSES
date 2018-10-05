@@ -242,6 +242,14 @@ class postgis_Util(object):
         geomdata = {}
         etdata = {}
         self.start_session()
+        print('LOOOOK')
+        geom_query = self.session.query(Geom).filter(
+            Geom.user_id == 0,
+            Geom.region_id == 3,
+            Geom.name.in_(['Mason_1513', 'Mason_1514'])
+        )
+        print(self.object_as_dict(geom_query.first()))
+        '''
         for year in self.tv['years']:
             geomdata[year] = {
                 'type': 'FeatureCollection',
@@ -253,47 +261,8 @@ class postgis_Util(object):
             }
             # Set the dates list from temporal_resolution
             dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
-            '''
-             # Not working
-             data_query = self.session.query(Data).join(Geom).\
-                 filter(
-                     Geom.user_id == 0,
-                     Geom.region_id == rgn_id,
-                     Geom.name.in_(geom_names)
-                 ).\
-                 filter(
-                     Data.dataset_id == config.statics['db_id_dataset'][self.tv['dataset']],
-                     Data.variable_id == config.statics['db_id_variable'][self.tv['variable']],
-                     Data.temporal_resolution == self.tv['temporal_resolution'],
-                     Data.data_date.in_(dates_list)
-                 )
-             print('LOOOK')
-             print(data_query)
-             '''
 
-            '''
-            # Not Working
-            data_query = self.session.query(Geom, Data). \
-                filter(
-                Geom.user_id == 0,
-                Geom.region_id == rgn_id,
-                Geom.name.in_(geom_names)
-            ). \
-                filter(
-                Data.dataset_id == config.statics['db_id_dataset'][self.tv['dataset']],
-                Data.variable_id == config.statics['db_id_variable'][self.tv['variable']],
-                Data.temporal_resolution == self.tv['temporal_resolution'],
-                Data.data_date.in_(dates_list)
-            )
-
-            json_data = []
-            for g, d in data_query.all():
-                json_data.append(self.object_as_dict(d))
-                # Convert datetime time stamp to datestring
-                json_data[-1]['data_date'] = json_data[-1]['data_date'].strftime('%Y-%m-%d')
-            '''
-
-            # Working!
+            # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
             # Query geometry table
             if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
                 geom_query = self.session.query(Geom).filter(
@@ -342,6 +311,7 @@ class postgis_Util(object):
                 data['properties']['data_date'] = data['properties']['data_date'].strftime('%Y-%m-%d')
                 feat_data.append(data)
             etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
+        '''
         self.end_session()
         return etdata, geomdata
 
