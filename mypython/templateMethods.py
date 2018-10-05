@@ -31,11 +31,11 @@ def set_form_options(variables):
     # Set the year form options
     form_options['year'] = statics['all_year'][dataset]
     form_options['years'] = statics['all_years'][dataset]
-    # Set the time_period according to t_res
-    if variables['t_res'] == 'annual':
+    # Set the time_period according to temporal_resolution
+    if variables['temporal_resolution'] == 'annual':
         form_options['time_period'] = {variables['year']: variables['year']}
     else:
-        periods = statics['time_period_by_res'][variables['t_res']]
+        periods = statics['time_period_by_res'][variables['temporal_resolution']]
         keys = sorted(periods.keys())
         form_options['time_period'] = {}
         for key in keys:
@@ -78,7 +78,7 @@ def set_map_type(tv):
         return 'default'
 
     # Single Year
-    if tv['variables']['t_res'] == 'annual':
+    if tv['variables']['temporal_resolution'] == 'annual':
         return 'Choropleth'
 
     # Sub Annual
@@ -162,7 +162,6 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
 
     if len(tv['variables']['years']) == 1:
         tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
-
     return tv
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):
@@ -220,11 +219,10 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
 
     if db_type == 'DATASTORE':
         tv = set_etdata_from_datastore(tv, feat_index_list)
-    elif db_engine == 'cloudSQL':
+    elif db_type == 'cloudSQL':
         tv = set_etdata_from_cloudSQL(tv, feat_index_list)
-    elif db_engine == 'TEST_SERVER':
+    elif db_type == 'TEST_SERVER':
         tv = set_etdata_from_test_server(tv, feat_index_list, db_engine)
     else:
         pass
-
     return tv

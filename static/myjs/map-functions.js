@@ -14,7 +14,7 @@ MAP_APP = {
 
 
         // Single Year
-        if ($('#t_res').val() == 'annual') {
+        if ($('#temporal_resolution').val() == 'annual') {
             return 'Choropleth';
         }
 
@@ -58,7 +58,7 @@ MAP_APP = {
     },
     set_feat_colors: function (start_color, DOrL, year) {
         var et_var = $('#variable').val(),
-            t_res = $('#t_res').val(),
+            temporal_resolution = $('#temporal_resolution').val(),
             time_period = $('#time_period').val(),
             stat = $('#time_period_statistic').val(),
             et_stat, i, idx, featsdata, j, colors = [], val_list, d, mn, mx,
@@ -105,12 +105,12 @@ MAP_APP = {
 
         var prop_name, p_idx, s, tp, val_list = [],
             stat  = $('#time_period_statistic').val(),
-            t_res = $('#t_res').val(),
+            temporal_resolution = $('#temporal_resolution').val(),
             time_period = $('#time_period').val(),
-            prop_names = statics.stats_by_var_res[$('#variable').val()][t_res];
+            prop_names = statics.stats_by_var_res[$('#variable').val()][temporal_resolution];
         for (p_idx = 0; p_idx < prop_names.length; p_idx++) {
             prop_name = prop_names[p_idx];
-            if (t_res != 'monthly'){
+            if (temporal_resolution != 'monthly'){
                 if (Math.abs(featdata['properties'][prop_name] + 9999) > 0.0001) {
                     val_list.push(featdata['properties'][prop_name]);
                 }
@@ -294,7 +294,7 @@ MAP_APP = {
         if ($('#form-timeperiod-statistic').css('display') != 'none' && $('#time_period_statistic').val() != 'none'){
             var time_period = $('#time_period').val(), t_idx, periods = [];
             for (t_idx = 0; t_idx < time_period.length; t_idx++) {
-                periods.push(statics.time_period_by_res[$('#t_res').val()][time_period[t_idx]]);
+                periods.push(statics.time_period_by_res[$('#temporal_resolution').val()][time_period[t_idx]]);
             }
             html += '<b>Time Period Statistic</b>: ' + br;
             html +=  $('#time_period_statistic option:selected').html() + ' over ' + periods.join(', ') + br;
@@ -316,7 +316,7 @@ MAP_APP = {
         var col_name, col_names, tp_idx, tp, y_idx, years = $('#years').val();
         if ($('#form-years-statistic').css('display') != 'none' && $('#years_statistic').val() != 'none' ){
             // Summary over multiple years
-            if ($('#t_res').val() == 'annual'){
+            if ($('#temporal_resolution').val() == 'annual'){
                 // Summary over multiple years
                 col_names = [$('#years_statistic option:selected').html() + ' over years'];
             }else{
@@ -329,13 +329,13 @@ MAP_APP = {
                     col_names = [];
                     tp = $('#time_period').val()
                     for (tp_idx = 0; tp_idx < tp.length; tp_idx++) {
-                        col_names.push(statics.time_period_by_res[$('#t_res').val()][tp[tp_idx]]);
+                        col_names.push(statics.time_period_by_res[$('#temporal_resolution').val()][tp[tp_idx]]);
                     }
                 }
             }
         }else {
             // Single years
-            if ($('#t_res').val() == 'annual'){
+            if ($('#temporal_resolution').val() == 'annual'){
                 // Summary over multiple years
                 col_names = years;
             }else {
@@ -346,7 +346,7 @@ MAP_APP = {
                         col_names.push(years[y_idx]);
                     } else {
                         for (tp_idx = 0; tp_idx < tp.length; tp_idx++) {
-                            col_name = years[y_idx] + ', ' + statics.time_period_by_res[$('#t_res').val()][tp[tp_idx]];
+                            col_name = years[y_idx] + ', ' + statics.time_period_by_res[$('#temporal_resolution').val()][tp[tp_idx]];
                             col_names.push(col_name);
                         }
                     }
@@ -424,8 +424,8 @@ LF_MAP_APP = {
         var year = $('#years').val()[0],
             idx = feature.properties['idx'],
             v = $('#variable').val(),
-            t_res = $('#t_res').val(),
-            et_var = statics.stats_by_var_res[v][t_res][0], color = null, i;
+            temporal_resolution = $('#temporal_resolution').val(),
+            et_var = statics.stats_by_var_res[v][temporal_resolution][0], color = null, i;
 
         var f_data = {'properties': DATA.etdata[year].features[idx]['properties']},
             val_list = MAP_APP.set_singleYear_singleFeat_valList(f_data);

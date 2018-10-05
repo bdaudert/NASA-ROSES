@@ -50,7 +50,7 @@ def runApp(req_args, app_name, method, db_type=None):
         # Set up database
         db_string = "postgresql+psycopg2://" + config.DB_USER + ":" + config.DB_PASSWORD
         db_string += "@" + config.DB_HOST + ":" + str(config.DB_PORT) + '/' + config.DB_NAME
-        engine = create_engine(db_string, pool_size=20, max_overflow=0)
+        db_engine = create_engine(db_string, pool_size=20, max_overflow=0)
     elif db_type == 'cloudSQL':
         db_engine = None # FIX ME: what is db engine for cloudSQL?
     else:
@@ -77,8 +77,8 @@ def home():
     ee.Initialize(config.EE_CREDENTIALS)
     ee.data.setDeadline(180000)
 
-    # db_type= 'TEST_SERVER' # Jordan's db
-    db_type = 'DATASTORE'
+    db_type= 'TEST_SERVER' # Jordan's db
+    # db_type = 'DATASTORE'
     app_name = 'main'
     method = flask.request.method
     if method == 'POST':

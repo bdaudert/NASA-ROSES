@@ -128,17 +128,17 @@ class Data(Base):
 #######################################
 class date_Util(object):
 
-    def get_month(self, t_res, data_var):
+    def get_month(self, temporal_resolution, data_var):
         '''
-        :param t_res: temporal resolution
+        :param temporal_resolution: temporal resolution
         :param data_var:  data variable found in data files: for monthly m01, m02, ect.
         :return:
         '''
-        if t_res == 'annual':
+        if temporal_resolution == 'annual':
             m = 12
-        elif t_res == 'seasonal':
+        elif temporal_resolution == 'seasonal':
             m = 10
-        elif t_res == 'monthly':
+        elif temporal_resolution == 'monthly':
             try:
                 m = int(data_var.split('m')[1])
             except:
@@ -150,13 +150,13 @@ class date_Util(object):
     def set_datetime_dates_list(self, year, tv):
         dates_list = []
         data_vars = []
-        t_res = tv['temporal_resolution']
+        temporal_resolution = tv['temporal_resolution']
         yr = int(year)
-        if t_res == 'annual':
+        if temporal_resolution == 'annual':
             data_vars = ['annual']
-        if t_res == 'seasonal':
+        if temporal_resolution == 'seasonal':
             data_vars = ['seasonal']
-        if t_res == 'monthly':
+        if temporal_resolution == 'monthly':
             months = tv['months']
             if len(months) == 1 and months[0] == 'all':
                 months = deepcopy(config.statics['all_months'])
@@ -165,7 +165,7 @@ class date_Util(object):
             data_vars = ['m' + str(m) for m in months]
 
         for data_var in data_vars:
-            m = self.get_month(t_res, data_var)
+            m = self.get_month(temporal_resolution, data_var)
             d = int(config.statics['mon_len'][m - 1])
             dates_list.append(dt.datetime(yr, m, d))
 
@@ -308,7 +308,22 @@ class postgis_Util(object):
                     Geom.name.in_(geom_names)
                 )
             # get the relevant geom_ids
-            geom_id_list = [q.id for q in geom_query.all()]
+            geom_id_list = []
+            feat_data = []
+            for q in geom_query.all():
+                geom_id_list.append(q.id)
+                data = {'properties': self.object_as_dict(q)}
+                # Convert postgis geometry to geojson geometry
+                postgis_geom = data['properties']['coords']
+                geojson_coords =  q.geom.coords(self.session)
+                del data['properties']['coords']
+                data['geometry'] = {
+                    'type': data['propertes']['type'],
+                    'coordinates': geojson_coords
+                }
+                feat_data.append(data)
+            etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
+
 
             # Query data table
             data_query = self.session.query(Data).filter(
@@ -320,13 +335,13 @@ class postgis_Util(object):
             )
 
             # Complile results as list of dicts
-            json_data = []
+            feat_data = []
             for q in data_query.all():
-                json_data.append(self.object_as_dict(q))
+                data = {'properties': self.object_as_dict(q)}
                 # Convert datetime time stamp to datestring
-                json_data[-1]['data_date'] = json_data[-1]['data_date'].strftime('%Y-%m-%d')
-            etdata[year]['features'] = json.dumps(json_data, ensure_ascii=False).encode('utf8')
-
+                data['properties']['data_date'] = data['properties']['data_date'].strftime('%Y-%m-%d')
+                feat_data.append(data)
+            etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
         self.end_session()
         return etdata, geomdata
 

@@ -7,7 +7,7 @@
         "variable",
         "dataset",
         "et_model",
-        "t_res",
+        "temporal_resolution",
         "years_statistic",
         "time_period_statistic"
     ],
@@ -23,7 +23,7 @@
         "variable": "et",
         "dataset": "MODIS",
         "et_model": "SSEBop",
-        "t_res": "annual",
+        "temporal_resolution": "annual",
         "time_period": [
             "2003"
         ],
@@ -88,7 +88,7 @@
         "SIMS": "SIMS",
         "ensemble": "Ensemble"
     },
-    "all_t_res": {
+    "all_temporal_resolution": {
         "monthly": "Monthly",
         "annual": "Annual"
     },

@@ -49,7 +49,7 @@ class ET_Util(object):
         self.geo_bucket_url = GEO_BUCKET_URL
 
 
-    def get_collection(self, t_res):
+    def get_collection(self, temporal_resolution):
         '''
         Gets the ee collection (by name)
         :param dataset: MODIS or LANDSAT
@@ -58,7 +58,7 @@ class ET_Util(object):
         '''
         ds = self.dataset
         m = self.et_model
-        coll_name = p_statics['ee_coll_name'][ds][m][t_res]
+        coll_name = p_statics['ee_coll_name'][ds][m][temporal_resolution]
         logging.debug('EE CALL: ee.ImageCollection({})'.format(coll_name))
         coll = ee.ImageCollection(coll_name)
         return coll
@@ -137,7 +137,7 @@ class ET_Util(object):
                 props[prop] = geo_props[prop]
         return props
 
-    def compute_et_stats(self, coll, var, geom, t_res):
+    def compute_et_stats(self, coll, var, geom, temporal_resolution):
         def average_over_region(img):
             '''
             Averages the ee.Image over all pixels of ee.Geometry
@@ -156,7 +156,7 @@ class ET_Util(object):
         etdata = {}
         imgs = []
         # logging.info('PROCESSING VARIABLE ' + str(v))
-        stat_names = statics['stats_by_var_res'][var][t_res]
+        stat_names = statics['stats_by_var_res'][var][temporal_resolution]
         for stat_name in stat_names:
             # logging.info('PROCESSING STATISTIC ' + str(stat_name))
             res = stat_name.split('_')[1]

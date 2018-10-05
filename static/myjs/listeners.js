@@ -20,7 +20,7 @@ $(document).ready(function () {
         change_inVariable($(this).val());
     });
 
-    $('#t_res').on('change', function(){
+    $('#temporal_resolution').on('change', function(){
         change_inTRes($(this).val());
     });
 
