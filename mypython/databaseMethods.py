@@ -233,7 +233,6 @@ class postgis_Util(object):
         '''
         # Set the geom_names from region and feature index
         region = self.tv['region']
-        geom_names = [region + '_' + str(f_idx) for f_idx in feature_index_list]
         rgn_id = config.statics['db_id_region'][region]
 
         # Set the dates list from temporal_resolution
@@ -242,14 +241,7 @@ class postgis_Util(object):
         geomdata = {}
         etdata = {}
         self.start_session()
-        print('LOOOOK')
-        geom_query = self.session.query(Geom).filter(
-            Geom.user_id == 0,
-            Geom.region_id == 3,
-            Geom.name.in_(['Mason_1513', 'Mason_1514'])
-        )
-        print(self.object_as_dict(geom_query.first()))
-        '''
+
         for year in self.tv['years']:
             geomdata[year] = {
                 'type': 'FeatureCollection',
@@ -261,7 +253,8 @@ class postgis_Util(object):
             }
             # Set the dates list from temporal_resolution
             dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
-
+            print('DATES_LIST')
+            print(dates_list)
             # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
             # Query geometry table
             if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
@@ -276,6 +269,7 @@ class postgis_Util(object):
                     Geom.region_id == rgn_id,
                     Geom.name.in_(geom_names)
                 )
+
             # get the relevant geom_ids
             geom_id_list = []
             feat_data = []
@@ -284,15 +278,18 @@ class postgis_Util(object):
                 data = {'properties': self.object_as_dict(q)}
                 # Convert postgis geometry to geojson geometry
                 postgis_geom = data['properties']['coords']
-                geojson_coords =  q.geom.coords(self.session)
                 del data['properties']['coords']
+                geojson_coords = mapping(to_shape(postgis_geom))
                 data['geometry'] = {
-                    'type': data['propertes']['type'],
+                    'type': data['properties']['type'],
                     'coordinates': geojson_coords
                 }
                 feat_data.append(data)
-            etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
 
+
+            #geomdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
+            geomdata[year]['features'] = feat_data
+            del feat_data
 
             # Query data table
             data_query = self.session.query(Data).filter(
@@ -303,6 +300,10 @@ class postgis_Util(object):
                 Data.data_date.in_(dates_list)
             )
 
+            print('LOOOOK')
+            print(data_query.all())
+
+
             # Complile results as list of dicts
             feat_data = []
             for q in data_query.all():
@@ -310,8 +311,9 @@ class postgis_Util(object):
                 # Convert datetime time stamp to datestring
                 data['properties']['data_date'] = data['properties']['data_date'].strftime('%Y-%m-%d')
                 feat_data.append(data)
-            etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
-        '''
+            # etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
+            etdata[year]['features'] = feat_data
+            del feat_data
         self.end_session()
         return etdata, geomdata
 
