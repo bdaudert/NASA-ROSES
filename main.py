@@ -130,10 +130,9 @@ def databaseTasks():
     for region in ['US_states_west_500k', 'Mason', 'US_counties_west_500k']:
         for year in ['2003']:
             logging.info('PROCESSING Region/Year ' + region + '/' + year)
-            for ds in ['MODIS']:
-                for et_model in ['SSEBop']:
-                    DU = databaseMethods.Datatstore_Util(region, year, ds, et_model)
-                    DU.add_to_db()
+            for ds in ['SSEBop']:
+                DU = databaseMethods.Datatstore_Util(region, year, ds)
+                DU.add_to_db()
             logging.info(region + '/' + year + ' PROCESSED!')
     return flask.render_template('databaseTasks.html', **tv)
 

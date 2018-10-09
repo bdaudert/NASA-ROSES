@@ -6,7 +6,6 @@
         "aggregation_area",
         "variable",
         "dataset",
-        "et_model",
         "temporal_resolution",
         "years_statistic",
         "time_period_statistic"
@@ -21,8 +20,7 @@
         ],
         "years_statistic": "none",
         "variable": "et",
-        "dataset": "MODIS",
-        "et_model": "SSEBop",
+        "dataset": "SSEBop",
         "temporal_resolution": "annual",
         "time_period": [
             "2003"
@@ -46,7 +44,29 @@
         "HUC10": "HUC 10, Western US"
     },
     "all_year": {
-        "MODIS": [
+        "SSEBop": [
+            "2003",
+            "2004",
+            "2005",
+            "2006",
+            "2007",
+            "2008",
+            "2009",
+            "2010",
+            "2011"
+        ],
+        "Landsat": [
+            "2003",
+            "2004",
+            "2005",
+            "2006",
+            "2007",
+            "2008",
+            "2009",
+            "2010",
+            "2011"
+        ],
+        "gridMET": [
             "2003",
             "2004",
             "2005",
@@ -59,7 +79,29 @@
         ]
     },
     "all_years": {
-        "MODIS": [
+        "SSEBop": [
+            "2003",
+            "2004",
+            "2005",
+            "2006",
+            "2007",
+            "2008",
+            "2009",
+            "2010",
+            "2011"
+        ],
+        "Landsat": [
+            "2003",
+            "2004",
+            "2005",
+            "2006",
+            "2007",
+            "2008",
+            "2009",
+            "2010",
+            "2011"
+        ],
+        "gridMET": [
             "2003",
             "2004",
             "2005",
@@ -74,19 +116,15 @@
     "all_dataset": {
         "MODIS": "MODIS",
         "Landsat": "Landsat",
-        "gridMET": "UI METDATA/gridMET"
+        "gridMET": "UI METDATA/gridMET",
+        "SSEBop": "SSEBop-MODIS"
     },
     "all_variable": {
         "et": "Actual ET",
         "etrf": "Fractional ET",
         "etr": "Reference ET",
-        "pr": "Precipitation"
-    },
-    "all_et_model": {
-        "SSEBop": "SSEBop",
-        "METRIC": "METRIC",
-        "SIMS": "SIMS",
-        "ensemble": "Ensemble"
+        "pr": "Precipitation",
+        "NDVI": "NDVI"
     },
     "all_temporal_resolution": {
         "monthly": "Monthly",
@@ -125,18 +163,11 @@
     },
     "mon_len": [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
     "dataset_by_var": {
-        "et": [
-            "MODIS",
-            "Landsat"
-        ],
-        "etrf": [
-            "MODIS",
-            "Landsat"
-        ],
+        "et": ["SSEBop"],
+        "etrf": ["SSEBop"],
         "etr": [],
-        "pr": [
-            "gridMET"
-        ]
+        "pr": ["gridMET"],
+        "NDVI": ["Landsat", "MODIS"]
     },
     "response_vars": {
         "None": [],
@@ -369,8 +400,6 @@
         "SSEBop": 3
     },
     "db_id_parameters_by_dataset": {
-        "MODIS": [],
-        "Landsat": [],
         "SSEBop": []
     },
     "db_id_variable": {

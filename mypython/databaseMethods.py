@@ -23,6 +23,7 @@ from geoalchemy2.shape import from_shape, to_shape
 from geoalchemy2.types import Geometry
 import geojson
 
+
 import config
 
 # TEST SERVER MODELS
@@ -181,8 +182,7 @@ class cloudSSQL_Util(object):
         :region Unique ID of geojson obbject, e.g. USFields
         :year year of geojson dataset, might be ALL if not USFields
             USField geojsons change every year
-        :dataset MODSI, Landsat or gridMET
-        :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
+        :dataset MODIS, Landsat, SSEBop etc
     '''
     def __init__(self):
         pass
@@ -196,8 +196,7 @@ class postgis_Util(object):
         :region Unique ID of geojson obbject, e.g. USFields
         :year year of geojson dataset, might be ALL if not USFields
             USField geojsons change every year
-        :dataset MODSI, Landsat or gridMET
-        :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
+        :dataset MODIS, Landsat, SSEBop etc
     '''
     def __init__(self, tv, db_engine):
         self.tv = tv
@@ -253,8 +252,6 @@ class postgis_Util(object):
             }
             # Set the dates list from temporal_resolution
             dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
-            print('DATES_LIST')
-            print(dates_list)
             # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
             # Query geometry table
             if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
@@ -264,7 +261,7 @@ class postgis_Util(object):
                 )
             else:
                 geom_names = [region + '_' + str(f_idx) for f_idx in feature_index_list]
-                geom_query = self.session.query(Geom).filter(
+                geom_query = self.session.query(Geom.coords.ST_AsGeoJSON()).filter(
                     Geom.user_id == 0,
                     Geom.region_id == rgn_id,
                     Geom.name.in_(geom_names)
@@ -275,19 +272,22 @@ class postgis_Util(object):
             feat_data = []
             for q in geom_query.all():
                 geom_id_list.append(q.id)
-                data = {'properties': self.object_as_dict(q)}
+                data = {'type': 'Feature', 'properties': self.object_as_dict(q)}
+                # Get the feature index and set it as a property
+                geom_name = data['properties']['name'] # geom_ame = region + '_' + feat_idx
+                data['properties']['feat_idx'] = geom_name.split('_')[-1]
                 # Convert postgis geometry to geojson geometry
                 postgis_geom = data['properties']['coords']
                 del data['properties']['coords']
-                geojson_coords = mapping(to_shape(postgis_geom))
-                data['geometry'] = {
-                    'type': data['properties']['type'],
-                    'coordinates': geojson_coords
-                }
-                feat_data.append(data)
+                geojson_geom = mapping(to_shape(postgis_geom))
+                data['geometry'] = geojson_geom
+                # QUIRK: mapping to_shape returns coordinates as tuples but geojson requires lists
+                # Need to convert the geometry coord tuples to lists, json.loads does this
+                feat_data.append(json.loads(json.dumps(data)))
 
 
-            #geomdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
+            # geomdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
+            # geomdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False)
             geomdata[year]['features'] = feat_data
             del feat_data
 
@@ -300,23 +300,21 @@ class postgis_Util(object):
                 Data.data_date.in_(dates_list)
             )
 
-            print('LOOOOK')
-            print(data_query.all())
-
 
             # Complile results as list of dicts
             feat_data = []
             for q in data_query.all():
-                data = {'properties': self.object_as_dict(q)}
+                data = {'type': 'Feature', 'properties': self.object_as_dict(q)}
                 # Convert datetime time stamp to datestring
                 data['properties']['data_date'] = data['properties']['data_date'].strftime('%Y-%m-%d')
                 feat_data.append(data)
             # etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
+            # etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False)
             etdata[year]['features'] = feat_data
             del feat_data
         self.end_session()
-        return etdata, geomdata
-
+        # return etdata, geomdata
+        return json.dumps(etdata, ensure_ascii=False), json.dumps(geomdata, ensure_ascii=False)
 
 class Datastore_Util(object):
     '''
@@ -328,13 +326,11 @@ class Datastore_Util(object):
         :year year of geojson dataset, might be ALL if not USFields
             USField geojsons change every year
         :dataset MODSI, Landsat or gridMET
-        :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
     '''
-    def __init__(self, region, year, dataset, et_model):
+    def __init__(self, region, year, dataset):
         self.region = region
         self.year = int(year)
         self.dataset = dataset
-        self.et_model = et_model
         self.DATASTORE_CLIENT = datastore.Client(project=config.PROJECT_ID)
         self.geo_bucket_url = config.GEO_BUCKET_URL
         self.data_bucket_url = config.DATA_BUCKET_URL
@@ -345,7 +341,7 @@ class Datastore_Util(object):
         else:
             self.geoFName = region + '_GEOM.geojson'
         # Only used to populate local DATASTORE @8000
-        self.local_dataFName = config.LOCAL_DATA_DIR + et_model + '/' +  region + '_' + year + '_DATA'  '.json'
+        self.local_dataFName = config.LOCAL_DATA_DIR + dataset + '/' +  region + '_' + year + '_DATA'  '.json'
         self.bucket_dataFName = region + '_' + year + '_DATA'  '.json'
 
 
@@ -370,7 +366,7 @@ class Datastore_Util(object):
         :param feat_index_list:
         :return:
         '''
-        url = self.data_bucket_url + self.et_model + '/' + self.bucket_dataFName
+        url = self.data_bucket_url + self.dataset + '/' + self.bucket_dataFName
         feature_data = {
             'type': 'FeatureCollection',
             'features': []
@@ -406,7 +402,7 @@ class Datastore_Util(object):
             'features': []
         }
         for feat_idx in feat_index_list:
-            unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(feat_idx)])
+            unique_str = ('-').join([self.region, self.dataset, str(self.year), str(feat_idx)])
             UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
             # query_data = ndb.Key('DATA', UNIQUE_ID).get()
             key = self.DATASTORE_CLIENT.key('DATA', UNIQUE_ID)
@@ -456,7 +452,7 @@ class Datastore_Util(object):
         :param feat_index_list:
         :return:
         '''
-        url = self.data_bucket_url + self.et_model + '/' + self.bucket_dataFName
+        url = self.data_bucket_url + self.dataset + '/' + self.bucket_dataFName
         feature_data = {
             'type': 'FeatureCollection',
             'features': []
@@ -476,7 +472,7 @@ class Datastore_Util(object):
 
     def read_data_from_db(self):
         '''
-        Reads all features for region, year, dataset, et_model
+        Reads all features for region, year, dataset
         :return:  dict of data for the features
         '''
 
@@ -488,13 +484,11 @@ class Datastore_Util(object):
         qry.add_filter('region', '=', self.region)
         qry.add_filter('year', '=', int(self.year))
         qry.add_filter('dataset', '=', self.dataset)
-        qry.add_filter('et_model', '=', self.et_model)
         '''
         qry = DATA.query(
             DATA.region == self.region,
             DATA.year == int(self.year),
             DATA.dataset == self.dataset,
-            DATA.et_model == self.et_model
         )
         '''
         query_data = qry.fetch()
@@ -534,7 +528,7 @@ class Datastore_Util(object):
         db_entities = []
         for idx in range(len(etdata['features'])):
             feat = etdata['features'][idx]
-            unique_str = ('-').join([self.region, self.dataset, self.et_model, str(self.year), str(idx)])
+            unique_str = ('-').join([self.region, self.dataset, str(self.year), str(idx)])
             UNIQUE_ID = hashlib.md5(unique_str).hexdigest()
             key = self.DATASTORE_CLIENT.key('DATA', UNIQUE_ID)
             db_entity = datastore.Entity(key = key)
@@ -542,20 +536,9 @@ class Datastore_Util(object):
                 'feat_idx': idx,
                 'region': self.region,
                 'year': self.year,
-                'dataset': self.dataset,
-                'et_model': self.et_model
+                'dataset': self.dataset
             })
             db_entity.update(feat)
-            '''
-            db_entity = DATA(
-                feat_idx = idx,
-                region = self.region,
-                year = self.year,
-                dataset = self.dataset,
-                et_model = self.et_model
-            )
-            db_entity.populate(**feat)
-            '''
             # db_entity.key = ndb.Key('DATA', UNIQUE_ID)
             db_entities.append(db_entity)
 

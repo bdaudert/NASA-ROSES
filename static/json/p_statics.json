@@ -1,12 +1,10 @@
 {
     "ee_coll_name": {
-        "MODIS": {
-            "SSEBop":{
-                "decadel": "projects/usgs-ssebop/modis_et_dekadal",
-                "monthly": "projects/usgs-ssebop/modis_et_monthly",
-                "annual": "projects/usgs-ssebop/modis_et_annual" 
-            }
-        }
+          "SSEBop": {
+            "decadel": "projects/usgs-ssebop/modis_et_dekadal",
+            "monthly": "projects/usgs-ssebop/modis_et_monthly",
+            "annual": "projects/usgs-ssebop/modis_et_annual"
+          }
     },
     "start_end_mon_days_by_res": {
     	"annual": ["01-01", "12-31"],

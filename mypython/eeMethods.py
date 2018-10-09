@@ -36,15 +36,13 @@ class ET_Util(object):
         :geoFName geojson file name
         :year year of geojson dataset, might be ALL if not USFields
             USField geojsons change every year
-        :dataset MODSI, Landsat or gridMET
-        :et_model Evapotranspiration modfel, e.g. SIMS, SSEBop, METRIC
+        :dataset MODIS, Landsat, gridMET, SSEBop, SIMS, etc
     '''
-    def __init__(self, region, year, dataset, et_model):
+    def __init__(self, region, year, dataset):
         self.region = region
         self.geoFName = region + '_' + year + '.geojson'
         self.year = year
         self.dataset = dataset
-        self.et_model = et_model
         self.missing_value = -9999
         self.geo_bucket_url = GEO_BUCKET_URL
 
@@ -57,8 +55,7 @@ class ET_Util(object):
         :return: ee.ImageCollection
         '''
         ds = self.dataset
-        m = self.et_model
-        coll_name = p_statics['ee_coll_name'][ds][m][temporal_resolution]
+        coll_name = p_statics['ee_coll_name'][ds][temporal_resolution]
         logging.debug('EE CALL: ee.ImageCollection({})'.format(coll_name))
         coll = ee.ImageCollection(coll_name)
         return coll

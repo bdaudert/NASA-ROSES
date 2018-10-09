@@ -281,7 +281,7 @@ MAP_APP = {
         var br = '<br>',
         html = 'Dataset: ' + $('#dataset option:selected').html() + br;
         html += 'Variable: ' + $('#variable option:selected').html() + br;
-        html += 'ET Model: ' + $('#et_model option:selected').html() + br;
+
 
         if ($('#years').val().length != 1){
             // Multiple Years
@@ -422,11 +422,10 @@ LF_MAP_APP = {
         Sets the feature styles for Choropleth map
         */
         var year = $('#years').val()[0],
-            idx = feature.properties['idx'],
+            idx = feature.properties['feat_idx'],
             v = $('#variable').val(),
             temporal_resolution = $('#temporal_resolution').val(),
             et_var = statics.stats_by_var_res[v][temporal_resolution][0], color = null, i;
-
         var f_data = {'properties': DATA.etdata[year].features[idx]['properties']},
             val_list = MAP_APP.set_singleYear_singleFeat_valList(f_data);
         // Note: for Choro, val_list is always of length 1
@@ -511,7 +510,7 @@ LF_MAP_APP = {
         if (years.length != 1) {
             //Multiple years, we need to query the database to get data for each year
             //Sets window.popup_html global var
-            $('#feat_indices').val(String(feat.properties['idx']));
+            $('#feat_indices').val(String(feat.properties['feat_idx']));
             ajax_set_featdata_on_feature_click(feat, layer);
         }else {
             var gf_data = MAP_APP.set_feature_data(years, feats);
@@ -683,7 +682,7 @@ var initialize_lf_map = function() {
             }
             if (e.boxZoomBounds.intersects(bounds)) {
                 try {
-                   feat_idx =  layer.feature.properties['idx'];
+                   feat_idx =  layer.feature.properties['feat_idx'];
                 }catch(e){
                     return;
                 }

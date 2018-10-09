@@ -102,7 +102,7 @@ function change_inVariable(variable){
 
     }
     if ($('#region').val() == 'ee_map'){
-    	//Get the map from db
+    	//Get the map from climate engine (API call)
     }
 
 	//Set dataset
@@ -213,7 +213,7 @@ function get_feat_index_from_featdata(year) {
     var f_idx_list = $('#feat_indices').val().replace(', ', ',').split(','), indices = [];
 
     $.each(window.DATA.featsgeomdata[year]['features'], function(idx, feat_data){
-        if (f_idx_list.includes(String(feat_data['properties']['idx']))) {
+        if (f_idx_list.includes(String(feat_data['properties']['feat_idx']))) {
             indices.push(String(idx));
         }
     });

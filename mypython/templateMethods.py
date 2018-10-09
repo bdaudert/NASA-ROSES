@@ -60,15 +60,6 @@ def set_dates():
     }
     return dates
 
-def set_database_util(year, tv):
-    # Load the data from the database
-    rgn = tv['variables']['region']
-    yr = year
-    ds = tv['variables']['dataset']
-    m = tv['variables']['et_model']
-    DU = databaseMethods.Datastore_Util(rgn, yr, ds, m)
-    return DU
-
 def set_map_type(tv):
     if (tv['variables']['region'] == 'ee_map'):
         return 'ee_map'
@@ -103,13 +94,12 @@ def set_etdata_from_datastore(template_variables, feat_index_list):
     # Load the data from the database
     rgn = tv['variables']['region']
     ds = tv['variables']['dataset']
-    m = tv['variables']['et_model']
     tv['etdata'] = {}
     tv['geomdata'] = {}
     tv['featsdata'] = {}
     tv['featsgeomdata'] = {}
     for year in tv['variables']['years']:
-        DU = databaseMethods.Datastore_Util(rgn, year, ds, m)
+        DU = databaseMethods.Datastore_Util(rgn, year, ds)
         # Get the feature data by index
         geomdata = DU.read_geometries_from_bucket()
         tv['featsgeomdata'][year] = {
@@ -128,7 +118,7 @@ def set_etdata_from_datastore(template_variables, feat_index_list):
                 tv['featsgeomdata'][year]['features'].append(geomdata['features'][int(feat_idx)])
     # Get all data for the first year in year_list
     year = tv['variables']['years'][0]
-    DU = databaseMethods.Datastore_Util(rgn, year, ds, m)
+    DU = databaseMethods.Datastore_Util(rgn, year, ds)
     if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
         # Running in production environment, read data from db
         etdata = DU.read_data_from_db()
@@ -162,6 +152,12 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
 
     if len(tv['variables']['years']) == 1:
         tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
+
+
+    print('LOOOK')
+    print(tv['variables']['years'])
+    print(tv['etdata'])
+
     return tv
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):
