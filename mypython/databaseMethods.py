@@ -321,7 +321,7 @@ class postgis_Util(object):
             feat_data = []
             for q in geom_query.all():
                 geom_id, g_data = self.set_geom_json(q)
-                geom_id_list.append(qeom_id)
+                geom_id_list.append(geom_id)
                 feat_data.append(g_data)
                 # Add the feature to etdata
                 etdata[year]['features'].append({'type': 'Feature', 'properties': {}})
@@ -340,7 +340,7 @@ class postgis_Util(object):
             # Complile results as list of dicts
             for q in data_query.all():
                 feat_idx, properties = self.set_data_json(q, geom_id_list)
-                etdata[year]['features'][f_idx]['properties'].update(properties)
+                etdata[year]['features'][feat_idx]['properties'].update(properties)
                 # etdata[year]['features'][f_idx]['properties'] = properties
         self.end_session()
         # return etdata, geomdata
