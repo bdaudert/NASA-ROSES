@@ -156,13 +156,12 @@ MAP_APP = {
         Sets the value list by area averaging over the features in featsdata
         */
         var val_lists = [], d, total_area = 0, f_area, feat_areas = [], feat_vals = [],
-            v_idx, val_list = [],d,
-            area_param = statics.area_param[$('#region').val()];
+            v_idx, val_list = [],d;
 
         // Return data for each feature separately
         $.map(featsdata['features'], function (f_data) {
             val_lists.push(MAP_APP.set_singleYear_singleFeat_valList(f_data));
-            f_area = f_data['properties'][area_param]
+            f_area = f_data['properties']['geom_area']
             feat_areas.push(f_area);
             total_area += f_area;
         });
@@ -306,10 +305,9 @@ MAP_APP = {
         /*
         Each feature is a row, summary stats over feats are listed in the bottom row
         */
-        var geom_name_prop = statics.geom_name_prop[$('#region').val()],
-            j, row_names = ['<b>Area average</b>'];
+        var j, row_names = ['<b>Area average</b>'];
         for (j = 0; j < geomdata['features'].length; j++) {
-            row_names.push(geomdata['features'][j]['properties'][geom_name_prop]);
+            row_names.push(geomdata['features'][j]['properties']['name']);
         }
         return row_names;
     },
@@ -383,7 +381,7 @@ MAP_APP = {
             featsdata[year] = {type: 'FeatureCollection', features: []};
             featsgeomdata[year] = {type: 'FeatureCollection', features: []};
             for (f_idx = 0; f_idx < feats.length; f_idx++) {
-                feat_idx = feats[f_idx].properties['feat_idx'];
+                feat_idx = feats[f_idx].properties['feature_index'];
                 featsdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
                 featsgeomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
             }
@@ -424,7 +422,7 @@ LF_MAP_APP = {
         Sets the feature styles for Choropleth map
         */
         var year = $('#years').val()[0],
-            idx = feature.properties['feat_idx'],
+            idx = feature.properties['feature_index'],
             v = $('#variable').val(),
             temporal_resolution = $('#temporal_resolution').val(),
             et_var = statics.stats_by_var_res[v][temporal_resolution][0], color = null, i;
@@ -512,7 +510,7 @@ LF_MAP_APP = {
         if (years.length != 1) {
             //Multiple years, we need to query the database to get data for each year
             //Sets window.popup_html global var
-            $('#feat_indices').val(String(feat.properties['feat_idx']));
+            $('#feat_indices').val(String(feat.properties['feature_index']));
             ajax_set_featdata_on_feature_click(feat, layer);
         }else {
             var gf_data = MAP_APP.set_feature_data(years, feats);
@@ -684,7 +682,7 @@ var initialize_lf_map = function() {
             }
             if (e.boxZoomBounds.intersects(bounds)) {
                 try {
-                   feat_idx =  layer.feature.properties['feat_idx'];
+                   feat_idx =  layer.feature.properties['feature_index'];
                 }catch(e){
                     return;
                 }

@@ -4,7 +4,7 @@ function change_inRegion(region, auto_set_region=false){
 	aut_region = false: region is only determiined by region value, not by zoom level
 	*/
 	// Clear the feature indices
-	$('#feat_indices').val('');
+	$('#feature_indices').val('');
 	// Hide the popup window
 	// Hide the popup window
 	window.map.closePopup();
@@ -54,7 +54,7 @@ function change_inYear(year){
 	//couple years field
     $('#years').val([year]);
 	//Clear the feature indices
-	$('#feat_indices').val('');
+	$('#feature_indices').val('');
 	// Hide the popup window
 	window.map.closePopup();
 	//Delete old layer
@@ -69,7 +69,7 @@ function change_inYear(year){
 
 function change_inYears(years){
     //Clear the featuer indices
-	$('#feat_indices').val('');// Hide the popup window
+	$('#feature_indices').val('');// Hide the popup window
 	// Hide the popup window
 	window.map.closePopup();
 	//Delete old layer
@@ -93,7 +93,7 @@ function change_inYears(years){
 
 function change_inVariable(variable){
 	//Clear the featuer indices
-	$('#feat_indices').val('');
+	$('#feature_indices').val('');
 	// Hide the popup window
 	window.map.closePopup();
 
@@ -134,7 +134,7 @@ function change_inTRes(resolution){
     var tps, tp, tp_name, option, key, key_list = [];
 
     //Clear the featuere indices
-	$('#feat_indices').val('');
+	$('#feature_indices').val('');
 	// Hide the popup window
 	window.map.closePopup();
 
@@ -210,10 +210,10 @@ function change_inTimePeriodStat(time_period_stat){
 }
 
 function get_feat_index_from_featdata(year) {
-    var f_idx_list = $('#feat_indices').val().replace(', ', ',').split(','), indices = [];
-
+    var f_idx_list = $('#feature_indices').val().replace(', ', ',').split(','),
+        indices = [];
     $.each(window.DATA.featsgeomdata[year]['features'], function(idx, feat_data){
-        if (f_idx_list.includes(String(feat_data['properties']['feat_idx']))) {
+        if (f_idx_list.includes(String(feat_data['properties']['feature_index']))) {
             indices.push(String(idx));
         }
     });

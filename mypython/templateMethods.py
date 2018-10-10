@@ -204,8 +204,8 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
         return tv
 
     feat_index_list = []
-    if 'feat_indices' in tv['variables'].keys() and tv['variables']['feat_indices']:
-        feat_index_list = tv['variables']['feat_indices'].replace(', ', ',').split(',')
+    if 'feature_indices' in tv['variables'].keys() and tv['variables']['feature_indices']:
+        feat_index_list = tv['variables']['feature_indices'].replace(', ', ',').split(',')
 
     if db_type == 'DATASTORE':
         tv = set_etdata_from_datastore(tv, feat_index_list)

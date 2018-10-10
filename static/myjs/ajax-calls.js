@@ -198,7 +198,7 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
             }
         }
         year = $('#years').val()[0];
-        feat_idx_list = $('#feat_indices').val().replace(', ', ',').split(',');
+        feat_idx_list = $('#feature_indices').val().replace(', ', ',').split(',');
         if (feat_idx_list.length != 0){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();

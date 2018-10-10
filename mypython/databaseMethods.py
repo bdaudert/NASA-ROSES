@@ -79,9 +79,12 @@ class Geom(Base):
     __tablename__ = 'geom'
     id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer())
+    year = db.Column(db.Integer())
     region_id = db.Column(db.Integer())
+    feature_index = db.Column(db.Integer())
     name = db.Column(db.String())
     type = db.Column(db.String())
+    area = db.Column(db.Float(precision=4))
     coords = db.Column(Geometry(geometry_type='MULTIPOLYGON'))
     '''
     FIX ME: I don't know how to implement that in dbSCHEMA or pgADMIN
@@ -116,6 +119,8 @@ class Data(Base):
     __tablename__ = 'data'
     id = db.Column(db.Integer(), primary_key=True)
     geom_id = db.Column(db.Integer(), db.ForeignKey('geom.id'), nullable=False)
+    geom_name = db.Column(db.String())
+    geom_area = db.Column(db.Float(precision=4))
     dataset_id =  db.Column(db.Integer(), db.ForeignKey('dataset.id'), nullable=False)
     variable_id =  db.Column(db.Integer(), db.ForeignKey('variable.id'), nullable=False)
     temporal_resolution = db.Column(db.String())
@@ -226,12 +231,9 @@ class postgis_Util(object):
         :return: int: geom_id
                 json: g_data quuery result converted to geojson feature
         '''
-        geom_id = q.id
         g_data = {'type': 'Feature', 'properties': self.object_as_dict(q)}
         # Get the feature index and set it as a property
         geom_name = g_data['properties']['name']  # geom_ame = region + '_' + feat_idx
-        feat_idx = geom_name.split('_')[-1]
-        g_data['properties']['feat_idx'] = feat_idx
         # Convert postgis geometry to geojson geometry
         postgis_geom = g_data['properties']['coords']
         del g_data['properties']['coords']
@@ -240,7 +242,7 @@ class postgis_Util(object):
         # QUIRK: mapping to_shape returns coordinates as tuples but geojson requires lists
         # Need to convert the geometry coord tuples to lists, json.loads does this
         g_data = json.loads(json.dumps(g_data))
-        return geom_id, g_data
+        return g_data
 
     def set_data_json(self, q, geom_id_list):
         props = self.object_as_dict(q)
@@ -261,13 +263,9 @@ class postgis_Util(object):
         elif t_res == 'monthly':
             month = date[5:7]
             data_name = var + '_' + month
-        properties = {
-            'feat_idx': feat_idx,
-            'geom_id': geom_id,
-            'temporal_resolution': t_res,
-            'variable': var
-        }
-        properties[data_name] = data_value
+        properties = {'feature_index': feat_idx, 'geom_id': geom_id, 'geom_name': props['geom_name'],
+                      'geom_area': props['geom_area'], 'temporal_resolution': t_res, 'variable': var,
+                      data_name: data_value}
         return feat_idx, properties
 
     def read_data_from_db(self, feature_index_list=['all']):
@@ -298,6 +296,8 @@ class postgis_Util(object):
                 'type': 'FeatureCollection',
                 'features': []
             }
+            print('LOOOOK')
+            print(feature_index_list)
             # Set the dates list from temporal_resolution
             dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
             # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
@@ -318,10 +318,13 @@ class postgis_Util(object):
 
             # get the relevant geom_ids
             geom_id_list = []
+            feature_index_list = []
             feat_data = []
             for q in geom_query.all():
-                geom_id, g_data = self.set_geom_json(q)
+                feature_index_list.append(q.feature_index)
+                geom_id = q.id
                 geom_id_list.append(geom_id)
+                g_data = self.set_geom_json(q)
                 feat_data.append(g_data)
                 # Add the feature to etdata
                 etdata[year]['features'].append({'type': 'Feature', 'properties': {}})
