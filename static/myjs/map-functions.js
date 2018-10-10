@@ -375,6 +375,7 @@ MAP_APP = {
         Given feats from dragbox event, we extract the relevant geomdata and featsdata from
         the template variables
         */
+
         var f_idx, y_idx, year, feat_idx,
             featsdata = {}, featsgeomdata = {}, gf_data;
         for (y_idx = 0; y_idx < years.length; y_idx++) {
@@ -382,7 +383,7 @@ MAP_APP = {
             featsdata[year] = {type: 'FeatureCollection', features: []};
             featsgeomdata[year] = {type: 'FeatureCollection', features: []};
             for (f_idx = 0; f_idx < feats.length; f_idx++) {
-                feat_idx = feats[f_idx].properties['idx'];
+                feat_idx = feats[f_idx].properties['feat_idx'];
                 featsdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
                 featsgeomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
             }
