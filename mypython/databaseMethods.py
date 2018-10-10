@@ -220,7 +220,55 @@ class postgis_Util(object):
         return {c.key: getattr(obj, c.key)
                 for c in inspect(obj).mapper.column_attrs}
 
+    def set_geom_json(self, q):
+        '''
+        :param q: query object
+        :return: int: geom_id
+                json: g_data quuery result converted to geojson feature
+        '''
+        geom_id = q.id
+        g_data = {'type': 'Feature', 'properties': self.object_as_dict(q)}
+        # Get the feature index and set it as a property
+        geom_name = g_data['properties']['name']  # geom_ame = region + '_' + feat_idx
+        feat_idx = geom_name.split('_')[-1]
+        g_data['properties']['feat_idx'] = feat_idx
+        # Convert postgis geometry to geojson geometry
+        postgis_geom = g_data['properties']['coords']
+        del g_data['properties']['coords']
+        geojson_geom = mapping(to_shape(postgis_geom))
+        g_data['geometry'] = geojson_geom
+        # QUIRK: mapping to_shape returns coordinates as tuples but geojson requires lists
+        # Need to convert the geometry coord tuples to lists, json.loads does this
+        g_data = json.loads(json.dumps(g_data))
+        return geom_id, g_data
 
+    def set_data_json(self, q, geom_id_list):
+        props = self.object_as_dict(q)
+        geom_id = props['geom_id']
+        feat_idx = geom_id_list.index(geom_id)
+        data_val = props['data_value']
+        t_res = props['temporal_resolution']
+        # Convert datetime time stamp to datestring
+        date = props['data_date'].strftime('%Y-%m-%d')
+        data_value = props['data_value']
+        var = None
+        for key, val in config.statics['db_id_variable'].items():
+            if val == props['variable_id']:
+                var = key
+                break
+        if t_res in ['seasonal', 'annual']:
+            data_name = var + '_' + t_res
+        elif t_res == 'monthly':
+            month = date[5:7]
+            data_name = var + '_' + month
+        properties = {
+            'feat_idx': feat_idx,
+            'geom_id': geom_id,
+            'temporal_resolution': t_res,
+            'variable': var
+        }
+        properties[data_name] = data_value
+        return feat_idx, properties
 
     def read_data_from_db(self, feature_index_list=['all']):
         '''
@@ -267,27 +315,16 @@ class postgis_Util(object):
                     Geom.name.in_(geom_names)
                 )
 
+
             # get the relevant geom_ids
             geom_id_list = []
             feat_data = []
             for q in geom_query.all():
-                geom_id_list.append(q.id)
-                data = {'type': 'Feature', 'properties': self.object_as_dict(q)}
-                # Get the feature index and set it as a property
-                geom_name = data['properties']['name'] # geom_ame = region + '_' + feat_idx
-                data['properties']['feat_idx'] = geom_name.split('_')[-1]
-                # Convert postgis geometry to geojson geometry
-                postgis_geom = data['properties']['coords']
-                del data['properties']['coords']
-                geojson_geom = mapping(to_shape(postgis_geom))
-                data['geometry'] = geojson_geom
-                # QUIRK: mapping to_shape returns coordinates as tuples but geojson requires lists
-                # Need to convert the geometry coord tuples to lists, json.loads does this
-                feat_data.append(json.loads(json.dumps(data)))
-
-
-            # geomdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
-            # geomdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False)
+                geom_id, g_data = self.set_geom_json(q)
+                geom_id_list.append(qeom_id)
+                feat_data.append(g_data)
+                # Add the feature to etdata
+                etdata[year]['features'].append({'type': 'Feature', 'properties': {}})
             geomdata[year]['features'] = feat_data
             del feat_data
 
@@ -300,18 +337,11 @@ class postgis_Util(object):
                 Data.data_date.in_(dates_list)
             )
 
-
             # Complile results as list of dicts
-            feat_data = []
             for q in data_query.all():
-                data = {'type': 'Feature', 'properties': self.object_as_dict(q)}
-                # Convert datetime time stamp to datestring
-                data['properties']['data_date'] = data['properties']['data_date'].strftime('%Y-%m-%d')
-                feat_data.append(data)
-            # etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False).encode('utf8')
-            # etdata[year]['features'] = json.dumps(feat_data, ensure_ascii=False)
-            etdata[year]['features'] = feat_data
-            del feat_data
+                feat_idx, properties = self.set_data_json(q, geom_id_list)
+                etdata[year]['features'][f_idx]['properties'].update(properties)
+                # etdata[year]['features'][f_idx]['properties'] = properties
         self.end_session()
         # return etdata, geomdata
         return json.dumps(etdata, ensure_ascii=False), json.dumps(geomdata, ensure_ascii=False)

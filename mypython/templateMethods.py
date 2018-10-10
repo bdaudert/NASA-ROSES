@@ -152,12 +152,6 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
 
     if len(tv['variables']['years']) == 1:
         tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
-
-
-    print('LOOOK')
-    print(tv['variables']['years'])
-    print(tv['etdata'])
-
     return tv
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):
