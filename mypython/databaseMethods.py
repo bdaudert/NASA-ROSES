@@ -267,6 +267,35 @@ class postgis_Util(object):
                       data_name: data_value}
         return feat_idx, properties
 
+    def read_geomdata_from_db(self, year):
+        '''
+        sets up geometry for year as geojson
+        :return: geojson['9999']
+        '''
+        geomdata = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        # Set the geom_names from region and feature index
+        region = self.tv['region']
+        rgn_id = config.statics['db_id_region'][region]
+
+        geom_query = self.session.query(Geom).filter(
+            Geom.user_id == 0,
+            Geom.region_id == rgn_id,
+            Geom.year == year
+        )
+        feat_data = []
+        for q in geom_query.all():
+            g_data = self.set_geom_json(q)
+            # Add the feature to etdata
+            geomdata['features'].append(g_data)
+        del g_data
+        data = {str(year): geomdata}
+        return json.dumps(data, ensure_ascii=False)
+
+
+
     def read_data_from_db(self, feature_index_list=['all']):
         '''
 
@@ -305,6 +334,8 @@ class postgis_Util(object):
                 geom_year = int(year)
             else:
                 geom_year = 9999
+
+            # Query the database
             if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
                 geom_query = self.session.query(Geom).filter(
                     Geom.user_id == 0,

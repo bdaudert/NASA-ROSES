@@ -138,6 +138,28 @@ def set_etdata_from_cloudSQL(template_variables, feat_index_list):
     tv = deepcopy(template_variables)
     return tv
 
+def determine_map_type(tv_vars):
+    '''
+    :param tv_vars: template variables tv['variables']
+    :return: string map_type: Choropleth or default
+    '''
+    if len(tv_vars['years']) != 1:
+        return 'default'
+
+    # Single Year is chorpleth if temp res is annual or seasonal
+    # or monthly ith a statistic
+    if tv_vars['temporal_resolution'] in ['annual', 'seasonal']:
+     return 'Choropleth'
+
+    # Sub annual
+    if len(tv_vars['time_period']) == 1:
+        return 'Choropleth';
+
+    # Multiple time periods
+    if tv_vars['time_period_statistic'] != 'none':
+        return 'Choropleth';
+    return 'default'
+
 def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
     '''
     Sets geondata, etdata, featsgeomdata, featsdata from Jordan's db
@@ -150,8 +172,14 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
     if feat_index_list:
         tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
 
-    if len(tv['variables']['years']) == 1:
+    map_type = determine_map_type(template_variables['variables'])
+
+    if map_type == "Choropleth":
         tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
+    else:
+        # Reads only the geometry data to generate non-choropleth map
+        tv['geomdata'] = DU.read_geomdata_from_db(9999)
+        tv['etdata'] = json.dumps({}, ensure_ascii=False)
     return tv
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):

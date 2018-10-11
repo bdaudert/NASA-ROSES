@@ -565,13 +565,16 @@ LF_MAP_APP = {
         // Delete old layer
         if (window.main_map_layer) {
             LF_MAP_APP.delete_mapLayer(window.main_map_layer);
+            MAP_APP.hide_mapColorbar('#colorbar');
         }
         // Find the new map type and set the map layer
         var map_type = MAP_APP.determine_map_type(),
-            styleFunct = LF_MAP_APP.defaultStyleFunction;
-        //Set the choropleth or default layer
-        var geojson = DATA.geomdata[$('#years').val()[0]];
+            styleFunct = LF_MAP_APP.defaultStyleFunction,
+            geojson;
+
+        // If choropleth, set the bins, colors and draw the colorbar
         if (map_type == 'Choropleth') {
+            geojson = DATA.geomdata[$('#years').val()[0]];
             styleFunct = LF_MAP_APP.choroStyleFunction;
             //Set the colors for Choropleth map, draw colorbar
             var year = $('#years').val()[0],
@@ -580,6 +583,8 @@ LF_MAP_APP = {
             window.feat_colors = cb['colors'];
             window.bins = cb['bins'];
             MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
+        } else{
+            geojson = DATA.geomdata['9999'];
         }
         LF_MAP_APP.set_mapLayer(geojson, styleFunct);
     },
