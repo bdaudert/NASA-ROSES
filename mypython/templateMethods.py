@@ -174,7 +174,7 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
 
     map_type = determine_map_type(template_variables['variables'])
 
-    if map_type == "Choropleth":
+    if map_type == "Choropleth" or len(tv['variables']['years']) == 1:
         tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
     else:
         # Reads only the geometry data to generate non-choropleth map

@@ -270,7 +270,7 @@ class postgis_Util(object):
     def read_geomdata_from_db(self, year):
         '''
         sets up geometry for year as geojson
-        :return: geojson['9999']
+        :return: geojson
         '''
         geomdata = {
             'type': 'FeatureCollection',
@@ -294,7 +294,22 @@ class postgis_Util(object):
         data = {str(year): geomdata}
         return json.dumps(data, ensure_ascii=False)
 
-
+    def make_geom_query(self, user_id, rgn_id, year, feature_index_list):
+        # Query the database
+        if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
+            geom_query = self.session.query(Geom).filter(
+                Geom.user_id == user_id,
+                Geom.region_id == rgn_id,
+                Geom.year == int(year)
+            )
+        else:
+            geom_query = self.session.query(Geom).filter(
+                Geom.user_id == user_id,
+                Geom.region_id == rgn_id,
+                Geom.year == int(year),
+                Geom.feature_index.in_(feature_index_list)
+            )
+        return geom_query
 
     def read_data_from_db(self, feature_index_list=['all']):
         '''
@@ -307,7 +322,7 @@ class postgis_Util(object):
         # Set the geom_names from region and feature index
         region = self.tv['region']
         rgn_id = config.statics['db_id_region'][region]
-
+        user_id = 0 # public
         # Set the dates list from temporal_resolution
         DateUtil = date_Util()
         
@@ -315,11 +330,25 @@ class postgis_Util(object):
         etdata = {}
         self.start_session()
 
+        geom_year = None
+        geom_query = None
+        if self.tv['region'] not in config.statics['regions_changing_by_year']:
+            geom_year = '9999'
+
+        if geom_year == '9999':
+            # We only need to query the data base once
+            geom_query = self.make_geom_query(user_id, rgn_id, geom_year, feature_index_list)
+
         for year in self.tv['years']:
-            geomdata[year] = {
-                'type': 'FeatureCollection',
-                'features': []
-            }
+            if geom_year != '9999':
+                geom_year = year
+
+            if geom_year != '9999' or '9999' not in geomdata.keys():
+                geomdata[geom_year] = {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+
             etdata[year] = {
                 'type': 'FeatureCollection',
                 'features': []
@@ -328,31 +357,14 @@ class postgis_Util(object):
             dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
             # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
             # Query geometry table
+            if not geom_query:
+                geom_query = self.make_geom_query(user_id, rgn_id, year, feature_index_list)
 
-            # FIX ME: if regionss vary by year
-            if self.tv['region'] in config.statics['regions_changing_by_year']:
-                geom_year = int(year)
-            else:
-                geom_year = 9999
-
-            # Query the database
-            if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
-                geom_query = self.session.query(Geom).filter(
-                    Geom.user_id == 0,
-                    Geom.region_id == rgn_id,
-                    Geom.year == geom_year
-                )
-            else:
-                geom_query = self.session.query(Geom).filter(
-                    Geom.user_id == 0,
-                    Geom.region_id == rgn_id,
-                    Geom.year == geom_year,
-                    Geom.feature_index.in_(feature_index_list)
-                )
             # get the relevant geom_ids
             geom_id_list = []
             feat_idx_list = []
             feat_data = []
+
             for q in geom_query.all():
                 geom_id = q.id
                 geom_id_list.append(geom_id)
@@ -361,7 +373,8 @@ class postgis_Util(object):
                 feat_data.append(g_data)
                 # Add the feature to etdata
                 etdata[year]['features'].append({'type': 'Feature', 'properties': {}})
-            geomdata[year]['features'] = feat_data
+            if  not geomdata[geom_year]['features']:
+                geomdata[geom_year]['features'] = feat_data
             del feat_data
 
             # Query data table

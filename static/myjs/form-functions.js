@@ -196,7 +196,9 @@ function change_inTRes(resolution){
     */
 	ajax_update_etdata_and_map(auto_set_region = false);
     // Update the map layer
-	LF_MAP_APP.update_mapLayer();
+	var map_type = MAP_APP.determine_map_type(),
+            geojson = MAP_APP.set_geojson();
+	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
 }
 
 function change_inTimePeriod(time_period){
@@ -211,14 +213,18 @@ function change_inTimePeriod(time_period){
 	}
 
     // Update the map layer
-    LF_MAP_APP.update_mapLayer();
+	var map_type = MAP_APP.determine_map_type(),
+		geojson = MAP_APP.set_geojson();
+	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
 }
 
 function change_inTimePeriodStat(time_period_stat){
     // Hide the popup window
 	window.map.closePopup();
 	// Update the map layer
-    LF_MAP_APP.update_mapLayer();
+    var map_type = MAP_APP.determine_map_type(),
+		geojson = MAP_APP.set_geojson();
+	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
 }
 
 function get_feat_index_from_featdata(year) {

@@ -12,7 +12,6 @@ MAP_APP = {
             return 'default';
         }
 
-
         // Single Year
         if ($('#temporal_resolution').val() == 'annual') {
             return 'Choropleth';
@@ -28,6 +27,18 @@ MAP_APP = {
             return 'Choropleth';
         }
         return 'default';
+    },
+    set_geojson: function() {
+        if ($('#region').val().is_in(statics.regions_changing_by_year)){
+            if ($('#years').val().length == 1) {
+                geojson = window.DATA.geomdata[$('#years').val()[0]];
+            } else{
+                geojson = window.DATA.geomdata['9999'];
+            }
+        } else {
+             geojson = window.DATA.geomdata['9999'];
+        }
+        return geojson;
     },
     set_start_color: function () {
         return '#9bc2cf';
@@ -558,7 +569,7 @@ LF_MAP_APP = {
         window.map.main_map_layer = null;
         MAP_APP.hide_mapColorbar('#colorbar');
     },
-    update_mapLayer: function(auto_set_region=false){
+    update_mapLayer: function(geojson, map_type, auto_set_region=false){
         /*
         Updates the map and sets up the popup window for click on single feature
         */
@@ -568,13 +579,12 @@ LF_MAP_APP = {
             MAP_APP.hide_mapColorbar('#colorbar');
         }
         // Find the new map type and set the map layer
-        var map_type = MAP_APP.determine_map_type(),
-            styleFunct = LF_MAP_APP.defaultStyleFunction,
-            geojson;
+        // var map_type = MAP_APP.determine_map_type(),
+        var styleFunct = LF_MAP_APP.defaultStyleFunction, geojson;
 
         // If choropleth, set the bins, colors and draw the colorbar
         if (map_type == 'Choropleth') {
-            geojson = DATA.geomdata[$('#years').val()[0]];
+            //geojson = DATA.geomdata[$('#years').val()[0]];
             styleFunct = LF_MAP_APP.choroStyleFunction;
             //Set the colors for Choropleth map, draw colorbar
             var year = $('#years').val()[0],
@@ -583,8 +593,6 @@ LF_MAP_APP = {
             window.feat_colors = cb['colors'];
             window.bins = cb['bins'];
             MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
-        } else{
-            geojson = DATA.geomdata['9999'];
         }
         LF_MAP_APP.set_mapLayer(geojson, styleFunct);
     },
@@ -644,7 +652,9 @@ var initialize_lf_map = function() {
     if (region == "ee_map"){
         //API call to CE
     }else {
-        LF_MAP_APP.update_mapLayer(auto_set_region = true);
+        var map_type = MAP_APP.determine_map_type(),
+            geojson = MAP_APP.set_geojson();
+        LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = true);
     }
     window.map.on("boxzoomend", function(e) {
         var bounds, feat_indices = [], layers = [], feat_idx;

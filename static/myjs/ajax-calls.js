@@ -89,7 +89,10 @@ function ajax_update_etdata_and_map(auto_set_region=false){
             window.DATA[tv_var] = $.parseJSON(r[tv_var]);
         }
         //Set new map layer
-        LF_MAP_APP.update_mapLayer(auto_set_region=auto_set_region);
+        var map_type = MAP_APP.determine_map_type(),
+		    geojson = MAP_APP.set_geojson();
+	    LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
+
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
         end_progressbar();
     })
