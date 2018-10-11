@@ -421,7 +421,7 @@ LF_MAP_APP = {
         Sets the feature styles for Choropleth map
         */
         var year = $('#years').val()[0],
-            idx = feature.properties['feature_index'],
+            idx = parseInt(feature.properties['feature_index']) - 1,
             v = $('#variable').val(),
             temporal_resolution = $('#temporal_resolution').val(),
             et_var = statics.stats_by_var_res[v][temporal_resolution][0], color = null, i;
@@ -505,13 +505,15 @@ LF_MAP_APP = {
 
         var years = $('#years').val(),
             feats = [feat];
+        // Update the feature index template variable
+        $('#feature_indices').val(String(feat.properties['feature_index']));
         // Get the html content for the popup
         if (years.length != 1) {
             //Multiple years, we need to query the database to get data for each year
             //Sets window.popup_html global var
-            $('#feature_indices').val(String(feat.properties['feature_index']));
             ajax_set_featdata_on_feature_click(feat, layer);
         }else {
+            // Single Year
             var gf_data = MAP_APP.set_feature_data(years, feats);
             window.popup_html = MAP_APP.set_dataModalHeader();
             // Only show data if single year

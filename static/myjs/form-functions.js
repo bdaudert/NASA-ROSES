@@ -68,19 +68,21 @@ function change_inYear(year){
 }
 
 function change_inYears(years){
-    //Clear the featuer indices
+    // Clear the featuer indices
 	$('#feature_indices').val('');// Hide the popup window
 	// Hide the popup window
 	window.map.closePopup();
-	//Delete old layer
+	// Delete old layer
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	var geojsonLayer = DATA.geomdata[$('#years').val()[0]];
-
+	// Delete old data
+	if (window.DATA['etdata'] ) {
+        window.DATA['etdata'] = {}
+        window.DATA['geomdata'] = {}
+    }
 	if (years.length != 1){
 		//$('#form-timeperiod-statistic').css('display', 'block')
 		var styleFunct = LF_MAP_APP.defaultStyleFunction;
-		// window.DATA['etdata'] = {}
-		// window.DATA['geomdata'] = {}
 	} else{
 		//New map layer is set inside ajax call (async issue)
 		ajax_update_etdata_and_map(auto_set_region=false);
@@ -187,7 +189,7 @@ function change_inTRes(resolution){
     }
 
 
-    if ($('#years').val().length != 1) {
+    if ($('#years').val().length == 1) {
         ajax_update_etdata_and_map(auto_set_region = false);
     }
     // Update the map layer

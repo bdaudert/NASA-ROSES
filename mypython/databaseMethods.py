@@ -318,8 +318,6 @@ class postgis_Util(object):
                     Geom.year == geom_year,
                     Geom.feature_index.in_(feature_index_list)
                 )
-
-
             # get the relevant geom_ids
             geom_id_list = []
             feat_idx_list = []
@@ -346,10 +344,10 @@ class postgis_Util(object):
 
             # Complile results as list of dicts
             for q in data_query.all():
+                geom_id = q.geom_id
+                idx = geom_id_list.index(geom_id)
                 feat_idx, properties = self.set_data_json(q, geom_id_list, feat_idx_list)
-                print(len(etdata[year]['features']))
-                etdata[year]['features'][feat_idx - 1]['properties'].update(properties)
-                # etdata[year]['features'][f_idx]['properties'] = properties
+                etdata[year]['features'][idx]['properties'].update(properties)
         self.end_session()
         # return etdata, geomdata
         return json.dumps(etdata, ensure_ascii=False), json.dumps(geomdata, ensure_ascii=False)
