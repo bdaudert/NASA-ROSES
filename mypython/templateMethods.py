@@ -203,9 +203,10 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
     if  tv['variables']['region'] in ['ee_map']:
         return tv
 
-    feat_index_list = []
+    feat_index_list = ['all']
     if 'feature_indices' in tv['variables'].keys() and tv['variables']['feature_indices']:
         feat_index_list = tv['variables']['feature_indices'].replace(', ', ',').split(',')
+        feat_index_list = [int(f_idx) for f_idx in feat_index_list]
 
     if db_type == 'DATASTORE':
         tv = set_etdata_from_datastore(tv, feat_index_list)

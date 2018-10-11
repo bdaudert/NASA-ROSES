@@ -132,20 +132,10 @@ function ajax_set_featdata_on_feature_click(feat, layer){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            //FIX ME, not sure why featsdata do not need to be json parsed
-            if (tv_var.is_in(['featsdata', 'featsgeomdata'])) {
-                window.DATA[tv_var] = r[tv_var];
-            }
-            else{
-                window.DATA[tv_var] = $.parseJSON(r[tv_var]);
-            }
+            window.DATA[tv_var] = JSON.parse(r[tv_var]);
         }
-        year = $('#years').val()[0];
-        feat_idx_list = get_feat_index_from_featdata(year);
-        if (feat_idx_list.length != 0){
-            html += MAP_APP.set_dataModalHeader();
-            html += MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
-        }
+        html += MAP_APP.set_dataModalHeader();
+        html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']), JSON.parse(r['featsgeomdata']));
         layer.bindPopup(html).openPopup();
         end_progressbar();
     }) // successfully got JSON response
@@ -190,12 +180,7 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
             //FIX ME, not sure why featsdata do not need to be json parsed
-            if (tv_var.is_in(['featsdata', 'featsgeomdata'])) {
-                window.DATA[tv_var] = r[tv_var];
-            }
-            else{
-                window.DATA[tv_var] = $.parseJSON(r[tv_var]);
-            }
+            window.DATA[tv_var] = JSON.parse(r[tv_var]);
         }
         year = $('#years').val()[0];
         feat_idx_list = $('#feature_indices').val().replace(', ', ',').split(',');

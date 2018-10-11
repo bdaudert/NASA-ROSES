@@ -79,6 +79,8 @@ function change_inYears(years){
 	if (years.length != 1){
 		//$('#form-timeperiod-statistic').css('display', 'block')
 		var styleFunct = LF_MAP_APP.defaultStyleFunction;
+		// window.DATA['etdata'] = {}
+		// window.DATA['geomdata'] = {}
 	} else{
 		//New map layer is set inside ajax call (async issue)
 		ajax_update_etdata_and_map(auto_set_region=false);
@@ -133,7 +135,7 @@ function change_inVariable(variable){
 function change_inTRes(resolution){
     var tps, tp, tp_name, option, key, key_list = [];
 
-    //Clear the featuere indices
+    //Clear the feature indices
 	$('#feature_indices').val('');
 	// Hide the popup window
 	window.map.closePopup();
@@ -183,8 +185,13 @@ function change_inTRes(resolution){
     if ($('#region').val() == 'ee_map'){
     	//Get the map from db
     }
+
+
+    if ($('#years').val().length != 1) {
+        ajax_update_etdata_and_map(auto_set_region = false);
+    }
     // Update the map layer
-    LF_MAP_APP.update_mapLayer();
+	LF_MAP_APP.update_mapLayer();
 }
 
 function change_inTimePeriod(time_period){

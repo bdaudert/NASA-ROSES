@@ -63,15 +63,16 @@
             js_statics = data;
         }
     });
-    window.DATA = {
-        etdata: {{ etdata|safe }},
-        geomdata: {{ geomdata|safe}}
-    }
-    /*
-    //Set etdata
-    google.charts.load('current', {'packages':['corechart', 'table', 'geomap']});
-    google.charts.setOnLoadCallback(initialize_map);
-    */
+    window.DATA = {};
+    {% if etdata %}
+        window.DATA['etdata'] = {{ etdata|safe }};
+        window.DATA['geomdata'] = {{ geomdata|safe}};
+    {% endif %}
+    {% if featsdata %}
+       window.DATA['featsdata'] = {{ featsdata|safe }};
+       window.DATA['featsgeomdata'] = {{ featsgeomdata|safe}}; 
+    {% endif %}
+
     //Set up leaflet map
     $( document ).ready(function() {
         initialize_lf_map();

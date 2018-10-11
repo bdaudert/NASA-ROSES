@@ -198,11 +198,10 @@ MAP_APP = {
         */
         var f_idx, featdata = {}, y_idx, val_dict_list = [],
             years = $('#years').val(), yr = years[0], year;
-
-        for (f_idx = 0; f_idx < featsdata[yr]['features'].length; f_idx++) {
+        for (f_idx = 0; f_idx < featsdata[String(yr)]['features'].length; f_idx++) {
             featdata = {}
             for (y_idx = 0; y_idx < years.length; y_idx++) {
-                year = years[y_idx];
+                year = String(years[y_idx]);
                 featdata[year] = featsdata[year]['features'][f_idx];
             }
             val_dict_list.push(MAP_APP.set_multiYear_singleFeat_valDict(featdata));
@@ -510,7 +509,7 @@ LF_MAP_APP = {
         if (years.length != 1) {
             //Multiple years, we need to query the database to get data for each year
             //Sets window.popup_html global var
-            $('#feat_indices').val(String(feat.properties['feature_index']));
+            $('#feature_indices').val(String(feat.properties['feature_index']));
             ajax_set_featdata_on_feature_click(feat, layer);
         }else {
             var gf_data = MAP_APP.set_feature_data(years, feats);
@@ -557,6 +556,8 @@ LF_MAP_APP = {
         window.geojson = geoJsonStructure._layers;
 
         window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 12}).addTo(window.map);
+        //window.geojson_map_layer = geoJsonStructure;
+
         window.geojson_map_layer = L.geoJson(
             {
                 "type": "FeatureCollection",
@@ -566,10 +567,11 @@ LF_MAP_APP = {
             style: styleFunct,
             onEachFeature: LF_MAP_APP.onEachFeature
         });
+
         LF_MAP_APP.filter_mapLayer();
 
         window.main_map_layer.addLayer(window.geojson_map_layer);
-        window.map.fitBounds(window.geojson_map_layer.getBounds());
+        //window.map.fitBounds(window.geojson_map_layer.getBounds());
 
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
     },
@@ -686,7 +688,7 @@ var initialize_lf_map = function() {
                 }catch(e){
                     return;
                 }
-                feat_indices.push(feat_idx);
+                feat_indices.push(String(feat_idx));
                 layers.push(layer);
             }
         });

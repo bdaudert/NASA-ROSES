@@ -177,8 +177,6 @@
         ],
         "get_feat_data": [
             "featsdata",
-            "geomdata",
-            "etdata",
             "featsgeomdata"
         ],
         "get_map": [
@@ -378,6 +376,7 @@
             "seasonal": [ "pr_seasonal", "net_seasonal"]
         }
     },
+    "regions_changing_by_year": [],
     "db_id_region": {
         "Custom": 0,
         "US_states_west_500k": 1,

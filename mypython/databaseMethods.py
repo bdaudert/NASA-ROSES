@@ -232,8 +232,6 @@ class postgis_Util(object):
                 json: g_data quuery result converted to geojson feature
         '''
         g_data = {'type': 'Feature', 'properties': self.object_as_dict(q)}
-        # Get the feature index and set it as a property
-        geom_name = g_data['properties']['name']  # geom_ame = region + '_' + feat_idx
         # Convert postgis geometry to geojson geometry
         postgis_geom = g_data['properties']['coords']
         del g_data['properties']['coords']
@@ -244,10 +242,11 @@ class postgis_Util(object):
         g_data = json.loads(json.dumps(g_data))
         return g_data
 
-    def set_data_json(self, q, geom_id_list):
+    def set_data_json(self, q, geom_id_list, feat_idx_list):
         props = self.object_as_dict(q)
         geom_id = props['geom_id']
-        feat_idx = geom_id_list.index(geom_id)
+        idx = geom_id_list.index(geom_id)
+        feat_idx = feat_idx_list[idx]
         data_val = props['data_value']
         t_res = props['temporal_resolution']
         # Convert datetime time stamp to datestring
@@ -296,34 +295,39 @@ class postgis_Util(object):
                 'type': 'FeatureCollection',
                 'features': []
             }
-            print('LOOOOK')
-            print(feature_index_list)
             # Set the dates list from temporal_resolution
             dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
             # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
             # Query geometry table
+
+            # FIX ME: if regionss vary by year
+            if self.tv['region'] in config.statics['regions_changing_by_year']:
+                geom_year = int(year)
+            else:
+                geom_year = 9999
             if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
                 geom_query = self.session.query(Geom).filter(
                     Geom.user_id == 0,
-                    Geom.region_id == rgn_id
+                    Geom.region_id == rgn_id,
+                    Geom.year == geom_year
                 )
             else:
-                geom_names = [region + '_' + str(f_idx) for f_idx in feature_index_list]
-                geom_query = self.session.query(Geom.coords.ST_AsGeoJSON()).filter(
+                geom_query = self.session.query(Geom).filter(
                     Geom.user_id == 0,
                     Geom.region_id == rgn_id,
-                    Geom.name.in_(geom_names)
+                    Geom.year == geom_year,
+                    Geom.feature_index.in_(feature_index_list)
                 )
 
 
             # get the relevant geom_ids
             geom_id_list = []
-            feature_index_list = []
+            feat_idx_list = []
             feat_data = []
             for q in geom_query.all():
-                feature_index_list.append(q.feature_index)
                 geom_id = q.id
                 geom_id_list.append(geom_id)
+                feat_idx_list.append(q.feature_index)
                 g_data = self.set_geom_json(q)
                 feat_data.append(g_data)
                 # Add the feature to etdata
@@ -342,8 +346,9 @@ class postgis_Util(object):
 
             # Complile results as list of dicts
             for q in data_query.all():
-                feat_idx, properties = self.set_data_json(q, geom_id_list)
-                etdata[year]['features'][feat_idx]['properties'].update(properties)
+                feat_idx, properties = self.set_data_json(q, geom_id_list, feat_idx_list)
+                print(len(etdata[year]['features']))
+                etdata[year]['features'][feat_idx - 1]['properties'].update(properties)
                 # etdata[year]['features'][f_idx]['properties'] = properties
         self.end_session()
         # return etdata, geomdata
