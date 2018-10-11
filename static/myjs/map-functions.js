@@ -367,30 +367,6 @@ MAP_APP = {
         val_dict_list = [val_dict].concat(val_dict_list);
         return val_dict_list;
     },
-    set_feature_data: function(years, feats){
-        /*
-        Given feats from dragbox event, we extract the relevant geomdata and featsdata from
-        the template variables
-        */
-
-        var f_idx, y_idx, year, feat_idx,
-            featsdata = {}, featsgeomdata = {}, gf_data;
-        for (y_idx = 0; y_idx < years.length; y_idx++) {
-            year = years[y_idx];
-            featsdata[year] = {type: 'FeatureCollection', features: []};
-            featsgeomdata[year] = {type: 'FeatureCollection', features: []};
-            for (f_idx = 0; f_idx < feats.length; f_idx++) {
-                feat_idx = feats[f_idx].properties['feature_index'];
-                featsdata[year]['features'].push(window.DATA.etdata[year]['features'][feat_idx]);
-                featsgeomdata[year]['features'].push(window.DATA.geomdata[year]['features'][feat_idx]);
-            }
-        }
-        gf_data = {
-            'featsgeomdata': featsgeomdata,
-            'featsdata': featsdata
-        }
-        return gf_data;
-    },
     set_popup_data: function(featsdata, featsgeomdata){
         var y_idx, year, years, html, val_dict_list, row_names, col_names,
             years = $('#years').val();
@@ -507,20 +483,9 @@ LF_MAP_APP = {
             feats = [feat];
         // Update the feature index template variable
         $('#feature_indices').val(String(feat.properties['feature_index']));
+
         // Get the html content for the popup
-        if (years.length != 1) {
-            //Multiple years, we need to query the database to get data for each year
-            //Sets window.popup_html global var
-            ajax_set_featdata_on_feature_click(feat, layer);
-        }else {
-            // Single Year
-            var gf_data = MAP_APP.set_feature_data(years, feats);
-            window.popup_html = MAP_APP.set_dataModalHeader();
-            // Only show data if single year
-            // Else only show header on click
-            window.popup_html += MAP_APP.set_popup_data(gf_data['featsdata'], gf_data['featsgeomdata']);
-            layer.bindPopup(window.popup_html).openPopup();
-        }
+        ajax_set_featdata_on_feature_click(feat, layer);
     },
     onEachFeature: function(feature, layer) {
         layer.on({

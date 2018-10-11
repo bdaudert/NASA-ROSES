@@ -163,7 +163,7 @@ class date_Util(object):
         if temporal_resolution == 'seasonal':
             data_vars = ['seasonal']
         if temporal_resolution == 'monthly':
-            months = tv['months']
+            months = tv['time_period']
             if len(months) == 1 and months[0] == 'all':
                 months = deepcopy(config.statics['all_months'])
                 del months['all']
@@ -261,7 +261,7 @@ class postgis_Util(object):
             data_name = var + '_' + t_res
         elif t_res == 'monthly':
             month = date[5:7]
-            data_name = var + '_' + month
+            data_name = var + '_m' + month
         properties = {'feature_index': feat_idx, 'geom_id': geom_id, 'geom_name': props['geom_name'],
                       'geom_area': props['geom_area'], 'temporal_resolution': t_res, 'variable': var,
                       data_name: data_value}

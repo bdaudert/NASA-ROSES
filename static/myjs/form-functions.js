@@ -190,6 +190,7 @@ function change_inTRes(resolution){
 
 
     if ($('#years').val().length == 1) {
+    	if ($('#time_period').val().length == 1 || $('#time_period_statistic').val() != 'none')
         ajax_update_etdata_and_map(auto_set_region = false);
     }
     // Update the map layer
