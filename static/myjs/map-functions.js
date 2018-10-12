@@ -29,6 +29,7 @@ MAP_APP = {
         return 'default';
     },
     set_geojson: function() {
+        var geojson;
         if ($('#region').val().is_in(statics.regions_changing_by_year)){
             if ($('#years').val().length == 1) {
                 geojson = window.DATA.geomdata[$('#years').val()[0]];

@@ -62,7 +62,7 @@ function change_inYear(year){
 	// We ned to recompute the template vars
 	//geodata, etdata for choropleth map
 	ajax_update_etdata_and_map(auto_set_region=false);
-	var geojsonLayer = DATA.geomdata[$('#years').val()[0]],
+	var geojsonLayer = MAP_APP.set_geojson(),
 		styleFunct = LF_MAP_APP.chorostyleFunction;
 	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
 }
@@ -74,11 +74,10 @@ function change_inYears(years){
 	window.map.closePopup();
 	// Delete old layer
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
-	var geojsonLayer = DATA.geomdata[$('#years').val()[0]];
+	var geojsonLayer = MAP_APP.set_geojson();
 	// Delete old data
 	if (window.DATA['etdata'] ) {
-        window.DATA['etdata'] = {}
-        window.DATA['geomdata'] = {}
+        window.DATA['etdata'] = {};
     }
 	if (years.length != 1){
 		//$('#form-timeperiod-statistic').css('display', 'block')
@@ -190,13 +189,6 @@ function change_inTRes(resolution){
 
     // Update the data and  map layer
     ajax_update_etdata_and_map(auto_set_region = false);
-
-    /*
-    // Update the map layer
-	var map_type = MAP_APP.determine_map_type(),
-            geojson = MAP_APP.set_geojson();
-	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
-	*/
 }
 
 function change_inTimePeriod(time_period){
