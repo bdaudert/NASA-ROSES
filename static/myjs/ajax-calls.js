@@ -138,7 +138,7 @@ function ajax_set_featdata_on_feature_click(feat, layer){
             window.DATA[tv_var] = JSON.parse(r[tv_var]);
         }
         html += MAP_APP.set_dataModalHeader();
-        html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']), JSON.parse(r['featsgeomdata']));
+        html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
         layer.bindPopup(html).openPopup();
         end_progressbar();
     }) // successfully got JSON response
@@ -190,7 +190,7 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         if (feat_idx_list.length != 0){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();
-            html += MAP_APP.set_popup_data(r['featsdata'], r['featsgeomdata']);
+            html += MAP_APP.set_popup_data(r['featsdata']);
             selectedFeatures[0].bindPopup(html).openPopup();
         }
         end_progressbar();

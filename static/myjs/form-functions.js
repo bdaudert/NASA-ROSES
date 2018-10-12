@@ -188,17 +188,15 @@ function change_inTRes(resolution){
     	//Get the map from db
     }
 
-	/*
-    if ($('#years').val().length == 1) {
-    	if ($('#time_period').val().length == 1 || $('#time_period_statistic').val() != 'none')
-        ajax_update_etdata_and_map(auto_set_region = false);
-    }
-    */
-	ajax_update_etdata_and_map(auto_set_region = false);
+    // Update the data and  map layer
+    ajax_update_etdata_and_map(auto_set_region = false);
+
+    /*
     // Update the map layer
 	var map_type = MAP_APP.determine_map_type(),
             geojson = MAP_APP.set_geojson();
 	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
+	*/
 }
 
 function change_inTimePeriod(time_period){
@@ -227,13 +225,3 @@ function change_inTimePeriodStat(time_period_stat){
 	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
 }
 
-function get_feat_index_from_featdata(year) {
-    var f_idx_list = $('#feature_indices').val().replace(', ', ',').split(','),
-        indices = [];
-    $.each(window.DATA.featsgeomdata[year]['features'], function(idx, feat_data){
-        if (f_idx_list.includes(String(feat_data['properties']['feature_index']))) {
-            indices.push(String(idx));
-        }
-    });
-    return indices;
-}

@@ -378,13 +378,13 @@ MAP_APP = {
         val_dict_list = [val_dict].concat(val_dict_list);
         return val_dict_list;
     },
-    set_popup_data: function(featsdata, featsgeomdata){
+    set_popup_data: function(featsdata){
         var y_idx, year, years, html, val_dict_list, row_names, col_names,
-            years = $('#years').val();
-
+            years = $('#years').val(),
+            geojson = MAP_APP.set_geojson();
         //Populate the data modal
         val_dict_list = MAP_APP.set_dataModalVals(featsdata);
-        row_names = MAP_APP.set_dataModalRowNames(featsgeomdata[years[0]]);
+        row_names = MAP_APP.set_dataModalRowNames(geojson);
         col_names = MAP_APP.set_dataModalColNames();
         html = MAP_APP.set_dataModalTable(val_dict_list, row_names, col_names);
         return html;
@@ -584,7 +584,6 @@ LF_MAP_APP = {
 
         // If choropleth, set the bins, colors and draw the colorbar
         if (map_type == 'Choropleth') {
-            //geojson = DATA.geomdata[$('#years').val()[0]];
             styleFunct = LF_MAP_APP.choroStyleFunction;
             //Set the colors for Choropleth map, draw colorbar
             var year = $('#years').val()[0],
