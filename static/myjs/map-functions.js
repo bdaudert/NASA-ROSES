@@ -312,13 +312,15 @@ MAP_APP = {
         }
         return html;
     },
-    set_dataModalRowNames: function(geomdata) {
+    set_dataModalRowNames: function(featsdata) {
         /*
         Each feature is a row, summary stats over feats are listed in the bottom row
         */
-        var j, row_names = ['<b>Area average</b>'];
-        for (j = 0; j < geomdata['features'].length; j++) {
-            row_names.push(geomdata['features'][j]['properties']['name']);
+        var j, row_names = ['<b>Area average</b>'], name, id;
+        for (j = 0; j < featsdata['features'].length; j++) {
+            name = featsdata['features'][j]['properties']['geom_name'];
+            id = featsdata['features'][j]['properties']['geom_id'];
+            row_names.push(name  + ', ID: ' + String(id));
         }
         return row_names;
     },
@@ -381,11 +383,10 @@ MAP_APP = {
     },
     set_popup_data: function(featsdata){
         var y_idx, year, years, html, val_dict_list, row_names, col_names,
-            years = $('#years').val(),
-            geojson = MAP_APP.set_geojson();
+            years = $('#years').val();
         //Populate the data modal
         val_dict_list = MAP_APP.set_dataModalVals(featsdata);
-        row_names = MAP_APP.set_dataModalRowNames(geojson);
+        row_names = MAP_APP.set_dataModalRowNames(featsdata[String(years[0])]);
         col_names = MAP_APP.set_dataModalColNames();
         html = MAP_APP.set_dataModalTable(val_dict_list, row_names, col_names);
         return html;
