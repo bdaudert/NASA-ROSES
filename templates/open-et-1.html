@@ -22,6 +22,17 @@
     {% include 'modal_general_error.html'%}
     {% include 'modal_data.html'%}
     {% include 'modal_layer_info.html'%}
+
+    {% if error %}
+        <script>
+            $('#general_errorModal').modal('show');
+        </script>
+    {% else %}
+        <script>
+            $('#general_errorModal').modal('hide');
+        </script> 
+    {% endif %}
+
 </div>
 
 <div id="footer-container">

@@ -205,6 +205,10 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
         'map_options': {},
         'ts_options': {}
     }
+    if method == 'ERROR':
+        tv['form_options'] = set_form_options(tv['variables'])
+        return tv
+
     # Overrode default variables if not GET
     if method == 'POST' or method == 'shareLink':
         for var_key, dflt in tv['variables'].items():
