@@ -139,7 +139,8 @@ function ajax_set_featdata_on_feature_click(feat, layer){
         }
         html += MAP_APP.set_dataModalHeader();
         html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
-        layer.bindPopup(html).openPopup();
+        var popup = L.popup({ closeOnClick: false }).setContent(html);
+        layer.bindPopup(popup).openPopup();
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {

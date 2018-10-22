@@ -530,12 +530,12 @@ LF_MAP_APP = {
         geoJsonStructure = L.geoJson(geojson, {
             style: styleFunct,
             onEachFeature: LF_MAP_APP.onEachFeature
-        })
+        });
 
         window.geojson = geoJsonStructure._layers;
 
-        window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 12}).addTo(window.map);
-        //window.geojson_map_layer = geoJsonStructure;
+        // Disable clustering for the time being
+        //window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 12}).addTo(window.map);
 
         window.geojson_map_layer = L.geoJson(
             {
@@ -545,11 +545,11 @@ LF_MAP_APP = {
             {
             style: styleFunct,
             onEachFeature: LF_MAP_APP.onEachFeature
-        });
+        }).addTo(map);;
 
         LF_MAP_APP.filter_mapLayer();
 
-        window.main_map_layer.addLayer(window.geojson_map_layer);
+        //window.main_map_layer.addLayer(window.geojson_map_layer);
         //window.map.fitBounds(window.geojson_map_layer.getBounds());
 
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
@@ -611,10 +611,10 @@ LF_MAP_APP = {
         }
     },
     on_zoom_filter_data: function(){
-        window.main_map_layer.clearLayers();
+        //window.main_map_layer.clearLayers();
         window.geojson_map_layer._layers = {};
         LF_MAP_APP.filter_mapLayer();
-        window.main_map_layer.addLayer(window.geojson_map_layer);
+        //window.main_map_layer.addLayer(window.geojson_map_layer);
     },
     set_map_zoom_pan_listener: function(auto_set_region=false) {
         /*
