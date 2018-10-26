@@ -148,9 +148,9 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
     '''
     tv = deepcopy(template_variables)
     DU = databaseMethods.postgis_Util(tv['variables'], db_engine)
-    if feat_index_list:
+    tv['featsdata'], tv['featsgeomdata'] = {}, {}
+    if len(feat_index_list) >= 1 and feat_index_list[0] != 'all':
         tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
-
     map_type = determine_map_type(template_variables['variables'])
 
     if map_type == "Choropleth" or len(tv['variables']['years']) == 1:
@@ -218,6 +218,7 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
     if 'feature_indices' in tv['variables'].keys() and tv['variables']['feature_indices']:
         feat_index_list = tv['variables']['feature_indices'].replace(', ', ',').split(',')
         feat_index_list = [int(f_idx) for f_idx in feat_index_list]
+
     if db_type == 'DATASTORE':
         tv = set_etdata_from_datastore(tv, feat_index_list)
     elif db_type == 'cloudSQL':
