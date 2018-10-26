@@ -16,9 +16,10 @@ import sqlalchemy as db
 from sqlalchemy.orm import session as session_module
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import inspect
-from shapely.geometry import asShape
+from sqlalchemy.orm import relationship
+# from shapely.geometry import asShape
 from shapely.geometry import mapping
-from shapely.geometry.multipolygon import MultiPolygon
+# from shapely.geometry.multipolygon import MultiPolygon
 from geoalchemy2.shape import from_shape, to_shape
 from geoalchemy2.types import Geometry
 import geojson
@@ -31,6 +32,14 @@ Base = declarative_base()
 #######################################
 # OpenET database tables
 #######################################
+
+# For many-to-many relationships (user-- geom)
+class Association(Base):
+    __tablename__ = 'association'
+    user = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    geom= db.Column(db.Integer, db.ForeignKey('geom.id'), primary_key=True)
+
+
 class User(Base):
     __tablename__ = 'user'
     id = db.Column(db.Integer(), primary_key=True)
@@ -44,6 +53,8 @@ class User(Base):
     active = db.Column(db.String())
     role = db.Column(db.String())
 
+    geometries = relationship("Geom", secondary='association', back_populates="users")
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -53,6 +64,7 @@ class Region(Base):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String())
 
+    geometries = relationship("Geom", back_populates="region")
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -63,6 +75,9 @@ class Dataset(Base):
     name = db.Column(db.String())
     ee_collection = db.Column(db.String())
 
+    parameters = relationship("Parameter", back_populates="dataset")
+    data = relationship("Data", back_populates="dataset")
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -72,25 +87,28 @@ class Variable(Base):
     name = db.Column(db.String())
     units = db.Column(db.String())
 
+    data = relationship("Data", back_populates="variable")
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
 class Geom(Base):
     __tablename__ = 'geom'
     id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer())
+    user_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)
     year = db.Column(db.Integer())
-    region_id = db.Column(db.Integer())
+    region_id = db.Column(db.Integer(), db.ForeignKey('region.id'), nullable=False)
     feature_index = db.Column(db.Integer())
     name = db.Column(db.String())
     type = db.Column(db.String())
     area = db.Column(db.Float(precision=4))
     coords = db.Column(Geometry(geometry_type='MULTIPOLYGON'))
-    '''
-    FIX ME: I don't know how to implement that in dbSCHEMA or pgADMIN
-    meta = relationship('GeomMetadata', backref='geom', lazy=True)
-    data = relationship('Data', backref='data', lazy=True)
-    '''
+
+    region = relationship("Region", back_populates="geometries")
+    users = relationship("User", secondary='association', back_populates="geometries")
+    meta_data = relationship("GeomMetadata", back_populates="geom")
+    data = relationship("Data", back_populates="geom")
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -101,6 +119,8 @@ class GeomMetadata(Base):
     name = db.Column(db.String())
     properties = db.Column(db.String())
 
+    geom = relationship("Geom", back_populates="meta_data")
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -110,6 +130,8 @@ class Parameter(Base):
     dataset_id = db.Column(db.Integer(), db.ForeignKey('dataset.id'), nullable=False)
     name = db.Column(db.String())
     properties =  db.Column(db.String())
+
+    dataset = relationship("Dataset", back_populates="parameters")
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -126,6 +148,10 @@ class Data(Base):
     temporal_resolution = db.Column(db.String())
     data_date = db.Column(db.DateTime())
     data_value = db.Column(db.Float(precision=4))
+
+    geom = relationship("Geom", back_populates="data")
+    dataset = relationship("Dataset", back_populates="data")
+    variable = relationship("Variable", back_populates="data")
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
