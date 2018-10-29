@@ -60,27 +60,27 @@ def set_dates():
     }
     return dates
 
-def set_map_type(tv):
-    if (tv['variables']['region'] == 'ee_map'):
+def determine_map_type(tv_vars):
+    if (tv_vars['region'] == 'ee_map'):
         return 'ee_map'
 
     # Multi year
-    if len(tv['variables']['years']) != 1:
+    if len(tv_vars['years']) != 1:
         return 'default'
 
     # Single Year
-    if tv['variables']['temporal_resolution'] == 'annual':
+    if tv_vars['temporal_resolution'] in ['annual', 'seasonal']:
         return 'Choropleth'
 
     # Sub Annual
-    if  len(tv['variables']['time_period']) == 1:
+    if  len(tv_vars['time_period']) == 1:
         return 'Choropleth'
 
     # Multiple time periods
-    if tv['variables']['time_period_statistic'] != 'none':
+    if tv_vars['time_period_statistic'] != 'none':
         return 'Choropleth'
-
     return 'default'
+
 
 def set_etdata_from_datastore(template_variables, feat_index_list):
     '''
@@ -138,27 +138,6 @@ def set_etdata_from_cloudSQL(template_variables, feat_index_list):
     tv = deepcopy(template_variables)
     return tv
 
-def determine_map_type(tv_vars):
-    '''
-    :param tv_vars: template variables tv['variables']
-    :return: string map_type: Choropleth or default
-    '''
-    if len(tv_vars['years']) != 1:
-        return 'default'
-
-    # Single Year is chorpleth if temp res is annual or seasonal
-    # or monthly ith a statistic
-    if tv_vars['temporal_resolution'] in ['annual', 'seasonal']:
-     return 'Choropleth'
-
-    # Sub annual
-    if len(tv_vars['time_period']) == 1:
-        return 'Choropleth';
-
-    # Multiple time periods
-    if tv_vars['time_period_statistic'] != 'none':
-        return 'Choropleth';
-    return 'default'
 
 def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
     '''
@@ -169,9 +148,9 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
     '''
     tv = deepcopy(template_variables)
     DU = databaseMethods.postgis_Util(tv['variables'], db_engine)
-    if feat_index_list:
+    tv['featsdata'], tv['featsgeomdata'] = {}, {}
+    if len(feat_index_list) >= 1 and feat_index_list[0] != 'all':
         tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
-
     map_type = determine_map_type(template_variables['variables'])
 
     if map_type == "Choropleth" or len(tv['variables']['years']) == 1:
@@ -205,6 +184,10 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
         'map_options': {},
         'ts_options': {}
     }
+    if method == 'ERROR':
+        tv['form_options'] = set_form_options(tv['variables'])
+        return tv
+
     # Overrode default variables if not GET
     if method == 'POST' or method == 'shareLink':
         for var_key, dflt in tv['variables'].items():
@@ -224,7 +207,7 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
     tv['form_options'] = set_form_options(tv['variables'])
 
     # Set the map type
-    tv['variables']['map_type'] = set_map_type(tv)
+    tv['variables']['map_type'] = determine_map_type(tv['variables'])
 
     if app_name == 'dataBaseTasks':
         return tv

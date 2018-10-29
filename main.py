@@ -147,9 +147,12 @@ def page_not_found(e):
 def application_error(e):
     """Return a custom 500 error."""
     logging.exception('A 500 error occurred during a request.')
-    return 'Sorry, unexpected error: {}'.format(e), 500
-
-
+    # return 'Sorry, unexpected error: {}'.format(e), 500
+    # return flask.redirect(flask.url_for('home'))
+    tv = {}
+    tv = runApp({}, 'main', 'ERROR', db_type='TEST_SERVER')
+    tv['error'] = str(e)
+    return flask.render_template('open-et-1.html', **tv)
 
 if __name__ == '__main__':
     # This is used when running locally. Gunicorn is used to run the

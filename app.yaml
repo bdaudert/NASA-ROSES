@@ -3,7 +3,6 @@ runtime: python37
 handlers:
 - url: /static/
   static_dir: static
-  application_readable: True
 - url: /media/
   static_dir: media
 - url: /oauth2callback

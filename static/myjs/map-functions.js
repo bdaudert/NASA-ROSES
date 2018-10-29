@@ -312,13 +312,15 @@ MAP_APP = {
         }
         return html;
     },
-    set_dataModalRowNames: function(geomdata) {
+    set_dataModalRowNames: function(featsdata) {
         /*
         Each feature is a row, summary stats over feats are listed in the bottom row
         */
-        var j, row_names = ['<b>Area average</b>'];
-        for (j = 0; j < geomdata['features'].length; j++) {
-            row_names.push(geomdata['features'][j]['properties']['name']);
+        var j, row_names = ['<b>Area average</b>'], name, id;
+        for (j = 0; j < featsdata['features'].length; j++) {
+            name = featsdata['features'][j]['properties']['geom_name'];
+            id = featsdata['features'][j]['properties']['geom_id'];
+            row_names.push(name  + ', ID: ' + String(id));
         }
         return row_names;
     },
@@ -381,15 +383,39 @@ MAP_APP = {
     },
     set_popup_data: function(featsdata){
         var y_idx, year, years, html, val_dict_list, row_names, col_names,
-            years = $('#years').val(),
-            geojson = MAP_APP.set_geojson();
+            years = $('#years').val();
         //Populate the data modal
         val_dict_list = MAP_APP.set_dataModalVals(featsdata);
-        row_names = MAP_APP.set_dataModalRowNames(geojson);
+        row_names = MAP_APP.set_dataModalRowNames(featsdata[String(years[0])]);
         col_names = MAP_APP.set_dataModalColNames();
         html = MAP_APP.set_dataModalTable(val_dict_list, row_names, col_names);
         return html;
     },
+    get_featuredata_from_etdata: function(feature_index, year) {
+        /*
+        Finds the feature in global var etdata and
+        sets the featsdata feature and the geomdata feature for this feature
+        Used  when user clicks on single feature on Choropleth map
+         */
+        var year_data = window.DATA.etdata[year],
+            feat_geom_data = {'featsdata_feature': {}, 'featsgeomdata_feature': {}}, index=null;
+        $.each(year_data.features, function (idx, feat_data) {
+            if (feat_data.properties.feature_index == parseInt(feature_index)){
+                index = idx;
+                return;
+            }
+        });
+        if (!index){
+            return feat_geom_data;
+        }
+        feat_geom_data['featsdata_features'] = window.DATA.etdata[year]['features'][index]
+        if ($('#region').val().is_in(statics.regions_changing_by_year)) {
+            feat_geom_data['featsgeomdata_features'] = window.DATA.geomdata[year]['features'][index];
+        }else{
+            feat_geom_data['featsgeomdata_features'] = window.DATA.geomdata['9999']['features'][index];
+        }
+        return feat_geom_data;
+    }
 }
 
 var LF_MAP_APP = LF_MAP_APP || {};
@@ -492,12 +518,38 @@ LF_MAP_APP = {
         window.map.closePopup();
 
         var years = $('#years').val(),
-            feats = [feat];
+            feats = [feat], feat_index = feat.properties['feature_index'],
+            map_type = MAP_APP.determine_map_type();
         // Update the feature index template variable
-        $('#feature_indices').val(String(feat.properties['feature_index']));
+        $('#feature_indices').val(String(feat_index));
 
         // Get the html content for the popup
-        ajax_set_featdata_on_feature_click(feat, layer);
+        if (years.length == 1 && map_type == 'Choropleth'){
+            var year = years[0], html='', fg_data;
+            if (window.DATA.hasOwnProperty('etdata') && window.DATA['etdata'].hasOwnProperty(year)){
+                // Set the feature data from the global vars etdata and geomdata
+                fg_data = MAP_APP.get_featuredata_from_etdata(feat_index, year);
+                window.DATA.featsdata = {}
+                window.DATA.featsgeomdata = {}
+                window.DATA.featsdata[year] = {
+                    'type': 'FeatureCollection',
+                    'features': [fg_data['featsdata_features']]
+                }
+                window.DATA.featsgeomdata[year] = {
+                    'type': 'FeatureCollection',
+                    'features': [fg_data['featsgeomdata_features']]
+                }
+                html += MAP_APP.set_dataModalHeader();
+                html += MAP_APP.set_popup_data(window.DATA.featsdata);
+                layer.bindPopup(html).openPopup();
+            }else{
+                // We need to query the database for the feature data
+                ajax_set_featdata_on_feature_click(feat, layer);
+            }
+        }else {
+            // We need to query the database for the feature data
+            ajax_set_featdata_on_feature_click(feat, layer);
+        }
     },
     onEachFeature: function(feature, layer) {
         layer.on({
