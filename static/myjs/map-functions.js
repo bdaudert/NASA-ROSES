@@ -490,7 +490,7 @@ LF_MAP_APP = {
     },
     resetHighlight: function(e) {
         /*Resets featue on mouseout*/
-        window.geojson_map_layer.resetStyle(e.target);
+        window.main_map_layer.resetStyle(e.target);
     },
     delay: function(timeout, id, callback){
         /*
@@ -525,7 +525,7 @@ LF_MAP_APP = {
 
         // Get the html content for the popup
         if (years.length == 1 && map_type == 'Choropleth'){
-            var year = years[0], html='', fg_data;
+            var year = years[0], html='', popup, fg_data;
             if (window.DATA.hasOwnProperty('etdata') && window.DATA['etdata'].hasOwnProperty(year)){
                 // Set the feature data from the global vars etdata and geomdata
                 fg_data = MAP_APP.get_featuredata_from_etdata(feat_index, year);
@@ -541,7 +541,8 @@ LF_MAP_APP = {
                 }
                 html += MAP_APP.set_dataModalHeader();
                 html += MAP_APP.set_popup_data(window.DATA.featsdata);
-                layer.bindPopup(html).openPopup();
+                popup = L.popup({ closeOnClick: false }).setContent(html);
+                layer.bindPopup(popup).openPopup();
             }else{
                 // We need to query the database for the feature data
                 ajax_set_featdata_on_feature_click(feat, layer);
@@ -589,7 +590,7 @@ LF_MAP_APP = {
         // Disable clustering for the time being
         //window.main_map_layer = L.markerClusterGroup({disableClusteringAtZoom: 12}).addTo(window.map);
 
-        window.geojson_map_layer = L.geoJson(
+        window.main_map_layer = L.geoJson(
             {
                 "type": "FeatureCollection",
                 "features": []
@@ -597,7 +598,7 @@ LF_MAP_APP = {
             {
             style: styleFunct,
             onEachFeature: LF_MAP_APP.onEachFeature
-        }).addTo(map);;
+        }).addTo(window.map);;
 
         LF_MAP_APP.filter_mapLayer();
 
@@ -610,7 +611,7 @@ LF_MAP_APP = {
         var bounds = window.map.getBounds();
         for (polygon in window.geojson) {
             if (bounds.overlaps(window.geojson[polygon].getBounds())) {
-                window.geojson_map_layer.addLayer(window.geojson[polygon]);
+                window.main_map_layer.addLayer(window.geojson[polygon]);
             }
         }
     },
@@ -664,7 +665,7 @@ LF_MAP_APP = {
     },
     on_zoom_filter_data: function(){
         //window.main_map_layer.clearLayers();
-        window.geojson_map_layer._layers = {};
+        window.main_map_layer._layers = {};
         LF_MAP_APP.filter_mapLayer();
         //window.main_map_layer.addLayer(window.geojson_map_layer);
     },

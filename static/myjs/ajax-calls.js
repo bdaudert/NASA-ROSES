@@ -191,8 +191,10 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         if (feat_idx_list.length != 0){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();
+            //html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
             html += MAP_APP.set_popup_data(r['featsdata']);
-            selectedFeatures[0].bindPopup(html).openPopup();
+            var popup = L.popup({ closeOnClick: false }).setContent(html);
+            selectedFeatures[0].bindPopup(popup).openPopup();
         }
         end_progressbar();
     }) // successfully got JSON response
