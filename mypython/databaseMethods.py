@@ -306,6 +306,7 @@ class postgis_Util(object):
         sets up geometry for year as geojson
         :return: geojson
         '''
+        self.start_session()
         geomdata = {
             'type': 'FeatureCollection',
             'features': []
@@ -334,6 +335,7 @@ class postgis_Util(object):
             geomdata['features'].append(g_data)
         del g_data
         data = {str(year): geomdata}
+        self.end_session()
         return json.dumps(data, ensure_ascii=False)
 
     def make_geom_query(self, user_id, rgn_id, year, feature_index_list):
