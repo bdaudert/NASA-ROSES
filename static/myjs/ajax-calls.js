@@ -104,7 +104,7 @@ function ajax_update_etdata_and_map(auto_set_region=false){
     });
 }
 
-function ajax_set_featdata_on_feature_click(feat, layer){
+function ajax_set_featdata_on_feature_click(latlng, layer){
     // Sets feature data on map click of single feature for
     // multiple years
     var tool_action = 'get_feat_data',
@@ -139,8 +139,10 @@ function ajax_set_featdata_on_feature_click(feat, layer){
         }
         html += MAP_APP.set_dataModalHeader();
         html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
-        var popup = L.popup({ closeOnClick: false }).setContent(html);
-        layer.bindPopup(popup).openPopup();
+        L.popup({ closeOnClick: false })
+            .setLatLng(latlng)
+            .setContent(html)
+            .openOn(layer);
         end_progressbar();
     }) // successfully got JSON response
     .fail(function(jqXHR) {

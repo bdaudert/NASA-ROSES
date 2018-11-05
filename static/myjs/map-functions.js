@@ -430,15 +430,18 @@ LF_MAP_APP = {
         });
         return layer;
     },
-    choroStyleFunction: function(idx) {
+    choroStyleFunction: function(feat_idx) {
         /*
         Sets the feature styles for Choropleth map
         */
         var year = $('#years').val()[0],
-            idx = parseInt(idx) - 1,
             v = $('#variable').val(),
             temporal_resolution = $('#temporal_resolution').val(),
             et_var = statics.stats_by_var_res[v][temporal_resolution][0], color = null, i;
+        var idx = 0;
+        DATA.etdata[year].features.forEach(function (e,i) {
+            if (e.properties.feature_index ==feat_idx){ idx = i;}
+        });
         var f_data = {'properties': DATA.etdata[year].features[idx]['properties']},
             val_list = MAP_APP.set_singleYear_singleFeat_valList(f_data);
         // Note: for Choro, val_list is always of length 1
@@ -455,6 +458,8 @@ LF_MAP_APP = {
     highlightFeature: function(e) {
         /*highlights feature on mouse over*/
         var style = {
+            fillColor: e.layer.options.fillColor,
+            fill: true,
             weight: 4,
             color: '#666',
             dashArray: '',
@@ -487,12 +492,14 @@ LF_MAP_APP = {
         e click event
         feat geosjon feature
         layer leaflet layer
-         */
+        */
         // Close all open popups
+        var latlng = [e.latlng.lat, e.latlng.lng];
         window.map.closePopup();
 
         var years = $('#years').val(),
-            feats = [feat], feat_index = feat.properties['feature_index'],
+            feats = [feat],
+            feat_index = e.layer.properties.feature_index;
             map_type = MAP_APP.determine_map_type();
         // Update the feature index template variable
         $('#feature_indices').val(String(feat_index));
@@ -515,15 +522,17 @@ LF_MAP_APP = {
                 }
                 html += MAP_APP.set_dataModalHeader();
                 html += MAP_APP.set_popup_data(window.DATA.featsdata);
-                popup = L.popup({ closeOnClick: false }).setContent(html);
-                layer.bindPopup(popup).openPopup();
+                L.popup({ closeOnClick: false })
+                    .setLatLng(latlng)
+                    .setContent(html)
+                    .openOn(window.map);
             }else{
                 // We need to query the database for the feature data
-                ajax_set_featdata_on_feature_click(feat, layer);
+                ajax_set_featdata_on_feature_click(latlng, window.map);
             }
         }else {
             // We need to query the database for the feature data
-            ajax_set_featdata_on_feature_click(feat, layer);
+            ajax_set_featdata_on_feature_click(latlng, window.map);
         }
     },
     get_etdata: function(id) {
@@ -536,7 +545,6 @@ LF_MAP_APP = {
         /*
         Set the map layer (geojson object) on the map
         */
-        console.log(window.DATA.etdata)
         window.main_map_layer = L.vectorGrid.slicer(geojson, {
             rendererFactory: L.canvas.tile,
             vectorTileLayerStyles: {
@@ -545,7 +553,7 @@ LF_MAP_APP = {
                 var idx = properties.feature_index;
                 return {
                     fillColor: LF_MAP_APP.get_color(idx, map_type),
-                    fillOpacity: 0.5,
+                    fillOpacity: 0.7,
                     stroke: true,
                     fill: true,
                     color: 'black',
@@ -560,15 +568,12 @@ LF_MAP_APP = {
               return feature.properties.id
           }
         })
-        .on('mouseover', function(e) {
-            LF_MAP_APP.highlightFeature(e)
-        })
-        .on('mouseout', function(e) {
-            LF_MAP_APP.resetHighlight(e)
+        .on ({
+            mouseover: LF_MAP_APP.highlightFeature,
+            mouseout: LF_MAP_APP.resetHighlight
         })
         .on('click', function(e) {
-            console.log(e)
-            LF_MAP_APP.set_popup_window_single_feat(e, feature, window.main_map_layer);
+            LF_MAP_APP.set_popup_window_single_feat(e, null, window.main_map_layer);
         })
         .addTo(window.map);
 
