@@ -210,6 +210,10 @@ label.form-group-header {
     background-color: #878787;
 }
 
+.leaflet-popup-content-wrapper {
+    overflow: scroll;
+}
+
 .popup_window {
      position: absolute;
     background-color: white;
