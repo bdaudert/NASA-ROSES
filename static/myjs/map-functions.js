@@ -546,9 +546,11 @@ LF_MAP_APP = {
         Set the map layer (geojson object) on the map
         */
         window.main_map_layer = L.vectorGrid.slicer(geojson, {
+        //window.main_map_layer = L.vectorGrid.protobuf('http://localhost:8889/data/vector/{z}/{x}/{y}.pbf?debug=true', {
             rendererFactory: L.canvas.tile,
             vectorTileLayerStyles: {
                 sliced: function(properties, zoom) {
+                //US_counties_west_500k_GEOM: function(properties, zoom) {
                
                 var idx = properties.feature_index;
                 return {
@@ -565,7 +567,7 @@ LF_MAP_APP = {
           indexMaxZoom: 5,       // max zoom in the initial tile index
           interactive: true,
           getFeatureId: function(feature) {
-              return feature.properties.id
+              return feature.properties.idx
           }
         })
         .on ({
