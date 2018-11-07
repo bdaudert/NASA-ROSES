@@ -210,7 +210,7 @@ MAP_APP = {
         */
         var f_idx, featdata = {}, y_idx, val_dict_list = [],
             years = $('#years').val(), yr = years[0], year;
-        for (f_idx = 0; f_idx < featsdata[String(yr)]['features'].length; f_idx++) {
+        for (f_idx = 0; f_idx < featsdata[yr]['features'].length; f_idx++) {
             featdata = {}
             for (y_idx = 0; y_idx < years.length; y_idx++) {
                 year = String(years[y_idx]);
@@ -385,6 +385,9 @@ MAP_APP = {
         var y_idx, year, years, html, val_dict_list, row_names, col_names,
             years = $('#years').val();
         //Populate the data modal
+        if (typeof featsdata === 'string' || featsdata instanceof String){
+            featsdata = JSON.parse(featsdata);
+        }
         val_dict_list = MAP_APP.set_dataModalVals(featsdata);
         row_names = MAP_APP.set_dataModalRowNames(featsdata[String(years[0])]);
         col_names = MAP_APP.set_dataModalColNames();
@@ -541,7 +544,11 @@ LF_MAP_APP = {
                 }
                 html += MAP_APP.set_dataModalHeader();
                 html += MAP_APP.set_popup_data(window.DATA.featsdata);
-                popup = L.popup({ closeOnClick: false }).setContent(html);
+                popup = L.popup({
+                    keepInView: true,
+                    closeOnClick: false
+                    })
+                    .setContent(html);
                 layer.bindPopup(popup).openPopup();
             }else{
                 // We need to query the database for the feature data
@@ -551,6 +558,39 @@ LF_MAP_APP = {
             // We need to query the database for the feature data
             ajax_set_featdata_on_feature_click(feat, layer);
         }
+    },
+    set_popup_window_boxzoom_feat: function(layers, feat_indices, year){
+        /*
+        Sets popup window when user creates boxzoom on features
+        feat_indices feat_idx of one or more features
+        year request eyar
+         */
+        var html = '';
+        var featsdata = {};
+        featsdata[year] = {};
+        featsdata[year]['features'] = [];
+        featsdata[year]['type'] = "FeatureCollection";
+
+        window.DATA.etdata[year].features.forEach(function (value) {
+            feat_indices.forEach(function (idx) {
+                if (parseInt(value.properties.feature_index) == idx) {
+                    var feature = {};
+                    feature['type'] = "Feature";
+                    feature['properties'] = null;
+                    feature.properties = value.properties;
+                    featsdata[year]['features'].push(feature);
+                }
+            });
+        });
+
+        html += MAP_APP.set_dataModalHeader();
+        html += MAP_APP.set_popup_data(featsdata);
+        var popup = L.popup({
+                        keepInView: true,
+                        closeOnClick: false
+                    })
+            .setContent(html);
+        layers[0].bindPopup(popup).openPopup();
     },
     onEachFeature: function(feature, layer) {
         layer.on({
@@ -603,7 +643,7 @@ LF_MAP_APP = {
         LF_MAP_APP.filter_mapLayer();
 
         //window.main_map_layer.addLayer(window.geojson_map_layer);
-        //window.map.fitBounds(window.geojson_map_layer.getBounds());
+        window.map.fitBounds(window.main_map_layer.getBounds());
 
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
     },
@@ -710,7 +750,7 @@ var initialize_lf_map = function() {
         LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = true);
     }
     window.map.on("boxzoomend", function(e) {
-        var bounds, feat_indices = [], layers = [], feat_idx;
+        var bounds, feat_indices = [], layers = [], feat_idx, years;
         window.map.eachLayer(function(layer) {
             try {
                 bounds = layer.getBounds();
@@ -728,7 +768,11 @@ var initialize_lf_map = function() {
             }
         });
         $('#feat_indices').val(feat_indices.join(','));
-        if (feat_indices.length > 0){
+        year = $('#year').val();
+        years = $('#years').val();
+        if (years.length == 1){
+            LF_MAP_APP.set_popup_window_boxzoom_feat(layers, feat_indices, year)
+        } else {
             ajax_set_featdata_on_dragbox(layers);
         }
     });
