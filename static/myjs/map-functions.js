@@ -469,12 +469,12 @@ LF_MAP_APP = {
         e.g., mutliple years
         */
         var style = {
-            fillColor: '#ddd1e7',
+            // fillColor: '#ddd1e7',
+            // fillOpacity: 0.7,
             weight: 2,
             opacity: 1,
             color: 'black',
-            dashArray: '3',
-            fillOpacity: 0.7
+            dashArray: '3'
         };
         return style;
     },
@@ -673,9 +673,8 @@ LF_MAP_APP = {
             MAP_APP.hide_mapColorbar('#colorbar');
         }
         // Find the new map type and set the map layer
-        // var map_type = MAP_APP.determine_map_type(),
-        var styleFunct = LF_MAP_APP.defaultStyleFunction, geojson;
-
+        var styleFunct = LF_MAP_APP.defaultStyleFunction,
+            geojson;
         // If choropleth, set the bins, colors and draw the colorbar
         if (map_type == 'Choropleth') {
             styleFunct = LF_MAP_APP.choroStyleFunction;
@@ -687,6 +686,10 @@ LF_MAP_APP = {
             window.bins = cb['bins'];
             MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
         }
+        LF_MAP_APP.set_mapLayer(geojson, styleFunct);
+    },
+    set_default_mapLayer: function(geojson){
+        var styleFunct = LF_MAP_APP.defaultStyleFunction, geojson;
         LF_MAP_APP.set_mapLayer(geojson, styleFunct);
     },
     on_zoom_change_region: function(){

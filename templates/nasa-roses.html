@@ -7,15 +7,15 @@
 </div><br>
 <div id="main-container">
     <input type="hidden" class="app_name" id="app_name" name="app_name" value="{{ app_name }}">
-    <p class="large error">Use Ctrl+Drag (Command+Drag on Mac) to select multiple features!</p>
+    <p class="large error">Use Ctrl+Drag (Shift+Drag on Mac) to select multiple features!</p>
     <div id="map-container">{% include 'map.html'%}</div>
     <div class="row">
         <div class="form-container draggable ui-widget-content">
-            <div class="form-container-header">You can move me!</div>
+            <div class="form-container-header">Click and drag to move</div>
             {% include 'form.html'%}
         </div> 
         <div class="colorbar-container draggable ui-widget-content">
-            <div class="colorbar-container-header">You can move me!</div>
+            <div class="colorbar-container-header">Click and drag to move</div>
             <div id="colorbar" class="colorbar ui-widget-content"></div>
         </div>
     </div>

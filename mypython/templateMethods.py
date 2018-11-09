@@ -6,8 +6,10 @@ import json
 import logging
 import operator
 from copy import deepcopy
+from urllib.request import urlopen
 
 from config import statics
+from config import GEO_BUCKET_URL
 from mypython import databaseMethods
 
 
@@ -161,6 +163,16 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
         tv['etdata'] = json.dumps({}, ensure_ascii=False)
     return tv
 
+def read_geomdata_from_bucket(geoFName):
+    url = GEO_BUCKET_URL + geoFName
+    try:
+        geomdata = json.load(urlopen(url))
+    except Exception as e:
+        logging.error(e)
+        raise Exception(e)
+    return geomdata
+
+
 def set_template_values(req_args, app_name, method, db_type, db_engine):
     '''
     Args:
@@ -219,12 +231,23 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
         feat_index_list = tv['variables']['feature_indices'].replace(', ', ',').split(',')
         feat_index_list = [int(f_idx) for f_idx in feat_index_list]
 
-    if db_type == 'DATASTORE':
-        tv = set_etdata_from_datastore(tv, feat_index_list)
-    elif db_type == 'cloudSQL':
-        tv = set_etdata_from_cloudSQL(tv, feat_index_list)
-    elif db_type == 'TEST_SERVER':
-        tv = set_etdata_from_test_server(tv, feat_index_list, db_engine)
+    if tv['variables']['tool_action'] == 'update_region':
+        if tv['variables']['region'] in ['Mason', 'US_fields']:
+            # Field boundaries depend on years
+            if 'year' in tv['variables'].keys():
+                geoFName = tv['variables']['region'] + '_' + tv['variables']['year'] + '_GEOM.geojson'
+            else:
+                geoFName = tv['variables']['region'] + '_' + tv['variables']['years'][0] + '_GEOM.geojson'
+        else:
+            geoFName = tv['variables']['region'] + '_GEOM.geojson'
+        tv['geomdata'] = json.dumps({'9999': read_geomdata_from_bucket(geoFName)}, ensure_ascii=False)
     else:
-        pass
+        if db_type == 'DATASTORE':
+            tv = set_etdata_from_datastore(tv, feat_index_list)
+        elif db_type == 'cloudSQL':
+            tv = set_etdata_from_cloudSQL(tv, feat_index_list)
+        elif db_type == 'TEST_SERVER':
+            tv = set_etdata_from_test_server(tv, feat_index_list, db_engine)
+        else:
+            pass
     return tv

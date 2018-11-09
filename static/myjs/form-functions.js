@@ -3,9 +3,9 @@ function change_inRegion(region, auto_set_region=false){
 	auto_set_region = true: we change the region according to zoom level
 	aut_region = false: region is only determiined by region value, not by zoom level
 	*/
+	ajax_update_region();
 	// Clear the feature indices
 	$('#feature_indices').val('');
-	// Hide the popup window
 	// Hide the popup window
 	window.map.closePopup();
 
@@ -21,9 +21,11 @@ function change_inRegion(region, auto_set_region=false){
 		// Generate a dynamic map with EE
 		// API call to CE
 	}else{
+		var geojson = MAP_APP.set_geojson();
+		LF_MAP_APP.set_default_mapLayer(geojson);
 		// We ned to recompute the template vars
 		// geodata, etdata and set the new map layer
-		ajax_update_etdata_and_map(auto_set_region=auto_set_region);
+		//ajax_update_etdata_and_map(auto_set_region=auto_set_region);
 	}
 
 	if (region.is_in(['US_fields', 'Mason'])){
@@ -57,6 +59,7 @@ function change_inYear(year){
 	$('#feature_indices').val('');
 	// Hide the popup window
 	window.map.closePopup();
+	/*
 	//Delete old layer
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	// We ned to recompute the template vars
@@ -65,6 +68,7 @@ function change_inYear(year){
 	var geojsonLayer = MAP_APP.set_geojson(),
 		styleFunct = LF_MAP_APP.chorostyleFunction;
 	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
+	*/
 }
 
 function change_inYears(years){
@@ -73,12 +77,15 @@ function change_inYears(years){
 	// Hide the popup window
 	window.map.closePopup();
 	// Delete old layer
-	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
+	//LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	var geojsonLayer = MAP_APP.set_geojson();
 	// Delete old data
 	if (window.DATA['etdata'] ) {
         window.DATA['etdata'] = {};
     }
+    //Couple year field to be first year of selection
+    $('#year').val($('#years').val()[0]);
+    /*
 	if (years.length != 1){
 		//$('#form-timeperiod-statistic').css('display', 'block')
 		var styleFunct = LF_MAP_APP.defaultStyleFunction;
@@ -89,8 +96,7 @@ function change_inYears(years){
 		var styleFunct = LF_MAP_APP.chorostyleFunction;
 	}
 	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
-	//Couple year field to be first year of selection
-    $('#year').val($('#years').val()[0])
+	*/
 }
 
 
@@ -135,7 +141,6 @@ function change_inVariable(variable){
 
 function change_inTRes(resolution){
     var tps, tp, tp_name, option, key, key_list = [];
-
     //Clear the feature indices
 	$('#feature_indices').val('');
 	// Hide the popup window
@@ -187,8 +192,10 @@ function change_inTRes(resolution){
     	//Get the map from db
     }
 
+    /*
     // Update the data and  map layer
     ajax_update_etdata_and_map(auto_set_region = false);
+	*/
 }
 
 function change_inTimePeriod(time_period){
@@ -202,18 +209,34 @@ function change_inTimePeriod(time_period){
 		$('#form-timeperiod-statistic').css('display', 'block');
 	}
 
+	/*
     // Update the map layer
 	var map_type = MAP_APP.determine_map_type(),
 		geojson = MAP_APP.set_geojson();
 	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
+	*/
 }
 
 function change_inTimePeriodStat(time_period_stat){
-    // Hide the popup window
+	// Hide the popup window
 	window.map.closePopup();
+	/*
 	// Update the map layer
     var map_type = MAP_APP.determine_map_type(),
 		geojson = MAP_APP.set_geojson();
 	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
+	*/
 }
 
+function update_map(){
+	//Update the data
+	ajax_update_data();
+	//Called when submit button is clicked
+	start_progressbar('Updating Map');
+	var map_type = MAP_APP.determine_map_type(),
+		geojson = MAP_APP.set_geojson();
+
+	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
+	LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
+	end_progressbar();
+}
