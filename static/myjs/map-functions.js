@@ -210,7 +210,6 @@ MAP_APP = {
         */
         var f_idx, featdata = {}, y_idx, val_dict_list = [],
             years = $('#years').val(), yr = years[0], year;
-        console.log(featsdata);
         for (f_idx = 0; f_idx < featsdata[yr]['features'].length; f_idx++) {
             featdata = {};
             for (y_idx = 0; y_idx < years.length; y_idx++) {
