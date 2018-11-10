@@ -32,7 +32,8 @@ $(document).ready(function () {
         change_inTimePeriodStat($(this).val());
     });
 
-    $('.main-form-button').on('function', function() {
-
+    $('.main-form-button').on('click', function(e) {
+        e.preventDefault();
+        ajax_update_data_and_map();
     });
 });

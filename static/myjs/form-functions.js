@@ -25,7 +25,7 @@ function change_inRegion(region, auto_set_region=false){
 		LF_MAP_APP.set_default_mapLayer(geojson);
 		// We ned to recompute the template vars
 		// geodata, etdata and set the new map layer
-		//ajax_update_etdata_and_map(auto_set_region=auto_set_region);
+		//ajax_update_data_and_map(auto_set_region=auto_set_region);
 	}
 
 	if (region.is_in(['US_fields', 'Mason'])){
@@ -64,7 +64,7 @@ function change_inYear(year){
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	// We ned to recompute the template vars
 	//geodata, etdata for choropleth map
-	ajax_update_etdata_and_map(auto_set_region=false);
+	ajax_update_data_and_map(auto_set_region=false);
 	var geojsonLayer = MAP_APP.set_geojson(),
 		styleFunct = LF_MAP_APP.chorostyleFunction;
 	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
@@ -91,7 +91,7 @@ function change_inYears(years){
 		var styleFunct = LF_MAP_APP.defaultStyleFunction;
 	} else{
 		//New map layer is set inside ajax call (async issue)
-		ajax_update_etdata_and_map(auto_set_region=false);
+		ajax_update_data_and_map(auto_set_region=false);
 		//$('#form-timeperiod-statistic').css('display', 'none');
 		var styleFunct = LF_MAP_APP.chorostyleFunction;
 	}
@@ -194,7 +194,7 @@ function change_inTRes(resolution){
 
     /*
     // Update the data and  map layer
-    ajax_update_etdata_and_map(auto_set_region = false);
+    ajax_update_data_and_map(auto_set_region = false);
 	*/
 }
 
@@ -228,15 +228,3 @@ function change_inTimePeriodStat(time_period_stat){
 	*/
 }
 
-function update_map(){
-	//Update the data
-	ajax_update_data();
-	//Called when submit button is clicked
-	start_progressbar('Updating Map');
-	var map_type = MAP_APP.determine_map_type(),
-		geojson = MAP_APP.set_geojson();
-
-	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
-	LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
-	end_progressbar();
-}

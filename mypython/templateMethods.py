@@ -153,14 +153,16 @@ def set_etdata_from_test_server(template_variables, feat_index_list, db_engine):
     tv['featsdata'], tv['featsgeomdata'] = {}, {}
     if len(feat_index_list) >= 1 and feat_index_list[0] != 'all':
         tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
-    map_type = determine_map_type(template_variables['variables'])
+    tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
 
+    '''
     if map_type == "Choropleth" or len(tv['variables']['years']) == 1:
         tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
     else:
         # Reads only the geometry data to generate non-choropleth map
         tv['geomdata'] = DU.read_geomdata_from_db(9999)
         tv['etdata'] = json.dumps({}, ensure_ascii=False)
+    '''
     return tv
 
 def read_geomdata_from_bucket(geoFName):

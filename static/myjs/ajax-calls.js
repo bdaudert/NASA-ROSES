@@ -116,7 +116,7 @@ function ajax_update_data(){
 }
 
 
-function ajax_update_etdata_and_map(auto_set_region=false){
+function ajax_update_data_and_map(auto_set_region=false){
     //Only used when single year request
     var tool_action = 'update_data_and_map';
     $('#tool_action').val(tool_action);

@@ -418,6 +418,58 @@ MAP_APP = {
             feat_geom_data['featsgeomdata_features'] = window.DATA.geomdata['9999']['features'][index];
         }
         return feat_geom_data;
+    },
+    set_feature_data: function(feat_indices){
+        var i, year, geom_year = '9999',
+            featsdata = {}, featsgeomdata = {},
+            data_indices = {}, i, j, d;
+
+        if ($('#region').val().is_in(statics.regions_changing_by_year)){
+            geom_year = $('#years').val()[0];
+        }
+        window.DATA.featsgeomdata[geom_year] = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        // Find the indices in the features
+        window.DATA.geomdata[geom_year]['features'].forEach(function(data_index, value){
+            feat_indices.forEach(function(idx){
+                if ( parseInt(value['properties']['feature_index']) == idx ) {
+                    var feature = {};
+                    feature['type'] = "Feature";
+                    feature['properties'] = value['properties'];
+                    featsgeomdata[geom_year]['features'].push(feature);
+                    data_indices.push(data_index);
+                }
+            });
+        });
+
+        for (i = 0; i < $('#years').val().length; i++) {
+            year = $('#years').val()[i];
+            if (geom_year != '9999' && i >0){
+                window.DATA.featsgeomdata[year] = {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            }
+            window.DATA.featsdata = {}
+            window.DATA.featsdata[year] = {
+                'type': 'FeatureCollection',
+                'features': [fg_data['featsdata_features']]
+            }
+            for (j = 0; j < data_indices.length; j++){
+                d = window.DATA.geomdata['features'][data_indices[j]];
+                window.DATA.featsgeomdata[year]['features'].push(d);
+                d = window.DATA.etdata['features'][data_indices[j]];
+                window.DATA.featsdata[year]['features'].push(d);
+            }
+
+        }
+        data = {
+            'featsdata': featsdata,
+            'featsgeomdata': featsgeomdata
+        }
+        return data;
     }
 }
 
@@ -526,6 +578,19 @@ LF_MAP_APP = {
         // Update the feature index template variable
         $('#feature_indices').val(String(feat_index));
 
+        var fg_data = MAP_APP.set_feature_data(feat_indices);
+        window.DATA.featsdata = fg_data['featsdata'];
+        window.DATA.featsgeomdata = fg_data['featsgeomdata'];
+        html += MAP_APP.set_dataModalHeader();
+        html += MAP_APP.set_popup_data(window.featsdata);
+        popup = L.popup({
+            keepInView: true,
+            closeOnClick: false
+            })
+            .setContent(html);
+        layer.bindPopup(popup).openPopup();
+
+        /*
         // Get the html content for the popup
         if (years.length == 1 && map_type == 'Choropleth'){
             var year = years[0], html='', popup, fg_data;
@@ -558,19 +623,23 @@ LF_MAP_APP = {
             // We need to query the database for the feature data
             ajax_set_featdata_on_feature_click(feat, layer);
         }
+        */
     },
-    set_popup_window_boxzoom_feat: function(layers, feat_indices, year){
+    set_popup_window_boxzoom_feat: function(layers, feat_indices){
         /*
         Sets popup window when user creates boxzoom on features
         feat_indices feat_idx of one or more features
         year request eyar
          */
         var html = '';
+        var fg_data = MAP_APP.set_feature_data(feat_indices);
+        window.DATA.featsdata = fg_data['featsdata'];
+        window.DATA.featsgeomdata = fg_data['featsgeomdata']
+        /*
         var featsdata = {};
         featsdata[year] = {};
         featsdata[year]['features'] = [];
         featsdata[year]['type'] = "FeatureCollection";
-
         window.DATA.etdata[year].features.forEach(function (value) {
             feat_indices.forEach(function (idx) {
                 if (parseInt(value.properties.feature_index) == idx) {
@@ -582,6 +651,7 @@ LF_MAP_APP = {
                 }
             });
         });
+        */
 
         html += MAP_APP.set_dataModalHeader();
         html += MAP_APP.set_popup_data(featsdata);
@@ -773,11 +843,14 @@ var initialize_lf_map = function() {
         $('#feat_indices').val(feat_indices.join(','));
         year = $('#year').val();
         years = $('#years').val();
+        LF_MAP_APP.set_popup_window_boxzoom_feat(layers, feat_indices)
+        /*
         if (years.length == 1){
-            LF_MAP_APP.set_popup_window_boxzoom_feat(layers, feat_indices, year)
+            LF_MAP_APP.set_popup_window_boxzoom_feat(layers, feat_indices)
         } else {
             ajax_set_featdata_on_dragbox(layers);
         }
+        */
     });
     //Set the map so that it changes region at different zoom levels
     //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
