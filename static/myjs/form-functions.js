@@ -59,6 +59,14 @@ function change_inYear(year){
 	$('#feature_indices').val('');
 	// Hide the popup window
 	window.map.closePopup();
+	// Delete old layer
+	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
+	var geojson = MAP_APP.set_geojson();
+	LF_MAP_APP.set_default_mapLayer(geojson);
+	// Delete old data
+	if (window.DATA['etdata'] ) {
+        window.DATA['etdata'] = {};
+    }
 	/*
 	//Delete old layer
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
@@ -76,6 +84,18 @@ function change_inYears(years){
 	$('#feature_indices').val('');// Hide the popup window
 	// Hide the popup window
 	window.map.closePopup();
+	//Couple year field to be first year of selection
+    $('#year').val($('#years').val()[0]);
+    // Delete old layer
+	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
+    var geojson = MAP_APP.set_geojson();
+	LF_MAP_APP.set_default_mapLayer(geojson);
+    // Delete old data
+	if (window.DATA['etdata'] ) {
+        window.DATA['etdata'] = {};
+    }
+
+	/*
 	// Delete old layer
 	//LF_MAP_APP.delete_mapLayer(window.main_map_layer);
 	var geojsonLayer = MAP_APP.set_geojson();
@@ -83,9 +103,6 @@ function change_inYears(years){
 	if (window.DATA['etdata'] ) {
         window.DATA['etdata'] = {};
     }
-    //Couple year field to be first year of selection
-    $('#year').val($('#years').val()[0]);
-    /*
 	if (years.length != 1){
 		//$('#form-timeperiod-statistic').css('display', 'block')
 		var styleFunct = LF_MAP_APP.defaultStyleFunction;

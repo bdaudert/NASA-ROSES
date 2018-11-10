@@ -128,7 +128,6 @@
     "all_variable": {
         "et": "Actual ET",
         "etrf": "Fractional ET",
-        "etr": "Reference ET",
         "pr": "Precipitation",
         "NDVI": "NDVI"
     },
@@ -142,7 +141,7 @@
         "mean": "Mean"
     },
     "all_time_period_statistic": {
-        "none": "None",
+        "none": "List monthly values",
         "sum": "Sum",
         "mean": "Mean"
     },
