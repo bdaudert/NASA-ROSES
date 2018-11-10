@@ -139,7 +139,7 @@ function ajax_set_featdata_on_feature_click(latlng, layer){
         }
         html += MAP_APP.set_dataModalHeader();
         html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
-        L.popup({ closeOnClick: false })
+        L.popup({ keepInView: true, closeOnClick: false })
             .setLatLng(latlng)
             .setContent(html)
             .openOn(layer);
@@ -193,10 +193,11 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         if (feat_idx_list.length != 0){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();
-            //html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
             html += MAP_APP.set_popup_data(r['featsdata']);
-            var popup = L.popup({ closeOnClick: false }).setContent(html);
-            selectedFeatures[0].bindPopup(popup).openPopup();
+            L.popup({ keepInView: true, closeOnClick: false })
+                .setLatLng(latlng)
+                .setContent(html)
+                .openOn(selectedFeature[0]);
         }
         end_progressbar();
     }) // successfully got JSON response
