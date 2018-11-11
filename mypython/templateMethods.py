@@ -213,7 +213,6 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
             else:
                 form_val = req_args.get(var_key, dflt)
             tv['variables'][var_key] = form_val
-
     # Set dates
     dates = set_dates()
     tv['variables'].update(dates)
@@ -234,6 +233,7 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
         feat_index_list = [int(f_idx) for f_idx in feat_index_list]
 
     if tv['variables']['tool_action'] == 'update_region':
+        # Read the geometry information from the bucket
         if tv['variables']['region'] in ['Mason', 'US_fields']:
             # Field boundaries depend on years
             if 'year' in tv['variables'].keys():
@@ -244,6 +244,7 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
             geoFName = tv['variables']['region'] + '_GEOM.geojson'
         tv['geomdata'] = json.dumps({'9999': read_geomdata_from_bucket(geoFName)}, ensure_ascii=False)
     else:
+        # Obtain the data from the datastore
         if db_type == 'DATASTORE':
             tv = set_etdata_from_datastore(tv, feat_index_list)
         elif db_type == 'cloudSQL':

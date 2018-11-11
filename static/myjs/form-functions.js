@@ -155,8 +155,16 @@ function change_inTimePeriod(time_period){
 }
 
 function change_inTimePeriodStat(time_period_stat){
+	/*
+	NOTE: statistic change does not affect the map,
+	as the statistic is computed on the fly in js
+	set_dataModalTable
+	*/
+	/*
 	clear_mapLayer_and_data();
 	set_new_mapLayer();
+	*/
+	window.map.closePopup();
 }
 
 function clear_mapLayer_and_data(){
@@ -167,6 +175,9 @@ function clear_mapLayer_and_data(){
 	// Delete old data
 	if (window.DATA['etdata'] ) {
         window.DATA['etdata'] = {};
+    }
+    if (window.DATA['featsdata'] ) {
+        window.DATA['featsdata'] = {};
     }
 }
 

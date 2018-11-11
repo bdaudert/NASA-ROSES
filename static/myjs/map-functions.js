@@ -394,31 +394,6 @@ MAP_APP = {
         html = MAP_APP.set_dataModalTable(val_dict_list, row_names, col_names);
         return html;
     },
-    get_featuredata_from_etdata: function(feature_index, year) {
-        /*
-        Finds the feature in global var etdata and
-        sets the featsdata feature and the geomdata feature for this feature
-        Used  when user clicks on single feature on Choropleth map
-         */
-        var year_data = window.DATA.etdata[year],
-            feat_geom_data = {'featsdata_feature': {}, 'featsgeomdata_feature': {}}, index=null;
-        $.each(year_data.features, function (idx, feat_data) {
-            if (feat_data.properties.feature_index == parseInt(feature_index)){
-                index = idx;
-                return;
-            }
-        });
-        if (!index){
-            return feat_geom_data;
-        }
-        feat_geom_data['featsdata_features'] = window.DATA.etdata[year]['features'][index]
-        if ($('#region').val().is_in(statics.regions_changing_by_year)) {
-            feat_geom_data['featsgeomdata_features'] = window.DATA.geomdata[year]['features'][index];
-        }else{
-            feat_geom_data['featsgeomdata_features'] = window.DATA.geomdata['9999']['features'][index];
-        }
-        return feat_geom_data;
-    },
     set_feature_data: function(feat_indices){
         /*
         Sets global vars featsdata and featsgeomdata for each year and feature index
@@ -428,6 +403,18 @@ MAP_APP = {
         if (Object.keys(window.DATA.geomdata).length === 0 || Object.keys(window.DATA.etdata).length === 0 ){
             return {};
         }
+
+
+        // Check if feature data already exists
+        if (window.DATA.hasOwnProperty('featsgeomdata') && window.DATA.hasOwnProperty('featsdata')) {
+            if (Object.keys(window.DATA.featsgeomdata).length != 0 && Object.keys(window.DATA.featsdata).length != 0) {
+                return {
+                    'featsdata': window.DATA.featsdata,
+                    'featsgeomdata': window.DATA.featsgeomdata
+                };
+            }
+        }
+
 
         var featsdata = {}, featsgeomdata = {},
             i, year, geom_year = '9999',
@@ -592,8 +579,8 @@ LF_MAP_APP = {
         fg_data = MAP_APP.set_feature_data([feat_index]);
         if (Object.keys(fg_data).length === 0){
             var error = 'Map data could not be found.',
-                cause = 'The map interface was not updated',
-                resolution = 'Please fill out the form and click "Upate Map".';
+                cause = 'The map was not updated after a change in the form was made.',
+                resolution = 'Click "Upate Map".';
             set_error(error, cause, resolution, 'Feature Click');
             return;
         }
@@ -607,40 +594,6 @@ LF_MAP_APP = {
         }).setContent(html);
         layer.bindPopup(popup).openPopup();
 
-        /*
-        // Get the html content for the popup
-        if (years.length == 1 && map_type == 'Choropleth'){
-            var year = years[0], html='', popup, fg_data;
-            if (window.DATA.hasOwnProperty('etdata') && window.DATA['etdata'].hasOwnProperty(year)){
-                // Set the feature data from the global vars etdata and geomdata
-                fg_data = MAP_APP.get_featuredata_from_etdata(feat_index, year);
-                window.DATA.featsdata = {}
-                window.DATA.featsgeomdata = {}
-                window.DATA.featsdata[year] = {
-                    'type': 'FeatureCollection',
-                    'features': [fg_data['featsdata_features']]
-                }
-                window.DATA.featsgeomdata[year] = {
-                    'type': 'FeatureCollection',
-                    'features': [fg_data['featsgeomdata_features']]
-                }
-                html += MAP_APP.set_dataModalHeader();
-                html += MAP_APP.set_popup_data(window.DATA.featsdata);
-                popup = L.popup({
-                    keepInView: true,
-                    closeOnClick: false
-                    })
-                    .setContent(html);
-                layer.bindPopup(popup).openPopup();
-            }else{
-                // We need to query the database for the feature data
-                ajax_set_featdata_on_feature_click(feat, layer);
-            }
-        }else {
-            // We need to query the database for the feature data
-            ajax_set_featdata_on_feature_click(feat, layer);
-        }
-        */
     },
     set_popup_window_boxzoom: function(layers, feat_indices){
         /*
@@ -652,31 +605,13 @@ LF_MAP_APP = {
         var fg_data = MAP_APP.set_feature_data(feat_indices);
         if (Object.keys(fg_data).length === 0){
             var error = 'Map data could not be found.',
-                cause = 'The map interface was not updated',
-                resolution = 'Please fill out the form and click "Upate Map".';
+                cause = 'The map was not updated after a change in the form was made.',
+                resolution = 'Click "Upate Map".';
             set_error(error, cause, resolution, 'Feature Click');
             return;
         }
         window.DATA.featsdata = fg_data['featsdata'];
         window.DATA.featsgeomdata = fg_data['featsgeomdata']
-        /*
-        var featsdata = {};
-        featsdata[year] = {};
-        featsdata[year]['features'] = [];
-        featsdata[year]['type'] = "FeatureCollection";
-        window.DATA.etdata[year].features.forEach(function (value) {
-            feat_indices.forEach(function (idx) {
-                if (parseInt(value.properties.feature_index) == idx) {
-                    var feature = {};
-                    feature['type'] = "Feature";
-                    feature['properties'] = null;
-                    feature.properties = value.properties;
-                    featsdata[year]['features'].push(feature);
-                }
-            });
-        });
-        */
-
         html += MAP_APP.set_dataModalHeader();
         html += MAP_APP.set_popup_data(window.DATA.featsdata);
         var popup = L.popup({
@@ -868,15 +803,6 @@ var initialize_lf_map = function() {
         year = $('#year').val();
         years = $('#years').val();
         LF_MAP_APP.set_popup_window_boxzoom(layers, feat_indices)
-        /*
-        if (years.length == 1){
-            LF_MAP_APP.set_popup_window_boxzoom_feat(layers, feat_indices)
-        } else {
-            ajax_set_featdata_on_dragbox(layers);
-        }
-        */
     });
-    //Set the map so that it changes region at different zoom levels
-    //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }
 
