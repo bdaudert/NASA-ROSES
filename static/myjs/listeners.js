@@ -31,4 +31,9 @@ $(document).ready(function () {
     $('#time_period_statistic').on('change', function(){
         change_inTimePeriodStat($(this).val());
     });
+
+    $('.main-form-button').on('click', function(e) {
+        e.preventDefault();
+        ajax_update_data_and_map();
+    });
 });

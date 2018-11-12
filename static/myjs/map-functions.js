@@ -211,7 +211,7 @@ MAP_APP = {
         var f_idx, featdata = {}, y_idx, val_dict_list = [],
             years = $('#years').val(), yr = years[0], year;
         for (f_idx = 0; f_idx < featsdata[yr]['features'].length; f_idx++) {
-            featdata = {}
+            featdata = {};
             for (y_idx = 0; y_idx < years.length; y_idx++) {
                 year = String(years[y_idx]);
                 featdata[year] = featsdata[year]['features'][f_idx];
@@ -394,30 +394,79 @@ MAP_APP = {
         html = MAP_APP.set_dataModalTable(val_dict_list, row_names, col_names);
         return html;
     },
-    get_featuredata_from_etdata: function(feature_index, year) {
+    set_feature_data: function(feat_indices){
         /*
-        Finds the feature in global var etdata and
-        sets the featsdata feature and the geomdata feature for this feature
-        Used  when user clicks on single feature on Choropleth map
-         */
-        var year_data = window.DATA.etdata[year],
-            feat_geom_data = {'featsdata_feature': {}, 'featsgeomdata_feature': {}}, index=null;
-        $.each(year_data.features, function (idx, feat_data) {
-            if (feat_data.properties.feature_index == parseInt(feature_index)){
-                index = idx;
-                return;
+        Sets global vars featsdata and featsgeomdata for each year and feature index
+        Results are json objects
+        */
+        // Sanity check
+        if (Object.keys(window.DATA.geomdata).length === 0 || Object.keys(window.DATA.etdata).length === 0 ){
+            return {};
+        }
+
+        // FIXME: Would like to remove this
+        // Check if feature data already exists
+        /*if (window.DATA.hasOwnProperty('featsgeomdata') && window.DATA.hasOwnProperty('featsdata')) {
+            if (Object.keys(window.DATA.featsgeomdata).length != 0 && Object.keys(window.DATA.featsdata).length != 0) {
+                return {
+                    'featsdata': window.DATA.featsdata,
+                    'featsgeomdata': window.DATA.featsgeomdata
+                };
             }
+        }*/
+
+
+        var featsdata = {}, featsgeomdata = {},
+            i, year, geom_year = '9999',
+            featsdata = {}, featsgeomdata = {},
+            data_indices = [], i, j, d;
+
+        if ($('#region').val().is_in(statics.regions_changing_by_year)){
+            geom_year = $('#years').val()[0];
+        }
+        featsgeomdata[geom_year] = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+        // Find the indices in the features
+        $(window.DATA.geomdata[geom_year]['features']).each(function(data_index, feat){
+            feat_indices.forEach(function(idx){
+                if ( parseInt(feat['properties']['feature_index']) == idx ) {
+                    var feature = {};
+                    feature['type'] = "Feature";
+                    feature['properties'] = feat['properties'];
+                    featsgeomdata[geom_year]['features'].push(feature);
+                    data_indices.push(data_index);
+                }
+            });
         });
-        if (!index){
-            return feat_geom_data;
+
+        for (i = 0; i < $('#years').val().length; i++) {
+            year = $('#years').val()[i];
+            if (geom_year != '9999' && i >0){
+                featsgeomdata[year] = {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            }
+            featsdata[year] = {
+                'type': 'FeatureCollection',
+                'features': []
+            }
+            for (j = 0; j < data_indices.length; j++){
+                if (geom_year != '9999' && i >0) {
+                    d = window.DATA.geomdata['features'][data_indices[j]];
+                    featsgeomdata[year]['features'].push(d);
+                }
+                d = window.DATA.etdata[year]['features'][data_indices[j]];
+                featsdata[year]['features'].push(d);
+            }
+
         }
-        feat_geom_data['featsdata_features'] = window.DATA.etdata[year]['features'][index]
-        if ($('#region').val().is_in(statics.regions_changing_by_year)) {
-            feat_geom_data['featsgeomdata_features'] = window.DATA.geomdata[year]['features'][index];
-        }else{
-            feat_geom_data['featsgeomdata_features'] = window.DATA.geomdata['9999']['features'][index];
-        }
-        return feat_geom_data;
+        return {
+            'featsdata': featsdata,
+            'featsgeomdata': featsgeomdata
+        };
     }
 }
 
@@ -456,21 +505,21 @@ LF_MAP_APP = {
                 break;
             }
         }
+
         return color;
     },
-    highlightFeature: function(e) {
+    highlight_feature: function(e) {
         /*highlights feature on mouse over*/
         var style = {
             fillColor: e.layer.options.fillColor,
+            fillOpacity: 0.7,
             fill: true,
             weight: 4,
             color: '#666',
-            dashArray: '',
-            fillOpacity: 0.7
         }
         window.main_map_layer.setFeatureStyle(e.layer.properties.id, style);
     },
-    resetHighlight: function(e) {
+    reset_highlight: function(e) {
         /*Resets featue on mouseout*/
         window.main_map_layer.resetFeatureStyle(e.layer.properties.id);
     },
@@ -500,50 +549,49 @@ LF_MAP_APP = {
         var latlng = [e.latlng.lat, e.latlng.lng];
         window.map.closePopup();
 
-        var years = $('#years').val(),
-            feats = [feat],
-            feat_index = e.layer.properties.feature_index;
-            map_type = MAP_APP.determine_map_type();
+        var years = $('#years').val(), feats = [feat],
+            feat_index = e.layer.properties.feature_index,
+            map_type = MAP_APP.determine_map_type(),
+            html = {}, fg_data;
         // Update the feature index template variable
         $('#feature_indices').val(String(feat_index));
 
-        // Get the html content for the popup
-        if (years.length == 1 && map_type == 'Choropleth'){
-            var year = years[0], html='', popup, fg_data;
-            if (window.DATA.hasOwnProperty('etdata') && window.DATA['etdata'].hasOwnProperty(year)){
-                // Set the feature data from the global vars etdata and geomdata
-                fg_data = MAP_APP.get_featuredata_from_etdata(feat_index, year);
-                window.DATA.featsdata = {}
-                window.DATA.featsgeomdata = {}
-                window.DATA.featsdata[year] = {
-                    'type': 'FeatureCollection',
-                    'features': [fg_data['featsdata_features']]
-                }
-                window.DATA.featsgeomdata[year] = {
-                    'type': 'FeatureCollection',
-                    'features': [fg_data['featsgeomdata_features']]
-                }
-                html += MAP_APP.set_dataModalHeader();
-                html += MAP_APP.set_popup_data(window.DATA.featsdata);
-                L.popup({ keepInView: true, closeOnClick: false })
-                    .setLatLng(latlng)
-                    .setContent(html)
-                    .openOn(window.map);
-            }else{
-                // We need to query the database for the feature data
-                ajax_set_featdata_on_feature_click(latlng, window.map);
-            }
-        }else {
-            // We need to query the database for the feature data
-            ajax_set_featdata_on_feature_click(latlng, window.map);
+        fg_data = MAP_APP.set_feature_data([feat_index]);
+        if (Object.keys(fg_data).length === 0){
+            var error = 'Map data could not be found.',
+                cause = 'The map was not updated after a change in the form was made.',
+                resolution = 'Click "Upate Map".';
+            set_error(error, cause, resolution, 'Feature Click');
+            return;
         }
+        window.DATA.featsdata = fg_data['featsdata'];
+        window.DATA.featsgeomdata = fg_data['featsgeomdata'];
+        html += MAP_APP.set_dataModalHeader();
+        html += MAP_APP.set_popup_data(window.DATA.featsdata);
+        L.popup({ keepInView: true, closeOnClick: false })
+            .setLatLng(latlng)
+            .setContent(html)
+            .openOn(window.map);
     },
-    set_popup_window_boxzoom_feat: function(layers, feat_indices, year){
+    set_popup_window_boxzoom: function(layers, feat_indices){
         /*
         Sets popup window when user creates boxzoom on features
         feat_indices feat_idx of one or more features
         year request eyar
          */
+        // FIXME: work in progress
+        /*var html = '';
+        var fg_data = MAP_APP.set_feature_data(feat_indices);
+        if (Object.keys(fg_data).length === 0){
+            var error = 'Map data could not be found.',
+                cause = 'The map was not updated after a change in the form was made.',
+                resolution = 'Click "Upate Map".';
+            set_error(error, cause, resolution, 'Feature Click');
+            return;
+        }
+        window.DATA.featsdata = fg_data['featsdata'];
+        window.DATA.featsgeomdata = fg_data['featsgeomdata']
+        */
         var html = '';
         var featsdata = {};
         featsdata[year] = {};
@@ -563,24 +611,11 @@ LF_MAP_APP = {
         });
 
         html += MAP_APP.set_dataModalHeader();
-        html += MAP_APP.set_popup_data(featsdata);
-        var popup = L.popup({
-                        keepInView: true,
-                        closeOnClick: false
-                    })
-            .setContent(html);
-        layers[0].bindPopup(popup).openPopup();
-    },
-    onEachFeature: function(feature, layer) {
-        layer.on({
-            mouseover: LF_MAP_APP.highlightFeature,
-            mouseout: LF_MAP_APP.resetHighlight
-        });
-        layer.on("click", function (e) {
-            // FIX ME: this will cause region change
-            //LF_MAP_APP.zoom_toFeature(e);
-            LF_MAP_APP.set_popup_window_single_feat(e, feature, layer);
-        });
+        html += MAP_APP.set_popup_data(window.DATA.featsdata);
+        L.popup({ keepInView: true, closeOnClick: false })
+            .setLatLng(latlng)
+            .setContent(html)
+            .openOn(window.map);
     },
     get_color: function(id, map_type) {
         return map_type == "Choropleth" ? LF_MAP_APP.choroStyleFunction(id) : '#ddd1e7';
@@ -603,7 +638,7 @@ LF_MAP_APP = {
                     stroke: true,
                     fill: true,
                     color: 'black',
-                    weight: 0.5,
+                    weight: 0.5
                 }
             }
           },
@@ -611,17 +646,18 @@ LF_MAP_APP = {
           indexMaxZoom: 5,       // max zoom in the initial tile index
           interactive: true,
           getFeatureId: function(feature) {
-              return feature.properties.idx
+              return feature.properties.feature_index;
           }
         })
         .on ({
-            mouseover: LF_MAP_APP.highlightFeature,
-            mouseout: LF_MAP_APP.resetHighlight
+            mouseover: LF_MAP_APP.highlight_feature,
+            mouseout: LF_MAP_APP.reset_highlight
         })
         .on('click', function(e) {
             LF_MAP_APP.set_popup_window_single_feat(e, null, window.main_map_layer);
         })
         .addTo(window.map);
+
 
         // FIXME: Is there a way to do this with vector tiles?
         var geojsonLayer = L.geoJson(geojson)
@@ -646,9 +682,11 @@ LF_MAP_APP = {
             LF_MAP_APP.delete_mapLayer(window.main_map_layer);
             MAP_APP.hide_mapColorbar('#colorbar');
         }
+
         // Find the new map type and set the map layer
-        // var map_type = MAP_APP.determine_map_type(),
-        
+        //var styleFunct = LF_MAP_APP.defaultStyleFunction,
+        //    geojson;
+
         // If choropleth, set the bins, colors and draw the colorbar
         if (map_type == 'Choropleth') {
             //Set the colors for Choropleth map, draw colorbar
@@ -659,6 +697,11 @@ LF_MAP_APP = {
             window.bins = cb['bins'];
             MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
         }
+        LF_MAP_APP.set_mapLayer(geojson, map_type);
+    },
+    set_default_mapLayer: function(geojson){
+        var map_type = MAP_APP.determine_map_type();
+        //var styleFunct = LF_MAP_APP.defaultStyleFunction, geojson;
         LF_MAP_APP.set_mapLayer(geojson, map_type);
     },
     on_zoom_change_region: function(){
@@ -678,7 +721,7 @@ LF_MAP_APP = {
     set_map_zoom_pan_listener: function(auto_set_region=false) {
         /*
         When aut_set_region = true we change region when user changes zoom on map
-        via the moveend listener (detects pan and zoom)
+        ia the moveend listener (detects pan and zoom)
         else (region was changed in the form), disbale the moveend listener
         */
         if (!auto_set_region) {
@@ -716,8 +759,10 @@ var initialize_lf_map = function() {
     }
     window.map.on("boxzoomend", function(e) {
         var bounds, feat_indices = [], layers = [], feat_idx, years;
+        console.log(e);
         window.map.eachLayer(function(layer) {
             try {
+                console.log(layer)
                 bounds = layer.getBounds();
             }catch(e){
                 return;
@@ -735,13 +780,7 @@ var initialize_lf_map = function() {
         $('#feat_indices').val(feat_indices.join(','));
         year = $('#year').val();
         years = $('#years').val();
-        if (years.length == 1){
-            LF_MAP_APP.set_popup_window_boxzoom_feat(layers, feat_indices, year)
-        } else {
-            ajax_set_featdata_on_dragbox(layers);
-        }
+        LF_MAP_APP.set_popup_window_boxzoom(layers, feat_indices)
     });
-    //Set the map so that it changes region at different zoom levels
-    //LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=true);
 }
 
