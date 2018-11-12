@@ -28,6 +28,12 @@
         "time_period_statistic": "none",
         "feature_indices": ""
     },
+    "msg_for_tool_action": {
+        "update_region": "Updating Region",
+        "update_data": "Obtaining Data",
+        "get_feat_data": "Obtaining Data",
+        "update_data_and_map": "Updating Map Data"
+    },
     "all_region": {
         "US_states_west_500k": "States, Western US",
         "US_counties_west_500k": "Counties, Western US",
@@ -122,7 +128,6 @@
     "all_variable": {
         "et": "Actual ET",
         "etrf": "Fractional ET",
-        "etr": "Reference ET",
         "pr": "Precipitation",
         "NDVI": "NDVI"
     },
@@ -136,7 +141,7 @@
         "mean": "Mean"
     },
     "all_time_period_statistic": {
-        "none": "None",
+        "none": "List monthly values",
         "sum": "Sum",
         "mean": "Mean"
     },
@@ -171,7 +176,14 @@
     },
     "response_vars": {
         "None": [],
+        "update_region": [
+            "geomdata"
+        ],
         "update_data": [
+            "geomdata",
+            "etdata"
+        ],
+        "update_data_and_map": [
             "geomdata",
             "etdata"
         ],

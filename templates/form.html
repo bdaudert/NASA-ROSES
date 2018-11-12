@@ -9,6 +9,8 @@
                 <input type="hidden" class="min_date" id="min_date" name="min_date" value="{{ variables.min_date }}">
                 <input type="hidden" class="max_date" id="max_date" name="max_date" value="{{ variables.max_date }}">
                 <input type="hidden" class="feature_indices" id="feature_indices" name="feature_indices" value="{{ variables.feature_indices }}">
+                <button type="button" class="main-form-button btn btn-large btn-info pull-left" style="width:100%">
+                Update Map</button>
                 <div id="form-region">
                     <b><span style="color:blue;font-size:medium">Visualization Layer:</span></b>
                     <select class="region" id="region" name="region">
@@ -121,7 +123,9 @@
                 <div id="form-end_date" style="display:none;">
                     <b>End Date: </b>
                     <input class="form-control" type='text' id="end_date" name="end_date" value="{{variables.end_date}}"/>
-                </div>
+                </div><br/>
+                <button type="button" class="main-form-button btn btn-large btn-info pull-left" style="width:100%">
+                Update Map</button>
             </div><!--panel-body panel-forms-->
         </div><!--panel panel-default-->
     </form>

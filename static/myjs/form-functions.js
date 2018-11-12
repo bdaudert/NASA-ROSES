@@ -3,28 +3,19 @@ function change_inRegion(region, auto_set_region=false){
 	auto_set_region = true: we change the region according to zoom level
 	aut_region = false: region is only determiined by region value, not by zoom level
 	*/
+	ajax_update_region();
+
 	// Clear the feature indices
 	$('#feature_indices').val('');
-	// Hide the popup window
-	// Hide the popup window
-	window.map.closePopup();
 
 	if (region != $('#region').val()){
 		// Zoom level was changed
 		// We need to change the region value
 		$('#region').val(region);
 	}
-    // Delete old layer
-	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
-	//Set the new map_layer
-	if (region == "ee_map"){
-		// Generate a dynamic map with EE
-		// API call to CE
-	}else{
-		// We ned to recompute the template vars
-		// geodata, etdata and set the new map layer
-		ajax_update_etdata_and_map(auto_set_region=auto_set_region);
-	}
+
+	clear_mapLayer_and_data();
+	set_new_mapLayer();
 
 	if (region.is_in(['US_fields', 'Mason'])){
 		// If mutiple years are displayed, switch to single year
@@ -55,59 +46,24 @@ function change_inYear(year){
     $('#years').val([year]);
 	//Clear the feature indices
 	$('#feature_indices').val('');
-	// Hide the popup window
-	window.map.closePopup();
-	//Delete old layer
-	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
-	// We ned to recompute the template vars
-	//geodata, etdata for choropleth map
-	ajax_update_etdata_and_map(auto_set_region=false);
-	var geojsonLayer = MAP_APP.set_geojson(),
-		styleFunct = LF_MAP_APP.chorostyleFunction;
-	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
+
+	clear_mapLayer_and_data();
+	set_new_mapLayer();
 }
 
 function change_inYears(years){
     // Clear the featuer indices
 	$('#feature_indices').val('');// Hide the popup window
-	// Hide the popup window
-	window.map.closePopup();
-	// Delete old layer
-	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
-	var geojsonLayer = MAP_APP.set_geojson();
-	// Delete old data
-	if (window.DATA['etdata'] ) {
-        window.DATA['etdata'] = {};
-    }
-	if (years.length != 1){
-		//$('#form-timeperiod-statistic').css('display', 'block')
-		var styleFunct = LF_MAP_APP.defaultStyleFunction;
-	} else{
-		//New map layer is set inside ajax call (async issue)
-		ajax_update_etdata_and_map(auto_set_region=false);
-		//$('#form-timeperiod-statistic').css('display', 'none');
-		var styleFunct = LF_MAP_APP.chorostyleFunction;
-	}
-	LF_MAP_APP.set_mapLayer(geojsonLayer, styleFunct);
 	//Couple year field to be first year of selection
-    $('#year').val($('#years').val()[0])
+    $('#year').val($('#years').val()[0]);
+    clear_mapLayer_and_data();
+	set_new_mapLayer();
 }
 
 
 function change_inVariable(variable){
 	//Clear the featuer indices
 	$('#feature_indices').val('');
-	// Hide the popup window
-	window.map.closePopup();
-
-	if ($('#region').val().is_in(['US_fields', 'Mason'])){
-    	//Set new dataModal
-
-    }
-    if ($('#region').val() == 'ee_map'){
-    	//Get the map from climate engine (API call)
-    }
-
 	//Set dataset
 	var datasets = statics.dataset_by_var[variable],
 		ds, option;
@@ -131,15 +87,14 @@ function change_inVariable(variable){
     else{
         $('#form-model').css('display', 'inline');
     }
+    clear_mapLayer_and_data();
+	set_new_mapLayer();
 }
 
 function change_inTRes(resolution){
     var tps, tp, tp_name, option, key, key_list = [];
-
     //Clear the feature indices
 	$('#feature_indices').val('');
-	// Hide the popup window
-	window.map.closePopup();
 
     if (resolution.is_in(['annual'])){
         $('#form-timeperiod').css('display','none');
@@ -154,7 +109,7 @@ function change_inTRes(resolution){
 			}
 		}
 		else {
-        	//Only one year is displayed
+            //Only one year is displayed
             $('#form-timeperiod-statistic').css('display', 'none');
             $('#time_period').val($('#year').val());
             $('#time_period_statistic').val('none');
@@ -183,17 +138,11 @@ function change_inTRes(resolution){
         $('#time_period').append(option);
 	}
 	$('#time_period').val(key_list);
-    if ($('#region').val() == 'ee_map'){
-    	//Get the map from db
-    }
-
-    // Update the data and  map layer
-    ajax_update_etdata_and_map(auto_set_region = false);
+	clear_mapLayer_and_data();
+	set_new_mapLayer();
 }
 
 function change_inTimePeriod(time_period){
-    // Hide the popup window
-	window.map.closePopup();
 	if (time_period.length == 1) {
         // Set monthly summary to none
         $('#time_period_statistic').val('none');
@@ -201,19 +150,45 @@ function change_inTimePeriod(time_period){
 	}else{
 		$('#form-timeperiod-statistic').css('display', 'block');
 	}
-
-    // Update the map layer
-	var map_type = MAP_APP.determine_map_type(),
-		geojson = MAP_APP.set_geojson();
-	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
+	clear_mapLayer_and_data();
+	set_new_mapLayer();
 }
 
 function change_inTimePeriodStat(time_period_stat){
-    // Hide the popup window
+	/*
+	NOTE: statistic change does not affect the map,
+	as the statistic is computed on the fly in js
+	set_dataModalTable
+	*/
+	/*
+	clear_mapLayer_and_data();
+	set_new_mapLayer();
+	*/
 	window.map.closePopup();
-	// Update the map layer
-    var map_type = MAP_APP.determine_map_type(),
-		geojson = MAP_APP.set_geojson();
-	LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
+}
+
+function clear_mapLayer_and_data(){
+	window.map.closePopup();
+	// Delete old layer
+	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
+	MAP_APP.hide_mapColorbar('#colorbar');
+	// Delete old data
+	if (window.DATA['etdata'] ) {
+        window.DATA['etdata'] = {};
+    }
+    if (window.DATA['featsdata'] ) {
+        window.DATA['featsdata'] = {};
+    }
+}
+
+function set_new_mapLayer(){
+	//Set the new map_layer
+	if (region == "ee_map"){
+		// Generate a dynamic map with EE
+		// API call to CE
+	}else{
+		var geojson = MAP_APP.set_geojson();
+		LF_MAP_APP.set_default_mapLayer(geojson);
+	}
 }
 

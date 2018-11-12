@@ -71,7 +71,7 @@ body {
     padding: 0% 1%;
     cursor: move;
     z-index: 10;
-    background-color: #2196F3;
+    background-color: #5d666d;
     color: #fff;
 }
 
@@ -93,7 +93,7 @@ body {
     padding: 0% 1%;
     cursor: move;
     z-index: 10;
-    background-color: #2196F3;
+    background-color: #5d666d;
     color: #fff;
     width: auto;
 }
