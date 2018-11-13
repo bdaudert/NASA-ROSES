@@ -130,7 +130,7 @@ function ajax_update_data_and_map(auto_set_region=false){
     });
 }
 
-function ajax_set_featdata_on_feature_click(feat, layer) {
+function ajax_set_featdata_on_feature_click(latlng, feat, layer) {
     // Sets feature data on map click of single feature for
     // multiple years
     var tool_action = 'get_feat_data', html, popup;
@@ -139,11 +139,10 @@ function ajax_set_featdata_on_feature_click(feat, layer) {
     $.when(ajax_call).done(function () {
         html += MAP_APP.set_dataModalHeader();
         html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
-        popup = L.popup({
-            keepInView: true,
-            closeOnClick: false
-        }).setContent(html);
-        layer.bindPopup(popup).openPopup();
+        L.popup({ keepInView: true, closeOnClick: false })
+            .setLatLng(latlng)
+            .setContent(html)
+            .openOn(layer);
     });
 }
 
@@ -161,11 +160,10 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
             // Set the popup data
             html += MAP_APP.set_dataModalHeader();
             html += MAP_APP.set_popup_data(r['featsdata']);
-            var popup = L.popup({
-                keepInView: true,
-                closeOnClick: false
-            }).setContent(html);
-            selectedFeatures[0].bindPopup(popup).openPopup();
+            L.popup({ keepInView: true, closeOnClick: false })
+                .setLatLng(latlng)
+                .setContent(html)
+                .openOn(selectedFeature[0]);
         }
     });
 }
