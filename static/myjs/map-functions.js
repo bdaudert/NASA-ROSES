@@ -650,7 +650,7 @@ LF_MAP_APP = {
             }
           },
           maxZoom: 22,
-          indexMaxZoom: 5,       // max zoom in the initial tile index
+          indexMaxZoom: 5,
           interactive: true,
           getFeatureId: function(feature) {
               return feature.properties.feature_index;
@@ -664,6 +664,7 @@ LF_MAP_APP = {
             LF_MAP_APP.set_popup_window_single_feat(e, null, window.main_map_layer);
         })
         .addTo(window.map);
+
 
         // FIXME: Is there a way to do this with vector tiles?
         var geojsonLayer = L.geoJson(geojson)
@@ -691,10 +692,6 @@ LF_MAP_APP = {
             LF_MAP_APP.delete_mapLayer();
             MAP_APP.hide_mapColorbar('#colorbar');
         }
-
-        // Find the new map type and set the map layer
-        //var styleFunct = LF_MAP_APP.defaultStyleFunction,
-        //    geojson;
 
         // If choropleth, set the bins, colors and draw the colorbar
         if (map_type == 'Choropleth') {
@@ -730,7 +727,7 @@ LF_MAP_APP = {
     set_map_zoom_pan_listener: function(auto_set_region=false) {
         /*
         When aut_set_region = true we change region when user changes zoom on map
-        ia the moveend listener (detects pan and zoom)
+        via the moveend listener (detects pan and zoom)
         else (region was changed in the form), disbale the moveend listener
         */
         if (!auto_set_region) {
