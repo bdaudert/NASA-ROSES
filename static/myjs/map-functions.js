@@ -665,6 +665,7 @@ LF_MAP_APP = {
         })
         .addTo(window.map);
 
+
         // FIXME: Is there a way to do this with vector tiles?
         var geojsonLayer = L.geoJson(geojson)
         window.map.fitBounds(geojsonLayer.getBounds());
@@ -768,8 +769,10 @@ var initialize_lf_map = function() {
     }
     window.map.on("boxzoomend", function(e) {
         var bounds, feat_indices = [], layers = [], feat_idx, years;
+        console.log(e);
         window.map.eachLayer(function(layer) {
             try {
+                console.log(layer)
                 bounds = layer.getBounds();
             }catch(e){
                 return;
