@@ -17,29 +17,10 @@ MAP_APP = {
             return 'Choropleth';
         }
 
-        // Sub Annual
-        if ($('#time_period').val().length == 1){
-            return 'Choropleth';
-        }
-
-        // Multiple time periods
-        if ($('#time_period_statistic').val() != 'none'){
-            return 'Choropleth';
-        }
         return 'default';
     },
     set_geojson: function() {
-        var geojson;
-        if ($('#region').val().is_in(statics.regions_changing_by_year)){
-            if ($('#years').val().length == 1) {
-                geojson = window.DATA.geomdata[$('#years').val()[0]];
-            } else{
-                geojson = window.DATA.geomdata['9999'];
-            }
-        } else {
-             geojson = window.DATA.geomdata['9999'];
-        }
-        return geojson;
+
     },
     set_start_color: function () {
         return '#9bc2cf';
@@ -477,8 +458,8 @@ LF_MAP_APP = {
         Sets default openlayer basemap raster
         FIX ME: there might be a better looking obne, e.g. satellite base
         */
-        var layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        var layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         });
         return layer;
     },
@@ -667,8 +648,8 @@ LF_MAP_APP = {
 
 
         // FIXME: Is there a way to do this with vector tiles?
-        var geojsonLayer = L.geoJson(geojson)
-        window.map.fitBounds(geojsonLayer.getBounds());
+        //var geojsonLayer = L.geoJson(geojson)
+        //window.map.fitBounds(geojsonLayer.getBounds());
 
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
     },
@@ -683,7 +664,7 @@ LF_MAP_APP = {
         window.map.main_map_layer = null;
         MAP_APP.hide_mapColorbar('#colorbar');
     },
-    update_mapLayer: function(geojson, map_type, auto_set_region=false){
+    update_mapLayer: function(map_type, auto_set_region=false){
         /*
         Updates the map and sets up the popup window for click on single feature
         */
@@ -703,12 +684,12 @@ LF_MAP_APP = {
             window.bins = cb['bins'];
             MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
         }
-        LF_MAP_APP.set_mapLayer(geojson, map_type);
+        //LF_MAP_APP.set_mapLayer(map_type);
     },
     set_default_mapLayer: function(geojson){
         var map_type = MAP_APP.determine_map_type();
         //var styleFunct = LF_MAP_APP.defaultStyleFunction, geojson;
-        LF_MAP_APP.set_mapLayer(geojson, map_type);
+        //LF_MAP_APP.set_mapLayer(geojson, map_type);
     },
     on_zoom_change_region: function(){
         /*
@@ -744,7 +725,7 @@ LF_MAP_APP = {
 
 
 var initialize_lf_map = function() {
-    var region = $('#region').val();
+    var region = 'US_states_west_500k'; //$('#region').val();
     //Set the map zoom dependent on region
     var mapZoom = js_statics.map_zoom_by_region[region],
         mapCenter = js_statics.map_center_by_region[region];
@@ -752,16 +733,21 @@ var initialize_lf_map = function() {
     //Set the basic map
     window.map = L.map('main-map', {
         center: [mapCenter.lat, mapCenter.lng],
-        zoom: mapZoom
+        zoom: mapZoom,
+        zoomControl: false
     });
     LF_MAP_APP.set_lfRaster().addTo(window.map);
+
+    L.control.zoom({
+       position:'topright'
+    }).addTo(window.map);
 
     if (region == "ee_map"){
         //API call to CE
     }else {
-        var map_type = MAP_APP.determine_map_type(),
-            geojson = MAP_APP.set_geojson();
-        LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = true);
+        var map_type = MAP_APP.determine_map_type();
+            //geojson = MAP_APP.set_geojson();
+        LF_MAP_APP.update_mapLayer(map_type,  auto_set_region = true);
     }
     window.map.on("boxzoomend", function(e) {
         var bounds, feat_indices = [], layers = [], feat_idx, years;

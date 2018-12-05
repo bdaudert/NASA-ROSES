@@ -1,32 +1,68 @@
-{% extends "base.html" %}
+{% extends "index.html" %}
 
 {% block content %}
-
-<div id="header-container" style="display:none;">
-    {% include 'header.html' %}
-</div><br>
-<div id="main-container">
-    <input type="hidden" class="app_name" id="app_name" name="app_name" value="{{ app_name }}">
-    <p class="large error">Use Ctrl+Drag (Shift+Drag on Mac) to select multiple features!</p>
-    <div id="map-container">{% include 'map.html'%}</div>
-    <div class="row">
-        <div class="form-container draggable ui-widget-content">
-            <div class="form-container-header">Click to move!</div>
-            {% include 'form.html'%}
+    <div id="map-container">
+        <div id="main-map"></div>
+        <div class="form-container">
+            <form action="/" id="form_all" method="post">
+                <!--Hidden vars-->
+                <input type="hidden" class="map_type" id="map_type" name="map_type" value="{{ variables.map_type }}">
+                <input type="hidden" class="tool_action" id="tool_action" name="tool_action" value="{{ variables.tool_action }}">
+                <input type="hidden" class="min_date" id="min_date" name="min_date" value="{{ variables.min_date }}">
+                <input type="hidden" class="max_date" id="max_date" name="max_date" value="{{ variables.max_date }}">
+                <input type="hidden" class="feature_indices" id="feature_indices" name="feature_indices" value="{{ variables.feature_indices }}">
+            <div class="panel panel-default">
+            <div class="panel-body panel-forms">
+                <div id="form-variable">
+                    <b>Variable: </b><br>
+                    <select class="variable" id="variable" name="variable">
+                        {% for x,y in form_options.variable.items() %}
+                        <option value="{{ x }}"
+                        {% if x == variables.variable  %} selected {% endif %}
+                        {% if x != 'et' %} disbaled {% endif %}
+                        >{{ y }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
+            </div><!--panel-body panel-forms-->
+            </div><!--panel panel-default-->    
+            <div class="panel panel-default">
+            <div class="panel-body panel-forms">
+                <div id='form-dataset'>
+                    <b>Dataset:</b><br>
+                    <select class="dataset" id="dataset" name="dataset">
+                        {% for x,y in form_options.dataset.items() %}
+                        <option value="{{ x }}"
+                        {% if x == variables.dataset  %} selected {% endif %}
+                        {% if x == "Landsat"  %} disabled {% endif %}
+                        >{{ y }}</option>
+                        {% endfor %}
+                    </select><br>
+                </div>
+            </div><!--panel-body panel-forms-->
+            </div><!--panel panel-default-->    
+            <div class="panel panel-default">
+            <div class="panel-body panel-forms">
+                <div id='form-years'
+                {% if variables.region |is_in('Mason, US_fields') %}style="display:none;"{%endif%}>
+                    <b>Years: </b><br>
+                    <select class="years" id="years" name="years" multiple size="1">
+                        {% for x in form_options.years %}
+                        <option value="{{ x }}" {% if x |is_in(variables.years) %} selected {% endif %}>{{ x }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div><!--panel-body panel-forms-->
+            </div><!--panel panel-default-->    
+            </form>
         </div> 
+    </div>
         <div class="colorbar-container draggable ui-widget-content">
             <div class="colorbar-container-header">Click to move!</div>
             <div id="colorbar" class="colorbar ui-widget-content"></div>
         </div>
-    </div>
     <!-- MODAL WINDOWS -->
     {% include 'modal_general_error.html'%}
     {% include 'modal_data.html'%}
     {% include 'modal_layer_info.html'%}
-</div>
-<!--
-<div id="footer-container">
-   {% include 'footer.html'%}
-</div>
--->
 {% endblock %}

@@ -246,11 +246,14 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
     else:
         # Obtain the data from the datastore
         if db_type == 'DATASTORE':
-            tv = set_etdata_from_datastore(tv, feat_index_list)
+            #tv = set_etdata_from_datastore(tv, feat_index_list)
+            pass
         elif db_type == 'cloudSQL':
-            tv = set_etdata_from_cloudSQL(tv, feat_index_list)
+            #tv = set_etdata_from_cloudSQL(tv, feat_index_list)
+            pass
         elif db_type == 'TEST_SERVER':
-            tv = set_etdata_from_test_server(tv, feat_index_list, db_engine)
+            #tv = set_etdata_from_test_server(tv, feat_index_list, db_engine)
+            pass
         else:
             pass
     return tv
