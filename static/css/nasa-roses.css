@@ -50,8 +50,6 @@ body {
 }
 
 #map-container {
-    //position: absolute;
-    //top: 10%;
     bottom: 5%;
     height: 100%;
     width: 100%;
@@ -77,37 +75,16 @@ body {
     color: #fff;
 }
 
-#form-variable {
-    cursor: pointer;
-    border: none;
-    margin: 0;
-    background: none;
-    text-align: left;
+.dropdown {
+    height: 100%;
 }
 
-#form-dataset {
-    cursor: pointer;
-    border: none;
-    margin: 0;
-    background: none;
-    text-align: left;
-}
-
-#form-years {
-    cursor: pointer;
-    border: none;
-    margin: 0;
-    background: none;
-    text-align: left;
-}
-
-.main-form-button {
-    display: inline-block;
-    cursor: pointer;
-    border: #d4d9db !important;
-    margin: 0;
-    background: #d4d9db !important;
-    text-align: left;
+#fh5co-hero .btn {
+   font-size: 18px;
+   color: black;
+   border: none;
+   border-radius: 5px;
+   background: #d4d9db !important;
 }
 
 select {
