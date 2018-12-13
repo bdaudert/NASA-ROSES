@@ -8,77 +8,34 @@ MAP_APP = {
         Determines map type (choropleth or default)
         from form inputs
         */
-        if ($('#years').val().length != 1) {
+        if (window.region == "landing_page") {
             return 'default';
-        }
-
-        // Single Year
-        if ($('#temporal_resolution').val() == 'annual') {
-            return 'Choropleth';
+        } else {
+            return 'choropleth';
         }
 
         return 'default';
     },
-    set_geojson: function() {
-
-    },
-    set_start_color: function () {
-        return '#9bc2cf';
-    },
-    LightenDarkenColor: function (col, amt) {
-        //Darken amnt = negative number
-        var usePound = false;
-        if (col[0] == "#") {
-            col = col.slice(1);
-            usePound = true;
+    set_geojson: function(map_type) {
+        var geojson = null;
+        if (map_type == 'default') {
+            geojson = landing_page;
         }
-        var num = parseInt(col, 16);
-        var r = (num >> 16) + amt;
-
-        if (r > 255) r = 255;
-        else if (r < 0) r = 0;
-
-        var b = ((num >> 8) & 0x00FF) + amt;
-
-        if (b > 255) b = 255;
-        else if (b < 0) b = 0;
-
-        var g = (num & 0x0000FF) + amt;
-
-        if (g > 255) g = 255;
-        else if (g < 0) g = 0;
-        return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
+        return geojson;
     },
-    set_feat_colors: function (start_color, DOrL, year) {
-        var et_var = $('#variable').val(),
-            temporal_resolution = $('#temporal_resolution').val(),
-            time_period = $('#time_period').val(),
-            stat = $('#time_period_statistic').val(),
-            et_stat, i, idx, featsdata, j, colors = [], val_list, d, mn, mx,
-            year = $('#year').val(),
-            bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color,
-            featsdata = DATA.etdata[year];
+    set_feat_colors: function () {
+        var i, j, mn, mx, bins = [], step, num_colors = 9, cb = {'colors': [], 'bins': []};
 
-        val_list = MAP_APP.set_singleYear_allFeat_valList(featsdata);
-        if (!val_list) {
-            return cb;
-        }
-        mn = Math.floor(Math.min.apply(null, val_list));
-        mx = Math.ceil(Math.max.apply(null, val_list));
-        step = myRound((mx - mn) / num_colors, 2);
-        if ((mx - mn) % num_colors != 0) {
-            mx = mx + step;
-        }
-        amt = 0, j = mn;
-        while (j < mx) {
-            new_color = MAP_APP.LightenDarkenColor(start_color, amt);
-            colors.push(new_color);
-            bins.push([myRound(j,2), myRound(j + step, 2)]);
-            if (DOrL != 'darken') {
-                amt += 10;
-            } else {
-                amt -= 10;
-            }
+        // Colors taken from colorbrewer2.org
+        var colors = ["#f7fcf0", "#e0f3db", "#ccebc5", "#a8ddb5", "#7bccc4", "#4eb3d3", "#2b8cbe", "#0868ac", "#084081"];
+        // Alternative set with 10 diverging colors
+        //var colors = ["#67001f", "#b2182b", "#d6604d", "#f4a582", "#fddbc7", "#e0e0e0", "#bababa", "#878787", "#4d4d4d", "#1a1a1a"];
+        mn = window.DATA.minET;
+        mx = window.DATA.maxET;
+        step = myRound((mx - mn) / num_colors, 0);
+        j = mn;
+	while (j <  mx) {
+            bins.push([myRound(j,0), myRound(j + step, 0)]);
             j += step;
         }
         cb = {'colors': colors, 'bins': bins}
@@ -129,20 +86,6 @@ MAP_APP = {
             val_list = compute_stat(val_list, stat);
         }
         return val_list
-    },
-    set_singleYear_allFeat_valList: function(featsdata){
-        /*
-        Used to set colorbar
-        Sets the value list for a single year and multiple features
-        NOTE: stat is computed over each feature
-        */
-        var val_list = [], d;
-        // Return data for each feature separately
-        d = $.map(featsdata['features'], function (f_data) {
-            return MAP_APP.set_singleYear_singleFeat_valList(f_data);
-        });
-        val_list = val_list.concat(d);
-        return val_list;
     },
     set_singleYear_areaAveraged_valList: function(featsdata){
         /*
@@ -463,31 +406,18 @@ LF_MAP_APP = {
         });
         return layer;
     },
-    choroStyleFunction: function(feat_idx) {
+    choroStyleFunction: function(et) {
         /*
         Sets the feature styles for Choropleth map
         */
-        var year = $('#years').val()[0],
-            v = $('#variable').val(),
-            temporal_resolution = $('#temporal_resolution').val(),
-            et_var = statics.stats_by_var_res[v][temporal_resolution][0], color = null, i;
-        var idx = 0;
-        window.DATA.etdata[year].features.forEach(function (e,i) {
-            if (typeof e.properties.feature_index != "undefined" && e.properties.feature_index ==feat_idx){ idx = i;} 
-            else if (e.properties.idx == feat_idx) { idx = i;}
-        });
-        var f_data = {'properties': DATA.etdata[year].features[idx]['properties']},
-            val_list = MAP_APP.set_singleYear_singleFeat_valList(f_data);
-        // Note: for Choro, val_list is always of length 1
-        var data_val = val_list[0];
-        //Find the right bin
+
+        var i, color = '';
         for (i = 0; i < window.bins.length; i++) {
-            if (window.bins[i][0] <= data_val && data_val <= window.bins[i][1]) {
+            if (window.bins[i][0] <= et && et <= window.bins[i][1]) {
                 color = window.feat_colors[i];
                 break;
             }
         }
-
         return color;
     },
     highlight_feature: function(e) {
@@ -496,14 +426,15 @@ LF_MAP_APP = {
             fillColor: e.layer.options.fillColor,
             fillOpacity: 0.7,
             fill: true,
-            weight: 4,
+            stroke: true,
+            weight: 3,
             color: '#666',
         }
-        window.main_map_layer.setFeatureStyle(e.layer.properties.id, style);
+        window.main_map_layer.setFeatureStyle(e.layer.properties.SimsID, style);
     },
     reset_highlight: function(e) {
         /*Resets featue on mouseout*/
-        window.main_map_layer.resetFeatureStyle(e.layer.properties.id);
+        window.main_map_layer.resetFeatureStyle(e.layer.properties.SimsID);
     },
     delay: function(timeout, id, callback){
         /*
@@ -520,108 +451,31 @@ LF_MAP_APP = {
     zoom_toFeature: function(e) {
         window.map.fitBounds(e.target.getBounds());
     },
-    set_popup_window_single_feat: function(e, feat, layer){
+    set_popup_window_single_feat: function(e){
         /*
         Sets popup window when user clicks on a single feature
         e click event
-        feat geosjon feature
-        layer leaflet layer
         */
-        // Close all open popups
-        var latlng = [e.latlng.lat, e.latlng.lng];
-        window.map.closePopup();
+        var text = "ET DATA:" +  e.layer.properties.et_2017;
+        $('.popup').empty();
+        $('.popup').css("display", "block");
+        $('.popup').append("<p>"+ text + "</p>");
 
-        var years = $('#years').val(), feats = [feat],
-            feat_index = e.layer.properties.feature_index,
-            map_type = MAP_APP.determine_map_type(),
-            html = {}, fg_data;
-        // Update the feature index template variable
-        $('#feature_indices').val(String(feat_index));
-
-        fg_data = MAP_APP.set_feature_data([feat_index]);
-        if (Object.keys(fg_data).length === 0){
-            var error = 'Map data could not be found.',
-                cause = 'The map was not updated after a change in the form was made.',
-                resolution = 'Click "Upate Map".';
-            set_error(error, cause, resolution, 'Feature Click');
-            return;
-        }
-        window.DATA.featsdata = fg_data['featsdata'];
-        window.DATA.featsgeomdata = fg_data['featsgeomdata'];
-        html += MAP_APP.set_dataModalHeader();
-        html += MAP_APP.set_popup_data(window.DATA.featsdata);
-        L.popup({ keepInView: true, closeOnClick: false })
-            .setLatLng(latlng)
-            .setContent(html)
-            .openOn(window.map);
     },
-    set_popup_window_boxzoom: function(layers, feat_indices){
-        /*
-        Sets popup window when user creates boxzoom on features
-        feat_indices feat_idx of one or more features
-        year request eyar
-         */
-        // FIXME: work in progress
-        /*var html = '';
-        var fg_data = MAP_APP.set_feature_data(feat_indices);
-        if (Object.keys(fg_data).length === 0){
-            var error = 'Map data could not be found.',
-                cause = 'The map was not updated after a change in the form was made.',
-                resolution = 'Click "Upate Map".';
-            set_error(error, cause, resolution, 'Feature Click');
-            return;
-        }
-        window.DATA.featsdata = fg_data['featsdata'];
-        window.DATA.featsgeomdata = fg_data['featsgeomdata']
-        */
-        var html = '';
-        var featsdata = {};
-        featsdata[year] = {};
-        featsdata[year]['features'] = [];
-        featsdata[year]['type'] = "FeatureCollection";
-
-        window.DATA.etdata[year].features.forEach(function (value) {
-            feat_indices.forEach(function (idx) {
-                if (parseInt(value.properties.feature_index) == idx) {
-                    var feature = {};
-                    feature['type'] = "Feature";
-                    feature['properties'] = null;
-                    feature.properties = value.properties;
-                    featsdata[year]['features'].push(feature);
-                }
-            });
-        });
-
-        html += MAP_APP.set_dataModalHeader();
-        html += MAP_APP.set_popup_data(window.DATA.featsdata);
-        L.popup({ keepInView: true, closeOnClick: false })
-            .setLatLng(latlng)
-            .setContent(html)
-            .openOn(window.map);
+    get_color: function(id = null, map_type) {
+        return map_type == "choropleth" ? LF_MAP_APP.choroStyleFunction(id) : '#98bd28';
     },
-    get_color: function(id, map_type) {
-        return map_type == "Choropleth" ? LF_MAP_APP.choroStyleFunction(id) : '#ddd1e7';
-    },
-    set_mapLayer: function(geojson, map_type) {
+    set_mapGeoJson: function(geojson, map_type, region) {
         /*
         Set the map layer (geojson object) on the map
         */
-
-        // TODO: Consume from vector tile server
-        //window.main_map_layer = L.vectorGrid.protobuf('http://localhost:8889/data/vector/{z}/{x}/{y}.pbf?debug=true', {
+        $('.popup').css("display", "none");
         window.main_map_layer = L.vectorGrid.slicer(geojson, {
             rendererFactory: L.canvas.tile,
             vectorTileLayerStyles: {
-                //base15_ca_poly_170616_WGS84: function(properties, zoom) {
                 sliced: function(properties, zoom) {
-                var idx;
-                if (typeof properties.feature_index != "undefined") {
-                    idx = properties.feature_index;
-                } else {
-                    idx = properties.idx;
-                }
                 return {
-                    fillColor: LF_MAP_APP.get_color(idx, map_type),
+                    fillColor: LF_MAP_APP.get_color(map_type),
                     fillOpacity: 0.7,
                     stroke: true,
                     fill: true,
@@ -630,66 +484,106 @@ LF_MAP_APP = {
                 }
             }
           },
-          maxZoom: 22,
-          indexMaxZoom: 5,
           interactive: true,
           getFeatureId: function(feature) {
-              return feature.properties.feature_index;
+              return feature.properties.region;
+          }
+        })
+        /*.on ({
+            mouseover: LF_MAP_APP.highlight_feature,
+            mouseout: LF_MAP_APP.reset_highlight
+        })*/
+        .addTo(window.map);
+
+        window.main_map_layer
+        .on('click', function(e) {
+                window.region = e.layer.properties.region;
+                window.map.flyTo(js_statics.map_center_by_region[e.layer.properties.region], js_statics.map_zoom_by_region[e.layer.properties.region]);
+               LF_MAP_APP.update_mapLayer(null, 'choropleth', e.layer.properties.region);
+        })
+    },
+    set_mapVectorTiles: function(map_type, region) {
+        /*
+        Set the map layer (vector tiles protobuf) on the map
+        */
+        window.main_map_layer = L.vectorGrid.protobuf('http://roses.dri.edu:8080/data/vector/{z}/{x}/{y}.pbf?debug=true', {
+            rendererFactory: L.canvas.tile,
+            vectorTileLayerStyles: {
+                cv_data_all: function(properties, zoom) {
+                var et = properties.et_2017;
+                return {
+                    fillColor: LF_MAP_APP.get_color(et, map_type),
+                    fillOpacity: 0.7,
+                    stroke: true,
+                    fill: true,
+                    color: 'black',
+                    weight: 0.5
+                }
+            }
+          },
+          interactive: true,
+          getFeatureId: function(feature) {
+              return feature.properties.SimsID;
           }
         })
         .on ({
             mouseover: LF_MAP_APP.highlight_feature,
             mouseout: LF_MAP_APP.reset_highlight
         })
-        .on('click', function(e) {
-            LF_MAP_APP.set_popup_window_single_feat(e, null, window.main_map_layer);
-        })
         .addTo(window.map);
 
-
-        // FIXME: Is there a way to do this with vector tiles?
-        //var geojsonLayer = L.geoJson(geojson)
-        //window.map.fitBounds(geojsonLayer.getBounds());
-
-        LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=false);
+        window.main_map_layer
+        .on('click', function(e) {
+            LF_MAP_APP.set_popup_window_single_feat(e);
+        })
     },
     delete_mapLayer: function(){
         /*
         Delete the map layer (geojson layer) from the map
         */
-        // TODO: Investigate why we can't add separate layer
+        var i = 0; //FIXME: this is a hack, need better solution
         window.map.eachLayer(function (layer) {
-             if (layer._leaflet_id != 26) { window.map.removeLayer(layer); }
+             if (i != 0) { window.map.removeLayer(layer); }
+             i++;
         });
         window.map.main_map_layer = null;
-        MAP_APP.hide_mapColorbar('#colorbar');
+        MAP_APP.hide_mapColorbar('.colorbar-container');
     },
-    update_mapLayer: function(map_type, auto_set_region=false){
+    update_mapLayer: function(geojson=null, map_type, auto_set_region=false){
         /*
         Updates the map and sets up the popup window for click on single feature
         */
         // Delete old layer
         if (window.main_map_layer) {
             LF_MAP_APP.delete_mapLayer();
-            MAP_APP.hide_mapColorbar('#colorbar');
+            MAP_APP.hide_mapColorbar('.colorbar-container');
         }
 
-        // If choropleth, set the bins, colors and draw the colorbar
-        if (map_type == 'Choropleth') {
+        if (map_type == 'default') {
+            LF_MAP_APP.set_mapGeoJson(geojson, map_type);
+        }
+
+        if (map_type == 'choropleth') {
             //Set the colors for Choropleth map, draw colorbar
-            var year = $('#years').val()[0],
-                start_color = MAP_APP.set_start_color(),
-                cb = MAP_APP.set_feat_colors(start_color, 'darken', year);
+            // FIXME: replace hard-coded values with ajax call to database?
+            window.DATA.maxET = 2510;
+            window.DATA.minET = 0;
+            $('.colorbar-container').css('display', 'block');
+            var cb = MAP_APP.set_feat_colors();
             window.feat_colors = cb['colors'];
             window.bins = cb['bins'];
             MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
+            LF_MAP_APP.set_mapVectorTiles(map_type);
         }
-        //LF_MAP_APP.set_mapLayer(map_type);
     },
-    set_default_mapLayer: function(geojson){
-        var map_type = MAP_APP.determine_map_type();
-        //var styleFunct = LF_MAP_APP.defaultStyleFunction, geojson;
-        //LF_MAP_APP.set_mapLayer(geojson, map_type);
+    set_default_mapLayer: function(){
+        var map_type = 'default';
+        window.region = 'landing_page';
+        var geojson = MAP_APP.set_geojson(map_type);
+        console.log(geojson);
+        LF_MAP_APP.delete_mapLayer();
+        window.map.flyTo(js_statics.map_center_by_region[window.region], js_statics.map_zoom_by_region[window.region]);
+        LF_MAP_APP.set_mapGeoJson(geojson, map_type);
     },
     on_zoom_change_region: function(){
         /*
@@ -725,10 +619,10 @@ LF_MAP_APP = {
 
 
 var initialize_lf_map = function() {
-    var region = 'US_states_west_500k'; //$('#region').val();
+    window.region = 'landing_page';
     //Set the map zoom dependent on region
-    var mapZoom = js_statics.map_zoom_by_region[region],
-        mapCenter = js_statics.map_center_by_region[region];
+    var mapZoom = js_statics.map_zoom_by_region[window.region],
+        mapCenter = js_statics.map_center_by_region[window.region];
 
     //Set the basic map
     window.map = L.map('main-map', {
@@ -741,36 +635,15 @@ var initialize_lf_map = function() {
     L.control.zoom({
        position:'topright'
     }).addTo(window.map);
+            
+    MAP_APP.hide_mapColorbar('.colorbar-container');
 
     if (region == "ee_map"){
         //API call to CE
     }else {
         var map_type = MAP_APP.determine_map_type();
-            //geojson = MAP_APP.set_geojson();
-        LF_MAP_APP.update_mapLayer(map_type,  auto_set_region = true);
+        var geojson = MAP_APP.set_geojson(map_type);
+        LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = true);
     }
-    window.map.on("boxzoomend", function(e) {
-        var bounds, feat_indices = [], layers = [], feat_idx, years;
-        window.map.eachLayer(function(layer) {
-            try {
-                bounds = layer.getBounds();
-            }catch(e){
-                return;
-            }
-            if (e.boxZoomBounds.intersects(bounds)) {
-                try {
-                   feat_idx = layer.feature.properties['feature_index'] ;
-                }catch(e){
-                    return;
-                }
-                feat_indices.push(String(feat_idx));
-                layers.push(layer);
-            }
-        });
-        $('#feat_indices').val(feat_indices.join(','));
-        year = $('#year').val();
-        years = $('#years').val();
-        LF_MAP_APP.set_popup_window_boxzoom(layers, feat_indices)
-    });
 }
 

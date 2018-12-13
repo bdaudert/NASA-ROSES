@@ -2,9 +2,13 @@
 
 {% block content %}
 <script>
-function jumpto(id, input) {
+function jumpto(id, input, x=null) {
     $('#'+id).text(input);
     // Can be used to trigger action
+    if (id == "variable") {
+        console.log(x);
+        change_inVariable(x);
+    }
 }
 </script>
     <div id="map-container">
@@ -14,7 +18,7 @@ function jumpto(id, input) {
                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><label>Variable:</label><br>
                     {% for x,y in form_options.variable.items() %}
                     {% if x == variables.variable  %} <span id="variable">{{ y }}</span> <span class="caret"></span></button><ul class="dropdown-menu">{% endif %}
-                    <li><a onclick="jumpto('variable', '{{ y }}');">{{ y }}</a></li>
+                    <li><a onclick="jumpto('variable', '{{ y }}', '{{ x }}');">{{ y }}</a></li>
                     {% endfor %}
                   </ul>
             </div>
@@ -22,7 +26,7 @@ function jumpto(id, input) {
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><label>Dataset:</label><br>
                     {% for x,y in form_options.dataset.items() %}
-                    {% if x == variables.dataset  %} <span id="dataset">{{ y }}</span> <span class="caret"></span></button><ul class="dropdown-menu">{% endif %}
+                    {% if x == variables.dataset  %} <span id="dataset">{{ y }}</span> <span class="caret"></span></button><ul class="dropdown-menu" id="form-dataset">{% endif %}
                     <li><a onclick="jumpto('dataset', '{{ y }}');">{{ y }}</a></li>
                     {% endfor %}
                   </ul>
@@ -34,11 +38,17 @@ function jumpto(id, input) {
                     <span class="caret"></span></button>
                     <ul class="dropdown-menu">
                     {% for x in form_options.years %}
-                      <li><a onclick="jumpto('years', '{{ x }}');">{{ x }}</a></li>
+                      <li><a onclick="jumpto('year', '{{ x }}');">{{ x }}</a></li>
                     {% endfor %}
                   </ul>
             </div>
         </div> 
+
+        <div class="reset">
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" onclick="set_new_mapLayer()"><label>Reset</label><br></button>
+           </div>
+       </div>
     </div>
         <div class="colorbar-container draggable ui-widget-content">
             <div class="colorbar-container-header">Click to move!</div>

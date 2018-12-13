@@ -62,25 +62,24 @@ function change_inYears(years){
 
 
 function change_inVariable(variable){
-	//Clear the featuer indices
-	$('#feature_indices').val('');
-	//Set dataset
 	var datasets = statics.dataset_by_var[variable],
-		ds, option;
-	$('#dataset > option').remove();
+		ds, li;
+	$('#form-dataset').find('li').remove();
 	if (datasets.length == 0){
 		$('#form-dataset').css('display', 'none');
 	}
 	else{
-		$('#form-dataset').css('display', 'inline');
 		for (var i = 0; i < datasets.length; i++){
-			ds =  datasets[i];
-			option = '<option value="' + ds + '">' + statics.all_dataset[ds];
-	        option+='</option>';
-	        $('#dataset').append(option);
-		}
+		    ds =  datasets[i];
+                    if (i == 0) {
+                        $('#dataset').text(statics.all_dataset[ds]);
+                    } else {
+	                li = "<li><a onclick="+"jumpto('dataset','" + statics.all_dataset[ds] + "');"+">" + ds + "</a></li>";
+	                $('#form-dataset').append(li);
+                    }
+                }
 	}
-	//Show or hide et-models
+/*	//Show or hide et-models
     if (variable.not_in(['ET', 'ETRF'])){
         $('#form-model').css('display', 'none');
     }
@@ -89,6 +88,7 @@ function change_inVariable(variable){
     }
     clear_mapLayer_and_data();
 	set_new_mapLayer();
+*/
 }
 
 function change_inTRes(resolution){
@@ -183,12 +183,6 @@ function clear_mapLayer_and_data(){
 
 function set_new_mapLayer(){
 	//Set the new map_layer
-	if (region == "ee_map"){
-		// Generate a dynamic map with EE
-		// API call to CE
-	}else{
-		var geojson = MAP_APP.set_geojson();
-		LF_MAP_APP.set_default_mapLayer(geojson);
-	}
+        LF_MAP_APP.set_default_mapLayer();
 }
 

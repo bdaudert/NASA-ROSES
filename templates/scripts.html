@@ -54,6 +54,14 @@
             js_statics = data;
         }
     });
+    $.ajax({
+        url: 'static/json/landing_page.json',
+        async: false,
+        dataType: 'json',
+        success: function(data) {
+            landing_page = data;
+        }
+    });
     window.DATA = {};
     {% if etdata %}
         window.DATA['etdata'] = {{ etdata|safe }};
