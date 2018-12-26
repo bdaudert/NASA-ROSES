@@ -1,10 +1,16 @@
 {
-  "study_areas": {
-      "WBDHU4_Truckee_Carson_Walker": [],
-      "WBDHU8_Bear": [],
-      "WBDHU8_Malheur": [],
-      "usgs_central_valley_mod": [],
-      "paso-robles": []
+  "study_areas_geojson": {
+      "landing_page": "static/geojson/landing_page.geojson",
+      "WBDHU4_Truckee_Carson_Walker": "static/geojson/study_areas/WBDHU4_Truckee_Carson_Walker.geojson",
+      "WBDHU8_Bear": "static/geojson/study_areas/WBDHU8_Bear.geojson",
+      "WBDHU8_Malheur": "static/geojson/study_areas/WBDHU8_Malheur.geojson",
+      "usgs_central_valley_mod": "static/geojson/study_areas/usgs_central_valley_mod.geojson",
+      "paso-robles": "static/geojson/study_areas/paso-robles.geojson"
+  },
+  "field_boundaries_geojson": {
+      "BRC_Combined_subset_2009": "static/geojson/field_boundaries/BRC_Combined_subset_2009.geojson",
+      "harney_field_boundaries_2011_se_gw_irr": "static/geojson/field_boundaries/harney_field_boundaries_2011_se_gw_irr.geojson",
+      "METRIC_NV_apolgy_subset": "static/geojson/field_boundaries/METRIC_NV_apolgy_subset.geojson"
   },
   "map_zoom_by_region": {
       "ee_map": 4,

@@ -14,6 +14,7 @@ function jumpto(id, input, x=null) {
     <div id="map-container">
         <div id="main-map"></div>
         <div class="form-container">
+            <input type="hidden" name="region" id="region" value="{{ variables.region }}">
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><label>Variable:</label><br>
                     {% for x,y in form_options.variable.items() %}
@@ -46,7 +47,7 @@ function jumpto(id, input, x=null) {
 
         <div class="reset">
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" onclick="set_new_mapLayer()"><label>Reset</label><br></button>
+                <button class="btn btn-primary dropdown-toggle" type="button" onclick="set_landing_page_mapLayer()"><label>Reset</label><br></button>
            </div>
        </div>
     </div>

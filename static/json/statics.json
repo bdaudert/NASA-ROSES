@@ -105,6 +105,12 @@
         ]
     },
     "regions_changing_by_year": ["paso-robles"],
+    "dataset_by_var": {
+        "et": ["SSEBop"],
+        "etnet": ["SSEBop"],
+        "precip": ["SSEBop"],
+        "ndvi": ["SSEBop"]
+    },
     "db_id_region": {
         "Custom": 0,
         "US_states_west_500k": 1,

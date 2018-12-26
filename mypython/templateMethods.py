@@ -43,25 +43,14 @@ def set_dates():
     return dates
 
 def determine_map_type(tv_vars):
-    if (tv_vars['region'] == 'ee_map'):
+    if tv_vars['region'] == 'ee_map':
         return 'ee_map'
+    elif tv_vars['region'] == 'landing_page':
+        return 'landing_page'
+    else:
+        return 'choropleth'
 
-    # Multi year
-    if len(tv_vars['years']) != 1:
-        return 'default'
-
-    # Single Year
-    if tv_vars['temporal_resolution'] in ['annual', 'seasonal']:
-        return 'Choropleth'
-
-    # Sub Annual
-    if  len(tv_vars['time_period']) == 1:
-        return 'Choropleth'
-
-    # Multiple time periods
-    if tv_vars['time_period_statistic'] != 'none':
-        return 'Choropleth'
-    return 'default'
+    return 'landing_page'
 
 
 

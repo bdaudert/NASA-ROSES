@@ -103,7 +103,7 @@ function ajax_update_region(){
     // $.when(ajax1(), ajax2(), ajax3(), ajax4()).done(function(a1, a2, a3, a4){
     $.when(ajax_call).done(function(){
         var geojson = MAP_APP.set_geojson();
-        LF_MAP_APP.set_default_mapLayer(geojson);
+        LF_MAP_APP.set_landing_page_mapLayer(geojson);
     });
 }
 

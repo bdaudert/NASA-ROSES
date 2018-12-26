@@ -5,22 +5,21 @@ var MAP_APP = MAP_APP || {};
 MAP_APP = {
     determine_map_type: function(){
         /*
-        Determines map type (choropleth or default)
+        Determines map type (choropleth or landing_page)
         from form inputs
         */
         if (window.region == "landing_page") {
-            return 'default';
+            return 'landing_page';
         } else {
             return 'choropleth';
         }
-
-        return 'default';
     },
-    set_geojson: function(map_type) {
+    set_geojson: function(region) {
         var geojson = null;
-        if (map_type == 'default') {
-            geojson = landing_page;
-        }
+
+        try{
+           geojson = window.map_geojson;
+        }catch(e){}
         return geojson;
     },
     set_feat_colors: function () {
@@ -559,7 +558,7 @@ LF_MAP_APP = {
             MAP_APP.hide_mapColorbar('.colorbar-container');
         }
 
-        if (map_type == 'default') {
+        if (map_type == 'landing_page') {
             LF_MAP_APP.set_mapGeoJson(geojson, map_type);
         }
 
@@ -576,14 +575,13 @@ LF_MAP_APP = {
             LF_MAP_APP.set_mapVectorTiles(map_type);
         }
     },
-    set_default_mapLayer: function(){
-        var map_type = 'default';
-        window.region = 'landing_page';
-        var geojson = MAP_APP.set_geojson(map_type);
+    set_landing_page_mapLayer: function(){
+        var region = 'landing_page';
+        var geojson = MAP_APP.set_geojson(region);
         console.log(geojson);
         LF_MAP_APP.delete_mapLayer();
-        window.map.flyTo(js_statics.map_center_by_region[window.region], js_statics.map_zoom_by_region[window.region]);
-        LF_MAP_APP.set_mapGeoJson(geojson, map_type);
+        window.map.flyTo(js_statics.map_center_by_region[region], js_statics.map_zoom_by_region[region]);
+        LF_MAP_APP.set_mapGeoJson(geojson, region);
     },
     on_zoom_change_region: function(){
         /*

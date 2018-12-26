@@ -47,16 +47,6 @@ function change_inYear(year){
 	set_new_mapLayer();
 }
 
-function change_inYears(years){
-    // Clear the featuer indices
-	$('#feature_indices').val('');// Hide the popup window
-	//Couple year field to be first year of selection
-    $('#year').val($('#years').val()[0]);
-    clear_mapLayer_and_data();
-	set_new_mapLayer();
-}
-
-
 function change_inVariable(variable){
 	var datasets = statics.dataset_by_var[variable],
 		ds, li;
@@ -67,101 +57,17 @@ function change_inVariable(variable){
 	else{
 		for (var i = 0; i < datasets.length; i++){
 		    ds =  datasets[i];
-                    if (i == 0) {
-                        $('#dataset').text(statics.all_dataset[ds]);
-                    } else {
-	                li = "<li><a onclick="+"jumpto('dataset','" + statics.all_dataset[ds] + "');"+">" + ds + "</a></li>";
-	                $('#form-dataset').append(li);
-                    }
-                }
-	}
-/*	//Show or hide et-models
-    if (variable.not_in(['ET', 'ETRF'])){
-        $('#form-model').css('display', 'none');
-    }
-    else{
-        $('#form-model').css('display', 'inline');
-    }
-    clear_mapLayer_and_data();
-	set_new_mapLayer();
-*/
-}
-
-function change_inTRes(resolution){
-    var tps, tp, tp_name, option, key, key_list = [];
-    //Clear the feature indices
-	$('#feature_indices').val('');
-
-    if (resolution.is_in(['annual'])){
-        $('#form-timeperiod').css('display','none');
-        $('#form-timeperiod-statistic').css('display', 'none');
-        if ($('#years').css('display') !=  'none'){
-        	//Mutiple years
-			var year_list = $('#years').val();
-			//Set time_period option to the year list
-			tps = {}
-			for (var i=0; i< year_list.length; i++ ){
-        		tps[year_list[i]] = year_list[i];
+			if (i == 0) {
+				$('#dataset').text(statics.all_dataset[ds]);
+			} else {
+				li = "<li><a onclick="+"jumpto('dataset','" + statics.all_dataset[ds] + "');"+">" + ds + "</a></li>";
+				$('#form-dataset').append(li);
 			}
 		}
-		else {
-            //Only one year is displayed
-            $('#form-timeperiod-statistic').css('display', 'none');
-            $('#time_period').val($('#year').val());
-            $('#time_period_statistic').val('none');
-            tps = {};
-            //Set the time period to the field year for region
-            if ($('#region').val() != 'ee_map') {
-                key = $('#year').val();
-                tps[key] = key;
-            }
-        }
-    }
-    else{
-        $('#form-timeperiod').css('display','block');
-        $('#form-timeperiod-statistic').css('display','block');
-        tps = statics.time_period_by_res[resolution];
-    }
-
-    //Set new timeseries options
-	$('#time_period > option').remove();
-	for (key in tps){
-		key_list.push(key);
-		tp =  key;
-		tp_name = tps[key]
-		option = '<option value="' + tp + '">' + tp_name;
-        option+='</option>';
-        $('#time_period').append(option);
 	}
-	$('#time_period').val(key_list);
-	clear_mapLayer_and_data();
-	set_new_mapLayer();
 }
 
-function change_inTimePeriod(time_period){
-	if (time_period.length == 1) {
-        // Set monthly summary to none
-        $('#time_period_statistic').val('none');
-    	$('#form-timeperiod-statistic').css('display', 'none');
-	}else{
-		$('#form-timeperiod-statistic').css('display', 'block');
-	}
-	clear_mapLayer_and_data();
-	set_new_mapLayer();
-}
 
-function change_inTimePeriodStat(time_period_stat){
-	/*
-	NOTE: statistic change does not affect the map,
-	as the statistic is computed on the fly in js
-	set_dataModalTable
-	*/
-	/*
-	clear_mapLayer_and_data();
-	set_new_mapLayer();
-	*/
-	window.map.closePopup();
-}
 
 function clear_mapLayer_and_data(){
 	window.map.closePopup();
@@ -179,6 +85,8 @@ function clear_mapLayer_and_data(){
 
 function set_new_mapLayer(){
 	//Set the new map_layer
-        LF_MAP_APP.set_default_mapLayer();
+	if ($('#region').val() == 'landing_page') {
+        LF_MAP_APP.set_landing_page_mapLayer();
+    }
 }
 

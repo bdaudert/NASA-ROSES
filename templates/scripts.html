@@ -54,12 +54,16 @@
             js_statics = data;
         }
     });
+    var region = $('#region').val();
+    var geojson_file_path = js_statics.study_areas_geojson[region];
+    console.log(region);
+    console.log(geojson_file_path);
     $.ajax({
-        url: 'static/geojson/landing_page.geojson',
+        url: geojson_file_path,
         async: false,
         dataType: 'json',
         success: function(data) {
-            landing_page = data;
+            map_geojson = data;
         }
     });
     window.DATA = {};
