@@ -26,16 +26,12 @@ function change_inRegion(region, auto_set_region=false){
         // Field data
 		$('#form-year').css('display', 'inline');
 		$('#form-years').css('display', 'none');
-        //Not clear if/when this will be used
-		//$('#form-aggregation_area').css('display', 'inline')
 	}else if (region == 'ee_map'){
 		//Maps
 		$('#form-years').css('display', 'none');
 		$('#form-year').css('display', 'none');
-		//Not clear if/when this will be used
-		//$('#form-aggregation_area').css('display', 'none');
 	}else{
-		//Predefined aggregation areas
+		//Predefined regions
 		$('#form-years').css('display', 'inline');
 		$('#form-year').css('display', 'none');
 	}

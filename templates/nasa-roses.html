@@ -37,7 +37,7 @@ function jumpto(id, input, x=null) {
                     <span id="year">{{ variables.year }}</span>
                     <span class="caret"></span></button>
                     <ul class="dropdown-menu">
-                    {% for x in form_options.years %}
+                    {% for x in form_options.year %}
                       <li><a onclick="jumpto('year', '{{ x }}');">{{ x }}</a></li>
                     {% endfor %}
                   </ul>

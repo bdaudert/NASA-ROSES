@@ -1,5 +1,12 @@
 {
-    "map_zoom_by_region": {
+  "study_areas": {
+      "WBDHU4_Truckee_Carson_Walker": [],
+      "WBDHU8_Bear": [],
+      "WBDHU8_Malheur": [],
+      "usgs_central_valley_mod": [],
+      "paso-robles": []
+  },
+  "map_zoom_by_region": {
       "ee_map": 4,
       "landing_page": 6,
       "Mason": 11,

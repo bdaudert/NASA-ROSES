@@ -3,30 +3,15 @@
     "form_option_keys": [
         "tool_action",
         "region",
-        "aggregation_area",
-        "variable",
         "dataset",
-        "temporal_resolution",
-        "years_statistic",
-        "time_period_statistic"
+        "variable"
     ],
     "variable_defaults": {
         "tool_action": "None",
-        "region": "US_states_west_500k",
-        "aggregation_area": "",
-        "year": "2003",
-        "years": [
-            "2003"
-        ],
-        "years_statistic": "none",
-        "variable": "et",
+        "region": "landing_page",
         "dataset": "SSEBop",
-        "temporal_resolution": "annual",
-        "time_period": [
-            "2003"
-        ],
-        "time_period_statistic": "none",
-        "feature_indices": ""
+        "year": "2003",
+        "variable": "et"
     },
     "msg_for_tool_action": {
         "update_region": "Updating Region",
@@ -35,19 +20,15 @@
         "update_data_and_map": "Updating Map Data"
     },
     "all_region": {
-        "US_states_west_500k": "States, Western US",
-        "US_counties_west_500k": "Counties, Western US",
-        "Mason": "Mason Valley Fields",
-        "CentralValley_15": "Central Valley Fields"
+        "landing_page": "Study Areas",
+        "WBDHU4_Truckee_Carson_Walker": "Truckee_Carson_Walker",
+        "WBDHU8_Bear": "Bear",
+        "WBDHU8_Malheur": "Malheur",
+        "usgs_central_valley_mod": "Central Valley",
+        "paso-robles": "Paso Robles"
     },
-    "all_aggregation_area": {
-        "US_states_west_500k": "States, Western US",
-        "US_counties_west_500k": "Counties, Western US",
-        "HUC2": "HUC 2, Western US",
-        "HUC4": "HUC 4, Western US",
-        "HUC6": "HUC 6, Western US",
-        "HUC8": "HUC 8, Western US",
-        "HUC10": "HUC 10, Western US"
+    "all_dataset": {
+        "SSEBop": "SSEBop-MODIS"
     },
     "all_year": {
         "SSEBop": [
@@ -60,90 +41,13 @@
             "2009",
             "2010",
             "2011"
-        ],
-        "Landsat": [
-            "2003",
-            "2004",
-            "2005",
-            "2006",
-            "2007",
-            "2008",
-            "2009",
-            "2010",
-            "2011"
-        ],
-        "gridMET": [
-            "2003",
-            "2004",
-            "2005",
-            "2006",
-            "2007",
-            "2008",
-            "2009",
-            "2010",
-            "2011"
         ]
-    },
-    "all_years": {
-        "SSEBop": [
-            "2003",
-            "2004",
-            "2005",
-            "2006",
-            "2007",
-            "2008",
-            "2009",
-            "2010",
-            "2011"
-        ],
-        "Landsat": [
-            "2003",
-            "2004",
-            "2005",
-            "2006",
-            "2007",
-            "2008",
-            "2009",
-            "2010",
-            "2011"
-        ],
-        "gridMET": [
-            "2003",
-            "2004",
-            "2005",
-            "2006",
-            "2007",
-            "2008",
-            "2009",
-            "2010",
-            "2011"
-        ]
-    },
-    "all_dataset": {
-        "MODIS": "MODIS",
-        "Landsat": "Landsat",
-        "gridMET": "UI METDATA/gridMET",
-        "SSEBop": "SSEBop-MODIS"
     },
     "all_variable": {
         "et": "Actual ET",
-        "etrf": "Fractional ET",
-        "pr": "Precipitation",
-        "NDVI": "NDVI"
-    },
-    "all_temporal_resolution": {
-        "monthly": "Monthly",
-        "annual": "Annual"
-    },
-    "all_years_statistic": {
-        "none": "None",
-        "sum": "Sum",
-        "mean": "Mean"
-    },
-    "all_time_period_statistic": {
-        "none": "List monthly values",
-        "sum": "Sum",
-        "mean": "Mean"
+        "etnet": "Net ET (ET - PPT)",
+        "precip": "Precipitation (PPT)",
+        "ndvi": "NDVI"
     },
     "all_tool_action": {
         "None": "None",
@@ -167,13 +71,6 @@
         "12": "December"
     },
     "mon_len": [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
-    "dataset_by_var": {
-        "et": ["SSEBop"],
-        "etrf": ["SSEBop"],
-        "etr": [],
-        "pr": ["gridMET"],
-        "NDVI": ["Landsat", "MODIS"]
-    },
     "response_vars": {
         "None": [],
         "update_region": [
@@ -207,188 +104,7 @@
             "point_value"
         ]
     },
-    "time_period_by_res": {
-        "monthly": {
-            "1": "January",
-            "2": "February",
-            "3": "March",
-            "4": "April",
-            "5": "May",
-            "6": "June",
-            "7": "July",
-            "8": "August",
-            "9": "September",
-            "10": "October",
-            "11": "November",
-            "12": "December"
-        },
-        "seasonal": {
-            "DJF": "DJF (Dec-Feb)",
-            "MAM": "MAM (Mar-May)",
-            "JJA": "JJA (Jun - Aug)",
-            "SON": "SON (Sept-Nov)",
-            "NWY": "Northern Water Year",
-            "SWY": "Southern Water Year",
-            "NGS": "Northern Growing Season (Apr - Oct)",
-            "NGS": "Last Northern Growing Season (Apr - Oct)",
-            "SGS": "Last Southern Growing Season (Nov - Mar)"
-        },
-        "annual": {}
-    },
-    "all_data_cols": [
-        "etr_annual",
-        "et_annual",
-        "etrf_annual",
-        "pr_annual",
-        "net_annual",
-        "etr_seasonal",
-        "et_seasonal",
-        "etrf_seasonal",
-        "pr_seasonal",
-        "net_seasonal",
-        "start_mon",
-        "end_mon",
-        "etr_m01",
-        "etr_m02",
-        "etr_m03",
-        "etr_m04",
-        "etr_m05",
-        "etr_m06",
-        "etr_m07",
-        "etr_m08",
-        "etr_m09",
-        "etr_m10",
-        "etr_m11",
-        "etr_m12",
-        "et_m01",
-        "et_m02",
-        "et_m03",
-        "et_m04",
-        "et_m05",
-        "et_m06",
-        "et_m07",
-        "et_m08",
-        "et_m09",
-        "et_m10",
-        "et_m11",
-        "et_m12",
-        "etrf_m01"
-    ],
-    "geom_meta_cols": {
-        "Mason": [
-            "OBJECTID",
-            "STATE",
-            "HUC8",
-            "HUC8_NAME",
-            "PIXELCOUNT",
-            "AREA"
-        ],
-        "CentralValley_15": [
-            "COUNTY",
-            "AcresMast",
-            "CmdtyMast",
-            "SourceMast"
-        ],
-        "US_states_west_500k": [
-            "STATEFP",
-            "STUSPS",
-            "NAME",
-            "ALAND",
-            "AWATER"
-        ],
-        "US_counties_west_500k": [
-            "STATEFP",
-            "COUNTYFP",
-            "NAME",
-            "ALAND",
-            "AWATER"
-        ],
-        "US_HUC2_west": [
-            "AREASQKM",
-            "STATES",
-            "HUC2",
-            "NAME"
-        ],
-        "US_HUC4_west": [
-            "AREASQKM",
-            "STATES",
-            "HUC2",
-            "NAME"
-        ],
-        "US_HUC6_west": [
-            "AREASQKM",
-            "STATES",
-            "HUC2",
-            "NAME"
-        ],
-        "US_HUC8_west": [
-            "AREASQKM",
-            "STATES",
-            "HUC2",
-            "NAME"
-        ],
-        "US_HUC10_west": [
-            "AREASQKM",
-            "STATES",
-            "HUC2",
-            "NAME"
-        ]
-    },
-    "geom_name_prop": {
-        "Mason": "OBJECTID",
-        "US_states_west_500k": "NAME",
-        "US_counties_west_500k": "NAME",
-        "US_HUC2_west": "NAME",
-        "US_HUC4_west": "NAME",
-        "US_HUC6_west": "NAME",
-        "US_HUC8_west": "NAME",
-        "US_HUC10_west": "NAME"
-    },
-    "geo_meta_cols_type": {
-        "Mason":["int", "str", "str", "str", "str", "str", "str", "int", "float"],
-        "US_states_west_500k": ["str", "str", "str", "float", "float"],
-        "US_counties_west_500k": ["str", "str", "str", "float", "float"],
-        "US_HUC2_west": ["float", "str", "str", "str"],
-        "US_HUC4_west": ["float", "str", "str", "str"],
-        "US_HUC6_west": ["float", "str", "str", "str"],
-        "US_HUC8_west": ["float", "str", "str", "str"],
-        "US_HUC10_west": ["float", "str", "str", "str"]
-    },
-    "stats_by_var_res":{
-        "et": {
-            "annual": ["et_annual"],
-            "monthly": ["et_m01", "et_m02" , "et_m03" , "et_m04",
-                "et_m05", "et_m06", "et_m07", "et_m08",
-                "et_m09", "et_m10", "et_m11", "et_m12"
-            ],
-            "seasonal": ["et_seasonal", "net_seasonal"]
-        },
-        "etr": {
-            "annual": ["etr_annual"],
-            "monthly": [ "etr_m01", "etr_m02", "etr_m03", "etr_m04",
-                "etr_m05", "etr_m06", "etr_m07", "etr_m08",
-                "etr_m09", "etr_m10", "etr_m11", "etr_m12"
-            ],
-            "seasonal": ["etr_seasonal", "net_seasonal"]
-        },
-        "etrf": {
-            "annual": ["etrf_annual"],
-            "monthly": ["etrf_m01", "etrf_m02", "etrf_m03", "etrf_m04",
-                "etrf_m05", "etrf_m06", "etrf_m07", "etrf_m08",
-                "etrf_m09", "etrf_m10", "etrf_m11", "etrf_m12"
-            ],
-            "seasonal": ["etrf_seasonal", "net_seasonal"]
-        },
-        "pr": {
-            "annual": ["pr_annual"],
-            "monthly": [ "pr_m01", "pr_m02", "pr_m03", "pr_m04",
-                "pr_m05", "pr_m06", "pr_m07", "pr_m08",
-                "pr_m09", "pr_m10", "pr_m11", "pr_m12"
-            ],
-            "seasonal": [ "pr_seasonal", "net_seasonal"]
-        }
-    },
-    "regions_changing_by_year": [],
+    "regions_changing_by_year": ["paso-robles"],
     "db_id_region": {
         "Custom": 0,
         "US_states_west_500k": 1,
@@ -397,29 +113,15 @@
         "CentralValley_15": 4
     },
     "db_id_dataset": {
-        "MODIS": 1,
-        "Landsat": 2,
-        "SSEBop": 3
+        "SSEBop": 1
     },
     "db_id_parameters_by_dataset": {
         "SSEBop": []
     },
     "db_id_variable": {
         "et": 1,
-        "etrf": 2,
-        "etr": 3,
-        "pr": 4
-    },
-    "db_id_parameter": {
-        "NDVI": 1,
-        "PPT": 2,
-        "ET0": 3,
-        "ETR": 4
-    },
-    "db_query_fields": [
-        "region",
-        "dataset",
-        "variable",
-        "feature_index"
-    ]
+        "etnet": 2,
+        "precip": 3,
+        "ndvi": 4
+    }
 }
