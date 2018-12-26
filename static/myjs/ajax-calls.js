@@ -102,7 +102,7 @@ function ajax_update_region(){
     var ajax_call = make_ajax_request(tool_action);
     // $.when(ajax1(), ajax2(), ajax3(), ajax4()).done(function(a1, a2, a3, a4){
     $.when(ajax_call).done(function(){
-        var geojson = MAP_APP.set_geojson();
+        var geojson = window.map_geojson[0];;
         LF_MAP_APP.set_landing_page_mapLayer(geojson);
     });
 }
@@ -124,7 +124,7 @@ function ajax_update_data_and_map(auto_set_region=false){
     $.when(ajax_call).done(function(){
         //Set new map layer
         var map_type = MAP_APP.determine_map_type(),
-		    geojson = MAP_APP.set_geojson();
+		    geojson = window.map_geojson[0];
 	    LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
         LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
     });

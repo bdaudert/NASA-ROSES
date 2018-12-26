@@ -12,35 +12,35 @@
       "harney_field_boundaries_2011_se_gw_irr": "static/geojson/field_boundaries/harney_field_boundaries_2011_se_gw_irr.geojson",
       "METRIC_NV_apolgy_subset": "static/geojson/field_boundaries/METRIC_NV_apolgy_subset.geojson"
   },
-  "map_zoom_by_region": {
-      "ee_map": 4,
-      "landing_page": 6,
-      "Mason": 11,
-      "CentralValley_15": 10,
-      "US_fields": 11,
-      "US_states_west_500k": 5,
-      "US_counties_west_500k": 7,
-      "US_HUC4_west": 8
-    },
-    "region_by_map_zoom": {
-      "6": "landing_page",
-      "5": "US_states_west_500k",
-      "7": "US_counties_west_500k",
-      "11": "Mason"
-    },
-    "map_center_by_region": {
-      "ee_map": {"lat": 38.96, "lng": -119.16},
-      "landing_page": {"lat": 40.13, "lng": -116.52},
-      "Mason": {"lat": 38.96, "lng": -119.16},
-      "CentralValley_15": {"lat": 38.0, "lng": -121.0},
-      "US_fields": {"lat": 38.96, "lng": -119.16},
-      "US_states_west_500k": {"lat": 38.96, "lng": -119.16},
-      "US_counties_west_500k": {"lat": 38.96, "lng": -119.16},
-      "US_HUC2_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC4_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC6_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC8_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC10_west": {"lat": 38.96, "lng": -119.16}
+  "region_properties": {
+      "ee_map": {
+        "zoom": 4,
+        "center": {"lat": 38.96, "lng": -119.16}
+      },
+      "landing_page": {
+        "zoom": 6,
+        "center": {"lat": 40.13, "lng": -116.52}
+      },
+      "WBDHU4_Truckee_Carson_Walker": {
+        "zoom": 11,
+        "center": {"lat": 39.27, "lng": -119.27}
+      },
+      "WBDHU8_Bear": {
+        "zoom": 11,
+        "center": {"lat": 41.92, "lng": -111.11}
+      },
+      "WBDHU8_Malheur": {
+        "zoom": 11,
+        "center": {"lat": 43.55, "lng": -118.76}
+      },
+      "usgs_central_valley_mod": {
+        "zoom": 9,
+        "center": {"lat": 37.78, "lng": -121}
+      },
+      "paso-robles": {
+        "zoom": 11,
+        "center": {"lat": 35.69, "lng": -120.52}
+      }
     },
     "default_generalCauseMessage": {
         "formChecks": "One or more form entries are invalid.",

@@ -54,28 +54,33 @@
             js_statics = data;
         }
     });
-    var region = $('#region').val();
-    var geojson_file_path = js_statics.study_areas_geojson[region];
-    console.log(region);
-    console.log(geojson_file_path);
-    $.ajax({
-        url: geojson_file_path,
-        async: false,
-        dataType: 'json',
-        success: function(data) {
-            map_geojson = data;
-        }
-    });
-    window.DATA = {};
-    {% if etdata %}
-        window.DATA['etdata'] = {{ etdata|safe }};
-        window.DATA['geomdata'] = {{ geomdata|safe}};
-    {% endif %}
-    {% if featsdata %}
-       window.DATA['featsdata'] = {{ featsdata|safe }};
-       window.DATA['featsgeomdata'] = {{ featsgeomdata|safe}}; 
-    {% endif %}
 
+    // Set the map data
+    //FIX ME: can we move this to statics/myjs/map_functions?
+    var region = $('#region').val(), 
+        geojson_file_paths = [], map_geojson = {}, r, regions = [];
+    if (region != 'landing_page'){
+        geosjon_file_paths.push(js_statics.study_areas_geojson[region]);
+        regions.push(region);
+    }else{
+        for (var i = 1; i < Object.keys(js_statics.study_areas_geojson).length; i++){
+            r = Object.keys(js_statics.study_areas_geojson)[i];
+            geojson_file_paths.push(js_statics.study_areas_geojson[r]);
+            map_geojson[r] = null;
+            regions.push(r);
+        }
+    }
+    for (var i = 0; i < geojson_file_paths.length; i++){ 
+        $.ajax({
+            url: geojson_file_paths[i],
+            async: false,
+            dataType: 'json',
+            success: function(data) {
+                map_geojson[regions[i]] = data;
+            }
+        });
+    }
+    console.log(map_geojson);
     //Set up leaflet map
     $( document ).ready(function() {
         initialize_lf_map();

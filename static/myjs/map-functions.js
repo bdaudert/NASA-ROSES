@@ -14,14 +14,6 @@ MAP_APP = {
             return 'choropleth';
         }
     },
-    set_geojson: function(region) {
-        var geojson = null;
-
-        try{
-           geojson = window.map_geojson;
-        }catch(e){}
-        return geojson;
-    },
     set_feat_colors: function () {
         var i, j, mn, mx, bins = [], step, num_colors = 9, cb = {'colors': [], 'bins': []};
 
@@ -461,45 +453,8 @@ LF_MAP_APP = {
         $('.popup').append("<p>"+ text + "</p>");
 
     },
-    get_color: function(id = null, map_type) {
+    get_color: function(id=null, map_type) {
         return map_type == "choropleth" ? LF_MAP_APP.choroStyleFunction(id) : '#98bd28';
-    },
-    set_mapGeoJson: function(geojson, map_type, region) {
-        /*
-        Set the map layer (geojson object) on the map
-        */
-        $('.popup').css("display", "none");
-        window.main_map_layer = L.vectorGrid.slicer(geojson, {
-            rendererFactory: L.canvas.tile,
-            vectorTileLayerStyles: {
-                sliced: function(properties, zoom) {
-                return {
-                    fillColor: LF_MAP_APP.get_color(map_type),
-                    fillOpacity: 0.7,
-                    stroke: true,
-                    fill: true,
-                    color: 'black',
-                    weight: 0.5
-                }
-            }
-          },
-          interactive: true,
-          getFeatureId: function(feature) {
-              return feature.properties.region;
-          }
-        })
-        /*.on ({
-            mouseover: LF_MAP_APP.highlight_feature,
-            mouseout: LF_MAP_APP.reset_highlight
-        })*/
-        .addTo(window.map);
-
-        window.main_map_layer
-        .on('click', function(e) {
-                window.region = e.layer.properties.region;
-                window.map.flyTo(js_statics.map_center_by_region[e.layer.properties.region], js_statics.map_zoom_by_region[e.layer.properties.region]);
-               LF_MAP_APP.update_mapLayer(null, 'choropleth', e.layer.properties.region);
-        })
     },
     set_mapVectorTiles: function(map_type, region) {
         /*
@@ -536,6 +491,45 @@ LF_MAP_APP = {
             LF_MAP_APP.set_popup_window_single_feat(e);
         })
     },
+     set_mapGeoJson: function(geojson, map_type, region) {
+        /*
+        Set the map layer (geojson object) on the map
+        */
+        $('.popup').css("display", "none");
+        window.main_map_layer = L.vectorGrid.slicer(geojson, {
+            rendererFactory: L.canvas.tile,
+            vectorTileLayerStyles: {
+                sliced: function(properties, zoom) {
+                return {
+                    fillColor: LF_MAP_APP.get_color(map_type),
+                    fillOpacity: 0.7,
+                    stroke: true,
+                    fill: true,
+                    color: 'black',
+                    weight: 0.5
+                }
+            }
+          },
+          interactive: true,
+          getFeatureId: function(feature) {
+              return feature.properties.region;
+          }
+        })
+        /*.on ({
+            mouseover: LF_MAP_APP.highlight_feature,
+            mouseout: LF_MAP_APP.reset_highlight
+        })*/
+        .addTo(window.map);
+
+        window.main_map_layer
+        .on('click', function(e) {
+                window.region = e.layer.properties.region;
+                var zoom = js_statics.region_properties[window.region]['zoom'];
+                var center = js_statics.region_properties[window.region]['center'];
+                window.map.flyTo(center, zoom);
+               LF_MAP_APP.update_mapLayer(null, 'choropleth', e.layer.properties.region);
+        })
+    },
     delete_mapLayer: function(){
         /*
         Delete the map layer (geojson layer) from the map
@@ -547,6 +541,25 @@ LF_MAP_APP = {
         });
         window.map.main_map_layer = null;
         MAP_APP.hide_mapColorbar('.colorbar-container');
+    },
+    delete_mapLayers: function(){
+        //NEW
+        window.map.eachLayer(function (layer) {
+             window.map.removeLayer(layer);
+        });
+        for (var i = 0; i < window.map_layers.length; i++){
+            window.map_layers[i] = null;
+
+        }
+    },
+    update_geosjon_mapLayers: function() {
+        //NEW
+        var map_type = MAP_APP.determine_map_type();
+        if (map_type == 'choropleth') {
+            LF_MAP_APP.set_choropleth_mapLayer();
+        } else if (map_type == 'landing_page') {
+            LF_MAP_APP.set_landing_page_mapLayer();
+        }
     },
     update_mapLayer: function(geojson=null, map_type, auto_set_region=false){
         /*
@@ -576,12 +589,63 @@ LF_MAP_APP = {
         }
     },
     set_landing_page_mapLayer: function(){
+        if (! window.map_layers) {
+            window.map_layers = [];
+        }
+        if (! window.regions){
+            window.regions = [];
+        }
+        //Delete old map layers
+        LF_MAP_APP.delete_mapLayers;
+
         var region = 'landing_page';
-        var geojson = MAP_APP.set_geojson(region);
-        console.log(geojson);
-        LF_MAP_APP.delete_mapLayer();
-        window.map.flyTo(js_statics.map_center_by_region[region], js_statics.map_zoom_by_region[region]);
-        LF_MAP_APP.set_mapGeoJson(geojson, region);
+        var zoom = js_statics.region_properties[region]['zoom'];
+        var center =  js_statics.region_properties[region]['center'];
+        window.map.flyTo(center, zoom);
+        for (var i = 0; i < Object.keys(window.map_geojson).length; i++) {
+            var r = Object.keys(window.map_geojson)[i];
+            var geojson = window.map_geojson[r];
+            console.log(geojson);
+            window.regions.push(r);
+
+            $('.popup').css("display", "none");
+            window.map_layers[i] = L.vectorGrid.slicer(geojson, {
+                rendererFactory: L.canvas.tile,
+                vectorTileLayerStyles: {
+                    sliced: function(properties, zoom) {
+                        return {
+                            fillColor: LF_MAP_APP.get_color(region),
+                            fillOpacity: 0.7,
+                            stroke: true,
+                            fill: true,
+                            color: 'black',
+                            weight: 0.5
+                        }
+                    }
+                },
+                interactive: true
+            })
+            /*.on ({
+                mouseover: LF_MAP_APP.highlight_feature,
+                mouseout: LF_MAP_APP.reset_highlight
+            })*/
+            .addTo(window.map);
+
+            window.map_layers[i].on('click', function(e) {
+                //Zoom to the region and show the filed choropleth
+                var r = window.regions[i];
+                var z = js_statics.region_properties[r]['zoom'];
+                var c =  js_statics.region_properties[r]['center'];
+                window.map.flyTo(c,z);
+                LF_MAP_APP.set_choropleth_mapLayer();
+            });
+
+        }
+    },
+    set_coropleth_mapLayer: function(){
+        //NEW --> needs to be written
+        //https://hub.mybinder.org/user/jupyter-widgets-ipyleaflet-wyog84hh/tree/examples?token=oZukyf5JQSmGBqlXgtCcOA
+        delete_mapLayers();
     },
     on_zoom_change_region: function(){
         /*
@@ -617,10 +681,10 @@ LF_MAP_APP = {
 
 
 var initialize_lf_map = function() {
-    window.region = 'landing_page';
+    var region = $('#region').val();
     //Set the map zoom dependent on region
-    var mapZoom = js_statics.map_zoom_by_region[window.region],
-        mapCenter = js_statics.map_center_by_region[window.region];
+    var mapZoom = js_statics.region_properties[region]['zoom'],
+        mapCenter = js_statics.region_properties[region]['center'];
 
     //Set the basic map
     window.map = L.map('main-map', {
@@ -628,20 +692,30 @@ var initialize_lf_map = function() {
         zoom: mapZoom,
         zoomControl: false
     });
+    // Set the base map
     LF_MAP_APP.set_lfRaster().addTo(window.map);
-
     L.control.zoom({
        position:'topright'
     }).addTo(window.map);
-            
     MAP_APP.hide_mapColorbar('.colorbar-container');
 
+    // Set the map layers
+    window.map_layers = [];
+    window.regions = [];
     if (region == "ee_map"){
         //API call to CE
     }else {
-        var map_type = MAP_APP.determine_map_type();
-        var geojson = MAP_APP.set_geojson(map_type);
-        LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = true);
+        LF_MAP_APP.update_geosjon_mapLayers();
+
+        /*
+        if (region == 'landing_page'){
+            set_landing_page_mapLayers();
+        }else {
+            var map_type = MAP_APP.determine_map_type();
+            var geojson = window.map_geojson[0];
+            LF_MAP_APP.update_mapLayer(geojson, map_type, auto_set_region = true);
+        }
+        */
     }
 }
 
