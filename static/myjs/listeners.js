@@ -17,6 +17,7 @@ $(document).ready(function () {
         change_inYears($(this).val());
     });
      $('#variable').on('change', function(){
+         console.log('YO');
         change_inVariable($(this).val());
     });
 

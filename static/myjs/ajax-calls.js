@@ -1,4 +1,4 @@
-function clearOut_URL() {
+function set_ajaxURL() {
     var new_url = window.location.href.split('?')[0];
     //clears out the query string stuff in URL, but doesn't reload hte page
     if (history.pushState) {
@@ -57,12 +57,13 @@ function set_error(error, cause, resolution, method) {
 }
 
 function make_ajax_request(tool_action){
-    //Get the form data
+    //General ajax request
     var form_data = $("#form_all").serialize(),
-        msg = statics.msg_for_tool_action[tool_action],
+        msg = js_statics.msg_for_tool_action[tool_action],
         method = 'ajax',
-        url = clearOut_URL(),
+        url = set_ajaxURL(),
         jqXHR, err_code, r, error, cause, i, tv_var;
+
     start_progressbar(msg);
     jqXHR = $.ajax({
         url: url,
@@ -94,76 +95,11 @@ function make_ajax_request(tool_action){
     return jqXHR;
 }
 
-function ajax_update_region(){
-    // Udates the global data variables etdata, geomdata, featsdata, featsgeomdata
-    //Update the tool_action
-    var tool_action = 'update_region';
-    $('#tool_action').val(tool_action);
-    var ajax_call = make_ajax_request(tool_action);
-    // $.when(ajax1(), ajax2(), ajax3(), ajax4()).done(function(a1, a2, a3, a4){
-    $.when(ajax_call).done(function(){
-        var geojson = window.map_geojson[0];;
-        LF_MAP_APP.set_landing_page_mapLayer(geojson);
-    });
-}
-
-function ajax_update_data(){
-    // Udates the global data variables etdata, geomdata, featsdata, featsgeomdata
-    //Update the tool_action
-    var tool_action = 'update_data';
+function ajax_update_etdata(){
+    // Udates the global data variables etdata
+    var tool_action = 'update_etdata';
     $('#tool_action').val(tool_action);
     var ajax_call = make_ajax_request(tool_action);
 }
 
 
-function ajax_update_data_and_map(auto_set_region=false){
-    //Only used when single year request
-    var tool_action = 'update_data_and_map';
-    $('#tool_action').val(tool_action);
-    var ajax_call = make_ajax_request(tool_action);
-    $.when(ajax_call).done(function(){
-        //Set new map layer
-        var map_type = MAP_APP.determine_map_type(),
-		    geojson = window.map_geojson[0];
-	    LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
-        LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
-    });
-}
-
-function ajax_set_featdata_on_feature_click(latlng, feat, layer) {
-    // Sets feature data on map click of single feature for
-    // multiple years
-    var tool_action = 'get_feat_data', html, popup;
-    $('#tool_action').val(tool_action);
-    var ajax_call = make_ajax_request(tool_action);
-    $.when(ajax_call).done(function () {
-        html += MAP_APP.set_dataModalHeader();
-        html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
-        L.popup({ keepInView: true, closeOnClick: false })
-            .setLatLng(latlng)
-            .setContent(html)
-            .openOn(layer);
-    });
-}
-
-
-function ajax_set_featdata_on_dragbox(selectedFeatures){
-    // multiple feeatures selected via dragbox
-    var tool_action = 'get_feat_data',
-        html, popup, year, feat_idx_list;
-    $('#tool_action').val(tool_action);
-    var ajax_call = make_ajax_request(tool_action);
-    $.when(ajax_call).done(function () {
-        year = $('#years').val()[0];
-        feat_idx_list = $('#feature_indices').val().replace(', ', ',').split(',');
-        if (feat_idx_list.length != 0){
-            // Set the popup data
-            html += MAP_APP.set_dataModalHeader();
-            html += MAP_APP.set_popup_data(r['featsdata']);
-            L.popup({ keepInView: true, closeOnClick: false })
-                .setLatLng(latlng)
-                .setContent(html)
-                .openOn(selectedFeature[0]);
-        }
-    });
-}

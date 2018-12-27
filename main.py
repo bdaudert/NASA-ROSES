@@ -77,8 +77,8 @@ def home():
     ee.Initialize(config.EE_CREDENTIALS)
     ee.data.setDeadline(180000)
 
-    db_type= 'TEST_SERVER' # Jordan's db
-    # db_type = 'DATASTORE'
+    #db_type= 'TEST_SERVER' # Jordan's or DRI test db
+    db_type = 'FAKE'
     app_name = 'main'
     method = flask.request.method
     if method == 'POST':

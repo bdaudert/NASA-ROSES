@@ -1,5 +1,30 @@
-
 {
+    "study_area_properties": {
+          "study_areas": {
+              "geojson": "",
+              "field_boundaries": ""
+          },
+          "WBDHU4_Truckee_Carson_Walker": {
+              "geojson": "WBDHU4_Truckee_Carson_Walker.geojson",
+              "field_boundaries": "METRIC_NV_agpoly_subset.geojson"
+          },
+          "WBDHU8_Bear": {
+              "geojson": "WBDHU8_Bear.geojson",
+              "field_boundaries": "BRC_Combined_subset_2009.geojson"
+          },
+          "WBDHU8_Malheur": {
+              "geojson": "WBDHU8_Malheur.geojson",
+              "field_boundaries": "harney_field_boundaries_2016_sw_gw_irr.geojson"
+          },
+          "usgs_central_valley_mod": {
+              "geojson": "usgs_central_valley_mod.geojson",
+              "field_boundaries": "usgs_central_valley_fields_mod"
+          },
+          "paso-robles": {
+              "geojson": "paso-robles.geojson",
+              "field_boundaries": "usgs_central_valley_mod"
+          }
+    },
     "form_option_keys": [
         "tool_action",
         "region",
@@ -8,19 +33,13 @@
     ],
     "variable_defaults": {
         "tool_action": "None",
-        "region": "landing_page",
+        "region": "study_areas",
         "dataset": "SSEBop",
         "year": "2003",
         "variable": "et"
     },
-    "msg_for_tool_action": {
-        "update_region": "Updating Region",
-        "update_data": "Obtaining Data",
-        "get_feat_data": "Obtaining Data",
-        "update_data_and_map": "Updating Map Data"
-    },
     "all_region": {
-        "landing_page": "Study Areas",
+        "study_areas": "Study Areas",
         "WBDHU4_Truckee_Carson_Walker": "Truckee_Carson_Walker",
         "WBDHU8_Bear": "Bear",
         "WBDHU8_Malheur": "Malheur",
@@ -51,6 +70,7 @@
     },
     "all_tool_action": {
         "None": "None",
+        "update_etdata": "Update Data",
         "get_map": "Get Map",
         "get_ts": "Get Time Series",
         "get_value": "Get Value"
@@ -73,21 +93,7 @@
     "mon_len": [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
     "response_vars": {
         "None": [],
-        "update_region": [
-            "geomdata"
-        ],
-        "update_data": [
-            "geomdata",
-            "etdata"
-        ],
-        "update_data_and_map": [
-            "geomdata",
-            "etdata"
-        ],
-        "get_feat_data": [
-            "featsdata",
-            "featsgeomdata"
-        ],
+        "update_etdata": ["etdata"],
         "get_map": [
             "mapid",
             "token",
@@ -99,9 +105,6 @@
             "token",
             "sharelink_map",
             "sharelink_ts"
-        ],
-        "get_value": [
-            "point_value"
         ]
     },
     "regions_changing_by_year": ["paso-robles"],

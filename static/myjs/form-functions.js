@@ -85,7 +85,7 @@ function clear_mapLayer_and_data(){
 
 function set_new_mapLayer(){
 	//Set the new map_layer
-	if ($('#region').val() == 'landing_page') {
+	if ($('#region').val() == 'study_areas') {
         LF_MAP_APP.set_landing_page_mapLayer();
     }
 }

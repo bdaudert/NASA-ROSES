@@ -7,6 +7,7 @@ import logging
 import operator
 from copy import deepcopy
 from urllib.request import urlopen
+import random
 
 from config import statics
 from config import GEO_BUCKET_URL
@@ -45,14 +46,11 @@ def set_dates():
 def determine_map_type(tv_vars):
     if tv_vars['region'] == 'ee_map':
         return 'ee_map'
-    elif tv_vars['region'] == 'landing_page':
-        return 'landing_page'
+    elif tv_vars['region'] == 'study_areas':
+        return 'study_areas'
     else:
         return 'choropleth'
-
-    return 'landing_page'
-
-
+    return 'study_areas'
 
 
 def read_geomdata_from_bucket(geoFName):
@@ -64,17 +62,93 @@ def read_geomdata_from_bucket(geoFName):
         raise Exception(e)
     return geomdata
 
+def get_map_geojson_from_bucket(region):
+    map_geojson = {}
+
+    if region != 'study_areas':
+        regions = [region]
+    else:
+        regions = list(statics['study_area_properties'].keys())
+        regions.remove('study_areas')
+
+    for r in regions:
+        geoFName = statics['study_area_properties'][r]['geojson']
+        url = GEO_BUCKET_URL + geoFName
+        try:
+            # Replace python None values with empty strings for javascript
+            map_geojson[r] = json.loads(json.dumps(json.load(urlopen(url))).replace('null', '""'))
+        except:
+            map_geojson[r] = {}
+    return map_geojson
+
+def set_fake_data(template_variables):
+    region = template_variables['variables']['region']
+    variable = template_variables['variables']['variable']
+    if region == 'study_areas':
+       return {}
+    geomdata = template_variables['map_geojson'][region]
+    etdata = {}
+
+    for year in statics.all_year[template_variables['variables']['dataset']]:
+        etdata['year'] = {
+            'type': 'FeatureCollection',
+            'features': []
+        }
+    # Loop over features
+    for feat in geomdata['features']:
+        feat_data = {}
+        for year in statics.all_year[template_variables['variables']['dataset']]:
+            for m in statics.all_months.keys()[1:]:
+                feat_data[variable + '_' + m] = random.uniform(0.0, 100.0)
+            etdata[year]['features'].append(feat_data)
+    return etdata
+
+def set_etdata_from_test_server(template_variables, db_engine):
+    '''
+    Sets geondata, etdata, featsgeomdata, featsdata from Jordan's db
+    :param template_variablesv: dict of template variables
+    :param feat_index_list: list of feature indices to to be displayed on map
+    :return: tv: updated template variables
+    FIXME: we don't use geomdata, currently as set the map_geojson
+           by reading geojson from the nasa-roses bucket
+           see get_mapgeojson_from_bucket
+    '''
+    feat_index_list = ['all']
+    tv = deepcopy(template_variables)
+    DU = databaseMethods.postgis_Util(tv['variables'], db_engine)
+    tv['featsdata'], tv['featsgeomdata'] = {}, {}
+    if len(feat_index_list) >= 1 and feat_index_list[0] != 'all':
+        tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
+    map_type = determine_map_type(template_variables['variables'])
+
+    if map_type == "Choropleth" or len(tv['variables']['years']) == 1:
+        tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
+    else:
+        # Reads only the geometry data to generate non-choropleth map
+        tv['geomdata'] = DU.read_geomdata_from_db(9999)
+        tv['etdata'] = json.dumps({}, ensure_ascii=False)
+    return tv['etdata']
+
+def set_etdata(template_variables, db_type, db_engine):
+    if db_type == 'FAKE':
+        etdata= set_fake_data(template_variables)
+    elif db_type == 'TEST_SERVER':
+        feat_index_list = ['all']
+        etdata = set_etdata_from_test_server(template_variables, db_engine)
+    return etdata
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):
     '''
     Args:
     req_args: request arguments
     app_name: application name, e.g. OpenET-1
-    method: GET, shareLink or POTS (ajax call)
-    db_engine: database engine, options
-               None
+    method: GET, shareLink or POST (ajax call)
+    db_type: database engine, options
+               FAKE,
                DATASTORE
-               cloudSQL
+               TEST_SERVER (postgreSQL + postgis)
+   db_engine: None or postgreSQL database engine
+
                <db engine object>: sqlaalchemy engine hooked up to Jordan's db
     Returns:
     tv: a dictionary of template variables
@@ -116,4 +190,7 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
     if  tv['variables']['region'] in ['ee_map']:
         return tv
 
+    tv['map_geojson'] = get_map_geojson_from_bucket(tv['variables']['region'])
+    if tv['variables']['region'] != 'study_areas':
+        tv['etdata'] = set_etdata(tv, db_type, db_engine)
     return tv
