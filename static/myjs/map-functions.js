@@ -414,7 +414,7 @@ LF_MAP_APP = {
     highlight_feature: function(e) {
         /*highlights feature on mouse over*/
         var style = {
-            fillColor: e.layer.options.fillColor,
+            fillColor: 'black',
             fillOpacity: 0.7,
             fill: true,
             stroke: true,
@@ -544,8 +544,10 @@ LF_MAP_APP = {
     },
     delete_mapLayers: function(){
         //NEW
+        var i = 0; //FIXME: this is a hack, need better solution, first layer is map itself
         window.map.eachLayer(function (layer) {
-             window.map.removeLayer(layer);
+             if (i != 0) { window.map.removeLayer(layer); }
+             i++;
         });
         for (var i = 0; i < window.map_layers.length; i++){
             window.map_layers[i] = null;
@@ -602,50 +604,79 @@ LF_MAP_APP = {
         var zoom = js_statics.region_properties[region]['zoom'];
         var center =  js_statics.region_properties[region]['center'];
         window.map.flyTo(center, zoom);
-        for (var i = 0; i < Object.keys(window.map_geojson).length; i++) {
-            var r = Object.keys(window.map_geojson)[i];
-            var geojson = window.map_geojson[r];
-            console.log(geojson);
-            window.regions.push(r);
-
+        for (var g_idx = 0; g_idx < Object.keys(window.map_geojson).length; g_idx++) {
             $('.popup').css("display", "none");
+            var r = Object.keys(window.map_geojson)[g_idx];
+            var geojson = window.map_geojson[r];
+            var color = js_statics.region_properties[r]['color'];
+            var style = {
+                fillColor: color,
+                fillOpacity: 0.7,
+                stroke: true,
+                fill: true,
+                color: 'black',
+                weight: 0.5
+            };
+            window.regions.push(r);
+            window.map_layers[g_idx]  = L.geoJson(geojson, {
+                style: style,
+                onEachFeature: function(feature, layer) {
+                    layer.on("click", function (e) {
+                        //Zoom to the region and show the filed choropleth
+                        var reg = feature.properties.region;
+                        var z = js_statics.region_properties[reg]['zoom'];
+                        var c = js_statics.region_properties[reg]['center'];
+                        window.map.flyTo(c, z);
+                        LF_MAP_APP.set_choropleth_mapLayer();
+                    });
+                }
+            }).addTo(map);
+
+            /*
+            // FIX ME: not working
+            //window.main_map_layer = L.vectorGrid.protobuf('http://localhost:8889/data/vector/{z}/{x}/{y}.pbf?debug=true', {
             window.map_layers[i] = L.vectorGrid.slicer(geojson, {
                 rendererFactory: L.canvas.tile,
                 vectorTileLayerStyles: {
                     sliced: function(properties, zoom) {
-                        return {
-                            fillColor: LF_MAP_APP.get_color(region),
-                            fillOpacity: 0.7,
-                            stroke: true,
-                            fill: true,
-                            color: 'black',
-                            weight: 0.5
-                        }
+                        return style;
                     }
                 },
-                interactive: true
+                interactive: true,
+                getFeatureId: function(f) {
+		            return f.properties[Object.keys(f.properties)[0]];
+	            }
             })
-            /*.on ({
-                mouseover: LF_MAP_APP.highlight_feature,
-                mouseout: LF_MAP_APP.reset_highlight
-            })*/
-            .addTo(window.map);
-
-            window.map_layers[i].on('click', function(e) {
+            .on('mouseover', function(e) {
+                console.log(e.layer.properties);
+            })
+            .on('mouseout', function(e) {
+                console.log('mouseover');
+            })
+            .on('click', function(e) {
+                console.log('clicked');
                 //Zoom to the region and show the filed choropleth
                 var r = window.regions[i];
                 var z = js_statics.region_properties[r]['zoom'];
                 var c =  js_statics.region_properties[r]['center'];
                 window.map.flyTo(c,z);
                 LF_MAP_APP.set_choropleth_mapLayer();
-            });
+            })
+            .addTo(window.map);
+            */
 
+            /*
+            // FIXME: Is there a way to do this with vector tiles?
+            var geojsonLayer = L.geoJson(geojson)
+            window.map.fitBounds(geojsonLayer.getBounds());
+            */
         }
+
     },
-    set_coropleth_mapLayer: function(){
+    set_choropleth_mapLayer: function(){
         //NEW --> needs to be written
         //https://hub.mybinder.org/user/jupyter-widgets-ipyleaflet-wyog84hh/tree/examples?token=oZukyf5JQSmGBqlXgtCcOA
-        delete_mapLayers();
+        LF_MAP_APP.delete_mapLayers();
     },
     on_zoom_change_region: function(){
         /*
@@ -706,16 +737,6 @@ var initialize_lf_map = function() {
         //API call to CE
     }else {
         LF_MAP_APP.update_geosjon_mapLayers();
-
-        /*
-        if (region == 'landing_page'){
-            set_landing_page_mapLayers();
-        }else {
-            var map_type = MAP_APP.determine_map_type();
-            var geojson = window.map_geojson[0];
-            LF_MAP_APP.update_mapLayer(geojson, map_type, auto_set_region = true);
-        }
-        */
     }
 }
 

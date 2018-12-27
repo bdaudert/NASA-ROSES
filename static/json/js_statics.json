@@ -15,31 +15,38 @@
   "region_properties": {
       "ee_map": {
         "zoom": 4,
-        "center": {"lat": 38.96, "lng": -119.16}
+        "center": {"lat": 38.96, "lng": -119.16},
+        "color": ""
       },
       "landing_page": {
         "zoom": 6,
-        "center": {"lat": 40.13, "lng": -116.52}
+        "center": {"lat": 40.13, "lng": -116.52},
+        "color": "#E59866"
       },
       "WBDHU4_Truckee_Carson_Walker": {
-        "zoom": 11,
-        "center": {"lat": 39.27, "lng": -119.27}
+        "zoom": 7,
+        "center": {"lat": 39.27, "lng": -119.27},
+        "color": "#F7DC6F"
       },
       "WBDHU8_Bear": {
-        "zoom": 11,
-        "center": {"lat": 41.92, "lng": -111.11}
+        "zoom": 7,
+        "center": {"lat": 41.92, "lng": -111.11},
+        "color": "#73C6B6"
       },
       "WBDHU8_Malheur": {
-        "zoom": 11,
-        "center": {"lat": 43.55, "lng": -118.76}
+        "zoom": 7,
+        "center": {"lat": 43.55, "lng": -118.76},
+        "color": "#85C1E9"
       },
       "usgs_central_valley_mod": {
-        "zoom": 9,
-        "center": {"lat": 37.78, "lng": -121}
+        "zoom": 6,
+        "center": {"lat": 37.78, "lng": -121},
+        "color": "#BB8FCE"
       },
       "paso-robles": {
-        "zoom": 11,
-        "center": {"lat": 35.69, "lng": -120.52}
+        "zoom": 7,
+        "center": {"lat": 35.69, "lng": -120.52},
+        "color": "#F5B7B1"
       }
     },
     "default_generalCauseMessage": {
