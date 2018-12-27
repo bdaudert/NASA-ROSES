@@ -546,13 +546,13 @@ LF_MAP_APP = {
         //NEW
         var i = 0; //FIXME: this is a hack, need better solution, first layer is map itself
         window.map.eachLayer(function (layer) {
-             if (i != 0) { window.map.removeLayer(layer); }
+             if (i != 0) {
+                 window.map.removeLayer(layer);
+                 window.map_layers[i - 1] = null;
+             }
              i++;
-        });
-        for (var i = 0; i < window.map_layers.length; i++){
-            window.map_layers[i] = null;
 
-        }
+        });
     },
     update_geosjon_mapLayers: function() {
         //NEW
