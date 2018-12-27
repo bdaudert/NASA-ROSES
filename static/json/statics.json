@@ -114,6 +114,9 @@
         "precip": ["SSEBop"],
         "ndvi": ["SSEBop"]
     },
+    "var_by_dataset": {
+        "SSEBop": ["et", "etnet", "precip", "ndvi"]
+    },
     "db_id_region": {
         "Custom": 0,
         "US_states_west_500k": 1,

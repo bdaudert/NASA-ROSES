@@ -4,11 +4,6 @@
 <script>
 function jumpto(id, input, x=null) {
     $('#'+id).text(input);
-    // Can be used to trigger action
-    if (id == "variable") {
-        console.log(x);
-        change_inVariable(x);
-    }
 }
 </script>
     <div id="map-container">
@@ -16,30 +11,30 @@ function jumpto(id, input, x=null) {
         <div class="form-container">
             <input type="hidden" name="region" id="region" value="{{ variables.region }}">
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><label>Variable:</label><br>
+                <button class="btn btn-primary dropdown-toggle" id="form-variable" type="button" data-toggle="dropdown"><label>Variable:</label><br>
                     {% for x,y in form_options.variable.items() %}
                     {% if x == variables.variable  %} <span id="variable">{{ y }}</span> <span class="caret"></span></button><ul class="dropdown-menu">{% endif %}
-                    <li><a onclick="jumpto('variable', '{{ y }}', '{{ x }}');">{{ y }}</a></li>
+                    <li><a onclick="change_inVariable('{{x}}');jumpto('variable', '{{y}}', '{{x}}');">{{ y }}</a></li>
                     {% endfor %}
                   </ul>
             </div>
 
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><label>Dataset:</label><br>
+                <button class="btn btn-primary dropdown-toggle" id="form-dataset" type="button" data-toggle="dropdown"><label>Dataset:</label><br>
                     {% for x,y in form_options.dataset.items() %}
                     {% if x == variables.dataset  %} <span id="dataset">{{ y }}</span> <span class="caret"></span></button><ul class="dropdown-menu" id="form-dataset">{% endif %}
-                    <li><a onclick="jumpto('dataset', '{{ y }}');">{{ y }}</a></li>
+                    <li><a onclick="change_inDataset('{{x}}');jumpto('dataset', '{{y}}', '{{x}}');">{{ y }}</a></li>
                     {% endfor %}
                   </ul>
             </div>
 
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><label>Year:</label><br>
+                <button class="btn btn-primary dropdown-toggle" id="form-year" type="button" data-toggle="dropdown"><label>Year:</label><br>
                     <span id="year">{{ variables.year }}</span>
                     <span class="caret"></span></button>
                     <ul class="dropdown-menu">
                     {% for x in form_options.year %}
-                      <li><a onclick="jumpto('year', '{{ x }}');">{{ x }}</a></li>
+                      <li><a onclick="change_inYear('{{x}}');jumpto('year', '{{y}}', '{{x}}');">{{ x }}</a></li>
                     {% endfor %}
                   </ul>
             </div>

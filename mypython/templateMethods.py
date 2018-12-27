@@ -101,7 +101,7 @@ def set_fake_data(template_variables):
             for m in statics.all_months.keys()[1:]:
                 feat_data['properties'][variable + '_' + m] = random.uniform(0.0, 100.0)
             etdata[year]['features'].append(feat_data)
-    return etdata
+    return json.dumps(etdata, ensure_ascii=False)
 
 def set_etdata_from_test_server(template_variables, db_engine):
     '''

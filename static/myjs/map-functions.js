@@ -416,7 +416,7 @@ LF_MAP_APP = {
         ajax_update_etdata();
         LF_MAP_APP.set_choro_colors_and_bins(window.DATA.etdata, '#e5f5f9', 10, 'darken');
         LF_MAP_APP.draw_mapColorbar(window.choro_bins, window.choro_colors, '#colorbar');
-        window.map_layer[0] =  L.geoJson(geojson, {
+        window.map_layer[0] =  L.geoJson(window.DATA.map_geojson[0], {
             style: LF_MAP_APP.choroStyleFunct,
             onEachFeature: function(feature, layer) {
                 layer.on("click", function (e) {
