@@ -95,11 +95,11 @@ def set_fake_data(template_variables):
             'features': []
         }
     # Loop over features
-    for feat in geomdata['features']:
-        feat_data = {}
+    for feat_idx, feat in enumerate(geomdata['features']):
         for year in statics.all_year[template_variables['variables']['dataset']]:
+            feat_data = { 'properties': {'feature_index': feat_idx}}
             for m in statics.all_months.keys()[1:]:
-                feat_data[variable + '_' + m] = random.uniform(0.0, 100.0)
+                feat_data['properties'][variable + '_' + m] = random.uniform(0.0, 100.0)
             etdata[year]['features'].append(feat_data)
     return etdata
 

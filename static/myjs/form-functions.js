@@ -73,7 +73,7 @@ function clear_mapLayer_and_data(){
 	window.map.closePopup();
 	// Delete old layer
 	LF_MAP_APP.delete_mapLayer(window.main_map_layer);
-	MAP_APP.hide_mapColorbar('#colorbar');
+	LF_MAP_APP.hide_mapColorbar('#colorbar');
 	// Delete old data
 	if (window.DATA['etdata'] ) {
         window.DATA['etdata'] = {};

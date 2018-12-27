@@ -1,35 +1,7 @@
 /* MAP Utils*/
 
-// General map utils (google map api and openlayers)
-var MAP_APP = MAP_APP || {};
-MAP_APP = {
-    LightenDarkenColor: function (col, amt) {
-        //Darkens or Lightens the color by the  amnt
-        //amnt negative means darken, amnt positive means lighten
-        var usePound = false;
-        if (col[0] == "#") {
-            col = col.slice(1);
-            usePound = true;
-        }
-        var num = parseInt(col, 16);
-        var r = (num >> 16) + amt;
-
-        if (r > 255) r = 255;
-        else if (r < 0) r = 0;
-
-        var b = ((num >> 8) & 0x00FF) + amt;
-
-        if (b > 255) b = 255;
-        else if (b < 0) b = 0;
-
-        var g = (num & 0x0000FF) + amt;
-
-        if (g > 255) g = 255;
-        else if (g < 0) g = 0;
-        return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
-    },
-     /*
-     // BRITTA: would like to delete this, I think we want to be more flexile with the colorbar generation
+var NOT_USED = NOT_USED || {}
+NOT_USED = {
     set_feat_colors: function () {
         var i, j, mn, mx, bins = [], step, num_colors = 9, cb = {'colors': [], 'bins': []};
         // Colors taken from colorbrewer2.org
@@ -46,72 +18,6 @@ MAP_APP = {
         }
         cb = {'colors': colors, 'bins': bins}
         return cb;
-    },
-    */
-    set_feat_colors: function (val_list, start_color, num_colors, DOrL) {
-        /*
-        Creates bins and colors for data in val_list
-        Given a start color and DOrL value of 'darken' or 'lighten',
-        colors
-        */
-        var j, colors = [], val_list, d, mn, mx,
-            bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color;
-
-        if (!val_list) {
-            return cb;
-        }
-        mn = Math.floor(Math.min.apply(null, val_list));
-        mx = Math.ceil(Math.max.apply(null, val_list));
-        step = myRound((mx - mn) / num_colors, 2);
-        if ((mx - mn) % num_colors != 0) {
-            mx = mx + step;
-        }
-        amt = 0, j = mn;
-        while (j < mx) {
-            new_color = MAP_APP.LightenDarkenColor(start_color, amt);
-            colors.push(new_color);
-            bins.push([myRound(j, 2), myRound(j + step, 2)]);
-            if (DOrL != 'darken') {
-                amt += 10;
-            } else {
-                amt -= 10;
-            }
-            j += step;
-        }
-        cb = {'colors': colors, 'bins': bins}
-        return cb;
-    },
-     draw_mapColorbar: function (bins, colors, div_id) {
-        $(div_id).css('display', 'block');
-        colorScale(bins, colors, div_id);
-    },
-    hide_mapColorbar: function(div_id){
-        $(div_id).css('display', 'none');
-    }
-}
-
-var LF_MAP_APP = LF_MAP_APP || {};
-LF_MAP_APP = {
-    determine_map_type: function(){
-        /*
-        Determines map type (choropleth or study_areas)
-        from form inputs
-        */
-        if ($('#region').val() == "study_areas") {
-            return 'study_areas';
-        } else {
-            return 'choropleth';
-        }
-    },
-    set_lfRaster: function(){
-        /*
-        Sets default openlayer basemap raster
-        FIX ME: there might be a better looking obne, e.g. satellite base
-        */
-        var layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        });
-        return layer;
     },
     choroStyleFunction: function(et) {
         /*
@@ -143,7 +49,7 @@ LF_MAP_APP = {
         /*Resets featue on mouseout*/
         window.main_map_layer.resetFeatureStyle(e.layer.properties.SimsID);
     },
-    delay: function(timeout, id, callback){
+        delay: function(timeout, id, callback){
         /*
         Delay needed for zooming to work properly
         */
@@ -155,59 +61,7 @@ LF_MAP_APP = {
         delay = setTimeout(callback, timeout);
         this.delays[id] = delay;
     },
-    zoom_toFeature: function(e) {
-        window.map.fitBounds(e.target.getBounds());
-    },
-    set_popup_window_single_feat: function(e){
-        /*
-        Sets popup window when user clicks on a single feature
-        e click event
-        */
-        var text = "ET DATA:" +  e.layer.properties.et_2017;
-        $('.popup').empty();
-        $('.popup').css("display", "block");
-        $('.popup').append("<p>"+ text + "</p>");
-
-    },
-    get_color: function(id=null, map_type) {
-        return map_type == "choropleth" ? LF_MAP_APP.choroStyleFunction(id) : '#98bd28';
-    },
-    set_mapVectorTiles: function(map_type, region) {
-        /*
-        Set the map layer (vector tiles protobuf) on the map
-        */
-        window.main_map_layer = L.vectorGrid.protobuf('http://roses.dri.edu:8080/data/vector/{z}/{x}/{y}.pbf?debug=true', {
-            rendererFactory: L.canvas.tile,
-            vectorTileLayerStyles: {
-                cv_data_all: function(properties, zoom) {
-                var et = properties.et_2017;
-                return {
-                    fillColor: LF_MAP_APP.get_color(et, map_type),
-                    fillOpacity: 0.7,
-                    stroke: true,
-                    fill: true,
-                    color: 'black',
-                    weight: 0.5
-                }
-            }
-          },
-          interactive: true,
-          getFeatureId: function(feature) {
-              return feature.properties.SimsID;
-          }
-        })
-        .on ({
-            mouseover: LF_MAP_APP.highlight_feature,
-            mouseout: LF_MAP_APP.reset_highlight
-        })
-        .addTo(window.map);
-
-        window.main_map_layer
-        .on('click', function(e) {
-            LF_MAP_APP.set_popup_window_single_feat(e);
-        })
-    },
-     set_mapGeoJson: function(geojson, map_type, region) {
+    set_mapGeoJson: function(geojson, map_type, region) {
         /*
         Set the map layer (geojson object) on the map
         */
@@ -246,7 +100,7 @@ LF_MAP_APP = {
                LF_MAP_APP.update_mapLayer(null, 'choropleth', e.layer.properties.region);
         })
     },
-    delete_mapLayer: function(){
+     delete_mapLayer: function(){
         /*
         Delete the map layer (geojson layer) from the map
         */
@@ -256,7 +110,197 @@ LF_MAP_APP = {
              i++;
         });
         window.map.main_map_layer = null;
-        MAP_APP.hide_mapColorbar('.colorbar-container');
+        LF_MAP_APP.hide_mapColorbar('.colorbar-container');
+    },
+     update_mapLayer: function(geojson=null, map_type, auto_set_region=false){
+        /*
+        Updates the map and sets up the popup window for click on single feature
+        */
+        // Delete old layer
+        if (window.main_map_layer) {
+            LF_MAP_APP.delete_mapLayer();
+            LF_MAP_APP.hide_mapColorbar('.colorbar-container');
+        }
+
+        if (map_type == 'study_areas') {
+            LF_MAP_APP.set_mapGeoJson(geojson, map_type);
+        }
+
+        if (map_type == 'choropleth') {
+            //Set the colors for Choropleth map, draw colorbar
+            // FIXME: replace hard-coded values with ajax call to database?
+            window.DATA.maxET = 2510;
+            window.DATA.minET = 0;
+            $('.colorbar-container').css('display', 'block');
+            var cb = LF_MAP_APP.set_choro_colors_and_bins();
+            window.feat_colors = cb['colors'];
+            window.bins = cb['bins'];
+            LF_MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
+            LF_MAP_APP.set_mapVectorTiles(map_type);
+        }
+    },
+    on_zoom_change_region: function(){
+        /*
+        Change the region at different zoom levels
+        when user zooms on map (auto_set_region = true)
+        */
+        var zoom = window.map.getZoom();
+        if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
+            var region = $('#region').val(),
+                new_region = js_statics.region_by_map_zoom[String(zoom)];
+            if (region != new_region) {
+                change_inRegion(new_region, auto_set_region=true);
+            }
+        }
+    },
+    set_map_zoom_pan_listener: function(auto_set_region=false) {
+        /*
+        When aut_set_region = true we change region when user changes zoom on map
+        via the moveend listener (detects pan and zoom)
+        else (region was changed in the form), disbale the moveend listener
+        */
+        if (!auto_set_region) {
+            //Disable the map listener that changes region on zoom
+            try {
+                window.map.off('moveend', LF_MAP_APP.on_zoom_change_region);
+            }catch(e){}
+        }else{
+            // Show different regions at different zoom levels
+            window.map.on('moveend', LF_MAP_APP.on_zoom_change_region);
+        }
+    }
+}
+
+
+var LF_MAP_APP = LF_MAP_APP || {};
+LF_MAP_APP = {
+    LightenDarkenColor: function (col, amt) {
+        //Darkens or Lightens the color by the  amnt
+        //amnt negative means darken, amnt positive means lighten
+        var usePound = false;
+        if (col[0] == "#") {
+            col = col.slice(1);
+            usePound = true;
+        }
+        var num = parseInt(col, 16);
+        var r = (num >> 16) + amt;
+
+        if (r > 255) r = 255;
+        else if (r < 0) r = 0;
+
+        var b = ((num >> 8) & 0x00FF) + amt;
+
+        if (b > 255) b = 255;
+        else if (b < 0) b = 0;
+
+        var g = (num & 0x0000FF) + amt;
+
+        if (g > 255) g = 255;
+        else if (g < 0) g = 0;
+        return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
+    },
+    set_choro_colors_and_bins: function (val_list, start_color, num_colors, DOrL) {
+        /*
+        Creates bins and colors for data in val_list
+        Given a start color and DOrL value of 'darken' or 'lighten',
+        colors
+        */
+        var j, colors = [], val_list, d, mn, mx,
+            bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color;
+
+        if (!val_list) {
+            return cb;
+        }
+        mn = Math.floor(Math.min.apply(null, val_list));
+        mx = Math.ceil(Math.max.apply(null, val_list));
+        step = myRound((mx - mn) / num_colors, 2);
+        if ((mx - mn) % num_colors != 0) {
+            mx = mx + step;
+        }
+        amt = 0, j = mn;
+        while (j < mx) {
+            new_color = LF_MAP_APP.LightenDarkenColor(start_color, amt);
+            colors.push(new_color);
+            bins.push([myRound(j, 2), myRound(j + step, 2)]);
+            if (DOrL != 'darken') {
+                amt += 10;
+            } else {
+                amt -= 10;
+            }
+            j += step;
+        }
+        /*
+        cb = {'colors': colors, 'bins': bins}
+        return cb;
+        */
+        window.choro_colors = colors;
+        window.choro_bins = bins;
+    },
+     draw_mapColorbar: function (bins, colors, div_id) {
+        $(div_id).css('display', 'block');
+        colorScale(bins, colors, div_id);
+    },
+    hide_mapColorbar: function(div_id){
+        $(div_id).css('display', 'none');
+    },
+    choroStyleFunction: function(feature) {
+        /*
+        Sets the feature styles for Choropleth map
+        */
+        var year = $('#year').val(),
+            idx = feature.properties['feature_index'],
+            v = $('#variable').val(), color = null, i;
+
+        // Note: for Choro, val_list is always of length 1
+        var feat_data = window.DATA.etdata[year]['features'][idx]['properties'];
+        // Get the monthly data
+        var data_vals = [],  data_val = 0.0, mon = ''
+        for (var i = 1; i < 12; i++){
+            if (i < 10){
+                mon = '0' + String(m);
+            }else{
+                mon = String(i);
+            }
+            data_vals.push(feat_data[v + '_' + mon]);
+        }
+        data_val = data_vals.sum;
+        //Find the right bin
+        for (i = 0; i < window.choro_bins.length; i++) {
+            if (window.choro_bins[i][0] <= data_val && data_val <= window.choro_bins[i][1]) {
+                color = window.choro_colors[i];
+                break;
+            }
+        }
+        var style = {
+            fillColor: color,
+            weight: 2,
+            opacity: 1,
+            color: 'black',
+            dashArray: '3',
+            fillOpacity: 0.7
+        }
+        return style;
+    },
+    determine_map_type: function(){
+        /*
+        Determines map type (choropleth or study_areas)
+        from form inputs
+        */
+        if ($('#region').val() == "study_areas") {
+            return 'study_areas';
+        } else {
+            return 'choropleth';
+        }
+    },
+    set_lfRaster: function(){
+        /*
+        Sets default openlayer basemap raster
+        FIX ME: there might be a better looking obne, e.g. satellite base
+        */
+        var layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        });
+        return layer;
     },
     delete_mapLayers: function(){
         //NEW
@@ -277,33 +321,6 @@ LF_MAP_APP = {
             LF_MAP_APP.set_choropleth_mapLayer();
         } else if (map_type == 'study_areas') {
             LF_MAP_APP.set_landing_page_mapLayer();
-        }
-    },
-    update_mapLayer: function(geojson=null, map_type, auto_set_region=false){
-        /*
-        Updates the map and sets up the popup window for click on single feature
-        */
-        // Delete old layer
-        if (window.main_map_layer) {
-            LF_MAP_APP.delete_mapLayer();
-            MAP_APP.hide_mapColorbar('.colorbar-container');
-        }
-
-        if (map_type == 'study_areas') {
-            LF_MAP_APP.set_mapGeoJson(geojson, map_type);
-        }
-
-        if (map_type == 'choropleth') {
-            //Set the colors for Choropleth map, draw colorbar
-            // FIXME: replace hard-coded values with ajax call to database?
-            window.DATA.maxET = 2510;
-            window.DATA.minET = 0;
-            $('.colorbar-container').css('display', 'block');
-            var cb = MAP_APP.set_feat_colors();
-            window.feat_colors = cb['colors'];
-            window.bins = cb['bins'];
-            MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
-            LF_MAP_APP.set_mapVectorTiles(map_type);
         }
     },
     set_landing_page_mapLayer: function(){
@@ -397,41 +414,18 @@ LF_MAP_APP = {
         $('.colorbar-container').css('display', 'block');
         // Update window.DATA.etdata
         ajax_update_etdata();
-        var cb = MAP_APP.set_feat_colors(window.DATA.etdata, '#e5f5f9', 10, 'darken');
-        window.feat_colors = cb['colors'];
-        window.bins = cb['bins'];
-        MAP_APP.draw_mapColorbar(cb['bins'], cb['colors'], '#colorbar');
-        LF_MAP_APP.set_mapVectorTiles(map_type);
-    },
-    on_zoom_change_region: function(){
-        /*
-        Change the region at different zoom levels
-        when user zooms on map (auto_set_region = true)
-        */
-        var zoom = window.map.getZoom();
-        if (js_statics.region_by_map_zoom.hasOwnProperty(String(zoom))) {
-            var region = $('#region').val(),
-                new_region = js_statics.region_by_map_zoom[String(zoom)];
-            if (region != new_region) {
-                change_inRegion(new_region, auto_set_region=true);
+        LF_MAP_APP.set_choro_colors_and_bins(window.DATA.etdata, '#e5f5f9', 10, 'darken');
+        LF_MAP_APP.draw_mapColorbar(window.choro_bins, window.choro_colors, '#colorbar');
+        window.map_layer[0] =  L.geoJson(geojson, {
+            style: LF_MAP_APP.choroStyleFunct,
+            onEachFeature: function(feature, layer) {
+                layer.on("click", function (e) {
+                    LF_MAP_APP.zoomToFeature(e);
+                    LF_MAP_APP.set_popup_window_single_feat(e, feature, layer);
+                })
             }
-        }
-    },
-    set_map_zoom_pan_listener: function(auto_set_region=false) {
-        /*
-        When aut_set_region = true we change region when user changes zoom on map
-        via the moveend listener (detects pan and zoom)
-        else (region was changed in the form), disbale the moveend listener
-        */
-        if (!auto_set_region) {
-            //Disable the map listener that changes region on zoom
-            try {
-                window.map.off('moveend', LF_MAP_APP.on_zoom_change_region);
-            }catch(e){}
-        }else{
-            // Show different regions at different zoom levels
-            window.map.on('moveend', LF_MAP_APP.on_zoom_change_region);
-        }
+        }).addTo(window.map);
+
     }
 }
 
@@ -453,7 +447,7 @@ var initialize_lf_map = function() {
     L.control.zoom({
        position:'topright'
     }).addTo(window.map);
-    MAP_APP.hide_mapColorbar('.colorbar-container');
+    LF_MAP_APP.hide_mapColorbar('.colorbar-container');
 
     // Set the map layers
     window.map_layers = [];
