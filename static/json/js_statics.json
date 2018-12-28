@@ -55,10 +55,9 @@
         "pageload": "Are you using Chrome? Refresh the webpage and try again=,<br>Check your internet connection,<br>"
     },
     "msg_for_tool_action": {
-        "update_region": "Updating Region",
-        "update_data": "Obtaining Data",
-        "update_etdata": "Obtaining Data",
-        "get_feat_data": "Obtaining Data",
-        "update_data_and_map": "Updating Map Data"
+        "switch_to_fields": "Obtaining Field Data",
+        "get_map": "Obtaining Map Data",
+        "get_ts": "Obtaining Time Series Data",
+        "get_value": "Obtaining Data Value"
     }
 }

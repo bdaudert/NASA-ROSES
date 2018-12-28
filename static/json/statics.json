@@ -70,7 +70,7 @@
     },
     "all_tool_action": {
         "None": "None",
-        "update_etdata": "Update Data",
+        "switch_to_fields": "Get Field Data",
         "get_map": "Get Map",
         "get_ts": "Get Time Series",
         "get_value": "Get Value"
@@ -93,8 +93,7 @@
     "mon_len": [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
     "response_vars": {
         "None": [],
-        "update_etdata": ["etdata"],
-        "switch_to_fields": ["map_geojson"],
+        "switch_to_fields": ["map_geojson", "etdata"],
         "get_map": [
             "mapid",
             "token",

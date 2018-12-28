@@ -100,20 +100,17 @@ function make_ajax_request(tool_action){
         error = 'Server request failed with code ' + String(err_code) + '!'
         set_error(error, '', '', method)
     });
-    return jqXHR;
+    // return jqXHR;
 }
 
-function ajax_update_etdata(){
-    // Udates the global data variables etdata
-    var tool_action = 'update_etdata';
-    $('#tool_action').val(tool_action);
-    var ajax_call = make_ajax_request(tool_action);
-}
+
 
 function ajax_switch_to_fields(){
-    var tool_action = 'switch_to_fields';
+    var region = $('#region').val(),
+        tool_action = 'switch_to_fields';
+
     $('#tool_action').val(tool_action);
-    var ajax_call = make_ajax_request(tool_action);
+    make_ajax_request(tool_action);
 }
 
 

@@ -416,19 +416,28 @@ LF_MAP_APP = {
         // FIXME: replace hard-coded values with ajax call to database?
         $('.colorbar-container').css('display', 'block');
         // Update window.DATA.etdata
-        ajax_update_etdata();
+        ajax_switch_to_fields();
+
         LF_MAP_APP.set_choro_colors_and_bins(window.DATA.etdata, '#e5f5f9', 10, 'darken');
         LF_MAP_APP.draw_mapColorbar(window.choro_bins, window.choro_colors, '#colorbar');
-        window.map_layer[0] =  L.geoJson(window.DATA.map_geojson[0], {
+
+        window.map_layer[0] =  L.geoJson(window.DATA.map_geojson[region], {
             style: LF_MAP_APP.choroStyleFunct,
             onEachFeature: function(feature, layer) {
+                layer.on("mouseover", function(e) {
+                    LF_MAP_APP.set_popup_window_single_feat(e, feature, layer);
+                });
+                layer.on("mouseout", function(e){
+
+                });
                 layer.on("click", function (e) {
                     LF_MAP_APP.zoomToFeature(e);
-                    LF_MAP_APP.set_popup_window_single_feat(e, feature, layer);
+                    //FIXME: add code for this
+                    //Show time series data in data box
+
                 })
             }
         }).addTo(window.map);
-
     }
 }
 
