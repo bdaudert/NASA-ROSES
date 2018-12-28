@@ -357,6 +357,9 @@ LF_MAP_APP = {
                     layer.on("click", function (e) {
                         //Zoom to the region and show the filed choropleth
                         var reg = feature.properties.region;
+                        $('#region').val(reg);
+                        //Updates map_geojson data to field data
+                        ajax_switch_to_fields();
                         var z = js_statics.region_properties[reg]['zoom'];
                         var c = js_statics.region_properties[reg]['center'];
                         window.map.flyTo(c, z);

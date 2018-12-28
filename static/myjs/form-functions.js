@@ -26,7 +26,7 @@ function change_inVariable(variable){
 		ds =  datasets[i];
 		ds_name = statics.all_dataset[ds];
 		if (i == 0) {
-			$('#dataset').text(s_name);
+			$('#dataset').text(ds_name);
 		} else {
 			li = "<li><a onclick="+"change_inDataset(variable);jumpto('dataset','" + statics.all_dataset[ds] + "');"+">" + ds_name + "</a></li>";
 			$('#form-dataset').append(li);

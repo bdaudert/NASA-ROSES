@@ -62,7 +62,7 @@ def read_geomdata_from_bucket(geoFName):
         raise Exception(e)
     return geomdata
 
-def get_map_geojson_from_bucket(region):
+def get_map_geojson_from_bucket(region, type):
     map_geojson = {}
 
     if region != 'study_areas':
@@ -72,7 +72,10 @@ def get_map_geojson_from_bucket(region):
         regions.remove('study_areas')
 
     for r in regions:
-        geoFName = statics['study_area_properties'][r]['geojson']
+        if type == 'study_areas':
+            geoFName = statics['study_area_properties'][r]['geojson']
+        if type == 'field_boundaries':
+            geoFName = statics['study_area_properties'][r]['field_boundaries']
         url = GEO_BUCKET_URL + geoFName
         try:
             # Replace python None values with empty strings for javascript
@@ -88,17 +91,19 @@ def set_fake_data(template_variables):
        return {}
     geomdata = template_variables['map_geojson'][region]
     etdata = {}
-
-    for year in statics.all_year[template_variables['variables']['dataset']]:
-        etdata['year'] = {
+    ds = template_variables['variables']['dataset']
+    for year in statics['all_year'][ds]:
+        etdata[year] = {
             'type': 'FeatureCollection',
             'features': []
         }
     # Loop over features
     for feat_idx, feat in enumerate(geomdata['features']):
-        for year in statics.all_year[template_variables['variables']['dataset']]:
+        for year in statics['all_year'][ds]:
             feat_data = { 'properties': {'feature_index': feat_idx}}
-            for m in statics.all_months.keys()[1:]:
+            months = list(statics['all_months'].keys())
+            months.remove('all')
+            for m in months:
                 feat_data['properties'][variable + '_' + m] = random.uniform(0.0, 100.0)
             etdata[year]['features'].append(feat_data)
     return json.dumps(etdata, ensure_ascii=False)
@@ -189,8 +194,11 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
         return tv
     if  tv['variables']['region'] in ['ee_map']:
         return tv
+    if tv['variables']['tool_action'] == 'None':
+        tv['map_geojson'] = get_map_geojson_from_bucket(tv['variables']['region'], 'study_areas')
+    if tv['variables']['tool_action'] == 'switch_to_fields':
+        tv['map_geojson'] = get_map_geojson_from_bucket(tv['variables']['region'], 'field_boundaries')
 
-    tv['map_geojson'] = get_map_geojson_from_bucket(tv['variables']['region'])
     if tv['variables']['region'] != 'study_areas':
         tv['etdata'] = set_etdata(tv, db_type, db_engine)
     return tv

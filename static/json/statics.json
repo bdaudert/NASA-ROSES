@@ -94,6 +94,7 @@
     "response_vars": {
         "None": [],
         "update_etdata": ["etdata"],
+        "switch_to_fields": ["map_geojson"],
         "get_map": [
             "mapid",
             "token",

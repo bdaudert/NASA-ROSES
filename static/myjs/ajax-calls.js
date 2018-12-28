@@ -56,14 +56,22 @@ function set_error(error, cause, resolution, method) {
     $('#generalErrorModal').modal('show');
 }
 
+function set_form_data(){
+    var form_data = 'region=' + $('#region').val();
+    form_data += '&tool_action=' + $('#tool_action').val();
+    form_data += '&variable=' + $('#variable').attr('data-id');
+    form_data += '&dataset=' +  $('#dataset').attr('data-id');
+    form_data += '&year=' +  String($('#year').attr('data-id'));
+    return form_data;
+}
+
 function make_ajax_request(tool_action){
     //General ajax request
-    var form_data = $("#form_all").serialize(),
+    var form_data = set_form_data(),
         msg = js_statics.msg_for_tool_action[tool_action],
         method = 'ajax',
         url = set_ajaxURL(),
         jqXHR, err_code, r, error, cause, i, tv_var;
-
     start_progressbar(msg);
     jqXHR = $.ajax({
         url: url,
@@ -98,6 +106,12 @@ function make_ajax_request(tool_action){
 function ajax_update_etdata(){
     // Udates the global data variables etdata
     var tool_action = 'update_etdata';
+    $('#tool_action').val(tool_action);
+    var ajax_call = make_ajax_request(tool_action);
+}
+
+function ajax_switch_to_fields(){
+    var tool_action = 'switch_to_fields';
     $('#tool_action').val(tool_action);
     var ajax_call = make_ajax_request(tool_action);
 }
