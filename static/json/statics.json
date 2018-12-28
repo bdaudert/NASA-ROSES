@@ -76,6 +76,7 @@
     "all_tool_action": {
         "None": "None",
         "switch_to_fields": "Get Field Data",
+        "switch_to_study_areas": "Get Study Area Data",
         "get_map": "Get Map",
         "get_ts": "Get Time Series",
         "get_value": "Get Value"
@@ -99,6 +100,7 @@
     "response_vars": {
         "None": [],
         "switch_to_fields": ["map_geojson"],
+        "switch_to_study_areas": ["map_geojson"],
         "get_map": [
             "mapid",
             "token",

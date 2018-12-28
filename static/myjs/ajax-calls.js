@@ -66,6 +66,9 @@ function set_form_data(){
 }
 
 function make_ajax_request(tool_action){
+    //NOTE: this is only a template, we can't use this because we need to run
+    //async ajax call fro the UI not to freeexe (no progresbar)
+    // And therefor we need to execute specific code for each tool_action in the .done section
     //General ajax request
     var form_data = set_form_data(),
         msg = js_statics.msg_for_tool_action[tool_action],
@@ -93,7 +96,7 @@ function make_ajax_request(tool_action){
             tv_var = statics.response_vars[tool_action][i];
             window.DATA[tv_var] = r[tv_var];
         }
-        //end_progressbar();
+        end_progressbar();
     })
     .fail(function(jqXHR) {
         end_progressbar();
@@ -105,10 +108,9 @@ function make_ajax_request(tool_action){
 }
 
 
-
-function ajax_switch_to_fields(){
-    var region = $('#region').val(),
-        tool_action = 'switch_to_fields';
+function ajax_switch_to_study_areas(){
+    $('#region').val('study_areas');
+    var tool_action = 'switch_to_study_areas';
     $('#tool_action').val(tool_action);
 
     var form_data = set_form_data(),
@@ -137,37 +139,50 @@ function ajax_switch_to_fields(){
             tv_var = statics.response_vars[tool_action][i];
             window.DATA[tv_var] = r[tv_var];
         }
+        LF_MAP_APP.show_study_areas();
+        end_progressbar();
+    })
+    .fail(function(jqXHR) {
+        end_progressbar();
+        err_code = jqXHR.status;
+        error = 'Server request failed with code ' + String(err_code) + '!'
+        set_error(error, '', '', method)
+    });
+    // return jqXHR;
+}
 
-        //Set the colors for Choropleth map, draw colorbar
-        $('.colorbar-container').css('display', 'block');
-        var region = $('#region').val(),
-            variable = $('#variable').attr('data-id'),
-            val_list = LF_MAP_APP.get_choropleth_data_values(region, variable);
-        var cb = LF_MAP_APP.set_choropleth_colors_and_bins(val_list, '#9bc2cf', 10, 'darken');
-        window.DATA.choropleth_colors = cb['colors'];
-        window.DATA.choropleth_bins = cb['bins'];
-        LF_MAP_APP.draw_mapColorbar(window.DATA.choropleth_bins, window.DATA.choropleth_colors, '#colorbar');
+function ajax_switch_to_fields(){
+    var tool_action = 'switch_to_fields';
+    $('#tool_action').val(tool_action);
 
-        window.map_layers[0] =  L.geoJson(window.DATA.map_geojson[region], {
-            style: LF_MAP_APP.choroplethStyleFunction,
-            onEachFeature: function(feature, layer) {
-                layer.on("mouseover", function(e) {
-                    var popup_html = LF_MAP_APP.set_feature_popup_html(feature, val_list);
-                    layer.bindPopup(popup_html).openPopup();
-                });
-                layer.on("mouseout", function(e){
-                    window.map.closePopup();
-                });
-                layer.on("click", function (e) {
-                    //Zoom to feature
-                    window.map.fitBounds(e.target.getBounds());
-                    //FIXME: add code for this
-                    //Show time series data in data box
+    var form_data = set_form_data(),
+        msg = js_statics.msg_for_tool_action[tool_action],
+        method = 'ajax',
+        url = set_ajaxURL(),
+        jqXHR, err_code, r, error, cause, i, tv_var;
 
-                })
-            }
-        }).addTo(window.map);
-        window.map.fitBounds(window.map_layers[0].getBounds());
+    start_progressbar(msg);
+    jqXHR = $.ajax({
+        url: url,
+        method: "POST",
+        timeout: 60 * 5 * 1000,
+        //async: false,
+        data: form_data
+    })
+    .done(function(response) {
+        r = $.parseJSON(response);
+        if (r.hasOwnProperty('error')) {
+            error = r.error;
+            set_error( error, '', '', method);
+            end_progressbar();
+        }
+        //Set the new template variables
+        for (i=0; i < statics.response_vars[tool_action].length; i++){
+            tv_var = statics.response_vars[tool_action][i];
+            window.DATA[tv_var] = r[tv_var];
+        }
+        LF_MAP_APP.show_field_choropleth();
+
         end_progressbar();
     })
     .fail(function(jqXHR) {

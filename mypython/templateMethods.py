@@ -192,9 +192,10 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
     region = tv['variables']['region']
 
 
-    if tv['variables']['tool_action'] == 'None':
+    if tv['variables']['tool_action'] in ['None', 'switch_to_study_areas']:
         # Only geojsons area stored
         tv['map_geojson'] = get_map_geojson_from_bucket(region, 'study_areas')
+
     elif tv['variables']['tool_action'] == 'switch_to_fields':
         # geojson + etdata stored
         geomdata = get_map_geojson_from_bucket(region , 'field_boundaries')[region]

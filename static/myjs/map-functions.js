@@ -306,16 +306,39 @@ LF_MAP_APP = {
             LF_MAP_APP.set_landing_page_mapLayer();
         }
     },
-    set_landing_page_mapLayer: function(){
-        if (! window.map_layers) {
-            window.map_layers = [];
-        }
-        if (! window.regions){
-            window.regions = [];
-        }
-        //Delete old map layers
-        LF_MAP_APP.delete_mapLayers;
+    show_field_choropleth: function(){
+        //Set the colors for Choropleth map, draw colorbar
+        $('.colorbar-container').css('display', 'block');
+        var region = $('#region').val(),
+            variable = $('#variable').attr('data-id'),
+            val_list = LF_MAP_APP.get_choropleth_data_values(region, variable);
+        var cb = LF_MAP_APP.set_choropleth_colors_and_bins(val_list, '#9bc2cf', 10, 'darken');
+        window.DATA.choropleth_colors = cb['colors'];
+        window.DATA.choropleth_bins = cb['bins'];
+        LF_MAP_APP.draw_mapColorbar(window.DATA.choropleth_bins, window.DATA.choropleth_colors, '#colorbar');
 
+        window.map_layers[0] =  L.geoJson(window.DATA.map_geojson[region], {
+            style: LF_MAP_APP.choroplethStyleFunction,
+            onEachFeature: function(feature, layer) {
+                layer.on("mouseover", function(e) {
+                    var popup_html = LF_MAP_APP.set_feature_popup_html(feature, val_list);
+                    layer.bindPopup(popup_html).openPopup();
+                });
+                layer.on("mouseout", function(e){
+                    window.map.closePopup();
+                });
+                layer.on("click", function (e) {
+                    //Zoom to feature
+                    window.map.fitBounds(e.target.getBounds());
+                    //FIXME: add code for this
+                    //Show time series data in data box
+
+                })
+            }
+        }).addTo(window.map);
+        window.map.fitBounds(window.map_layers[0].getBounds());
+    },
+    show_study_areas: function(){
         var region = 'study_areas';
         var zoom = js_statics.region_properties[region]['zoom'];
         var center =  js_statics.region_properties[region]['center'];
@@ -387,6 +410,23 @@ LF_MAP_APP = {
             var geojsonLayer = L.geoJson(geojson)
             window.map.fitBounds(geojsonLayer.getBounds());
             */
+        }
+    },
+    set_landing_page_mapLayer: function() {
+        if (!window.map_layers) {
+            window.map_layers = [];
+        }
+        if (!window.regions) {
+            window.regions = [];
+        }
+        //Delete old map layers
+        LF_MAP_APP.delete_mapLayers;
+        var region = $('#region').val();
+        console.log(region);
+        if (region != 'study_areas') {
+            ajax_switch_to_study_areas();
+        } else {
+            LF_MAP_APP.show_study_areas();
         }
     },
     set_feature_popup_html: function(feature, val_list){
