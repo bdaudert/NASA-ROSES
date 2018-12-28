@@ -8,6 +8,7 @@ import operator
 from copy import deepcopy
 from urllib.request import urlopen
 import random
+import copy
 
 from config import statics
 from config import GEO_BUCKET_URL
@@ -84,29 +85,27 @@ def get_map_geojson_from_bucket(region, type):
             map_geojson[r] = {}
     return map_geojson
 
-def set_fake_data(template_variables):
+def set_fake_data(template_variables, geomdata):
     region = template_variables['variables']['region']
     variable = template_variables['variables']['variable']
     if region == 'study_areas':
        return {}
-    geomdata = template_variables['map_geojson'][region]
-    etdata = {}
+    etdata = {
+        'type': 'FeatureCollection',
+        'features': []
+    }
     ds = template_variables['variables']['dataset']
-    for year in statics['all_year'][ds]:
-        etdata[year] = {
-            'type': 'FeatureCollection',
-            'features': []
-        }
     # Loop over features
     for feat_idx, feat in enumerate(geomdata['features']):
-        for year in statics['all_year'][ds]:
-            feat_data = { 'properties': {'feature_index': feat_idx}}
-            months = list(statics['all_months'].keys())
-            months.remove('all')
-            for m in months:
-                feat_data['properties'][variable + '_' + m] = random.uniform(0.0, 100.0)
-            etdata[year]['features'].append(feat_data)
-    return json.dumps(etdata, ensure_ascii=False)
+        feat_data = copy.deepcopy(feat)
+        feat_data['properties']['feature_index'] = feat_idx
+        months = list(statics['all_months'].keys())
+        months.remove('all')
+        for m in months:
+            feat_data['properties'][variable + '_' + m] = round(random.uniform(0.0, 100.0), 4)
+        etdata['features'].append(feat_data)
+    # return json.dumps(etdata, ensure_ascii=False)
+    return etdata
 
 def set_etdata_from_test_server(template_variables, db_engine):
     '''
@@ -114,13 +113,13 @@ def set_etdata_from_test_server(template_variables, db_engine):
     :param template_variablesv: dict of template variables
     :param feat_index_list: list of feature indices to to be displayed on map
     :return: tv: updated template variables
-    FIXME: we don't use geomdata, currently as set the map_geojson
-           by reading geojson from the nasa-roses bucket
-           see get_mapgeojson_from_bucket
+    FIXME: NEED to check that read_map_geojson works as expected, neeeds to match output from fake data
     '''
     feat_index_list = ['all']
     tv = deepcopy(template_variables)
     DU = databaseMethods.postgis_Util(tv['variables'], db_engine)
+    map_geojson = DU.read_map_geojson_from_db(feature_index_list=feat_index_list)
+    '''
     tv['featsdata'], tv['featsgeomdata'] = {}, {}
     if len(feat_index_list) >= 1 and feat_index_list[0] != 'all':
         tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
@@ -133,14 +132,8 @@ def set_etdata_from_test_server(template_variables, db_engine):
         tv['geomdata'] = DU.read_geomdata_from_db(9999)
         tv['etdata'] = json.dumps({}, ensure_ascii=False)
     return tv['etdata']
-
-def set_etdata(template_variables, db_type, db_engine):
-    if db_type == 'FAKE':
-        etdata= set_fake_data(template_variables)
-    elif db_type == 'TEST_SERVER':
-        feat_index_list = ['all']
-        etdata = set_etdata_from_test_server(template_variables, db_engine)
-    return etdata
+    '''
+    return map_geojson
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):
     '''
@@ -152,7 +145,7 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
                FAKE,
                DATASTORE
                TEST_SERVER (postgreSQL + postgis)
-   db_engine: None or postgreSQL database engine
+    db_engine: None or postgreSQL database engine
 
                <db engine object>: sqlaalchemy engine hooked up to Jordan's db
     Returns:
@@ -194,11 +187,19 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
         return tv
     if  tv['variables']['region'] in ['ee_map']:
         return tv
-    if tv['variables']['tool_action'] == 'None':
-        tv['map_geojson'] = get_map_geojson_from_bucket(tv['variables']['region'], 'study_areas')
-    if tv['variables']['tool_action'] == 'switch_to_fields':
-        tv['map_geojson'] = get_map_geojson_from_bucket(tv['variables']['region'], 'field_boundaries')
 
-    if tv['variables']['region'] != 'study_areas':
-        tv['etdata'] = set_etdata(tv, db_type, db_engine)
+    # Set the map_geojson file(s)
+    region = tv['variables']['region']
+
+
+    if tv['variables']['tool_action'] == 'None':
+        # Only geojsons area stored
+        tv['map_geojson'] = get_map_geojson_from_bucket(region, 'study_areas')
+    elif tv['variables']['tool_action'] == 'switch_to_fields':
+        # geojson + etdata stored
+        geomdata = get_map_geojson_from_bucket(region , 'field_boundaries')[region]
+        if db_type == 'FAKE':
+            tv['map_geojson'] = {region: set_fake_data(tv, geomdata)}
+        else:
+            tv['map_geojson'] = {region: set_etdata_from_test_server(tv, db_engine)}
     return tv

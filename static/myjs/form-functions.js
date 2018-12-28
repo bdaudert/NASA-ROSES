@@ -4,9 +4,6 @@ function clear_mapLayer_and_data(){
 	LF_MAP_APP.delete_mapLayers();
 	LF_MAP_APP.hide_mapColorbar('#colorbar');
 	// Delete old data
-	if (window.DATA['etdata'] ) {
-        window.DATA['etdata'] = {};
-    }
 }
 
 function set_new_mapLayer(){

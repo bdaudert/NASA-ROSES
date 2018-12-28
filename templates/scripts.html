@@ -60,9 +60,6 @@
     {% if map_geojson %}
         window.DATA['map_geojson'] = {{ map_geojson|safe }};
     {% endif %}
-    {% if etdata %}
-        window.DATA['etdata'] = {{ etdata|safe }};
-    {% endif %} 
    
     //Set up leaflet map
     $( document ).ready(function() {

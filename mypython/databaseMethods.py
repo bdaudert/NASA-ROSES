@@ -354,8 +354,83 @@ class postgis_Util(object):
 
         return geom_query
 
+    def read_map_geojson_from_db(self):
+        '''
+        :return: map_geojson: contains everything stored in geojson + et data
+        '''
+        # Set the geom_names from region and feature index
+        region = self.tv['region']
+        rgn_id = config.statics['db_id_region'][region]
+        user_id = 0  # public
+        # Set the dates list from temporal_resolution
+        DateUtil = date_Util()
+
+        map_geojson = {}
+        self.start_session()
+
+        geom_year = None
+        geom_query = None
+        if self.tv['region'] not in config.statics['regions_changing_by_year']:
+            geom_year = '9999'
+
+        if geom_year == '9999':
+            # We only need to query the data base once
+            geom_query = self.make_geom_query(user_id, rgn_id, geom_year, feature_index_list)
+
+        for year in self.tv['years']:
+            if geom_year != '9999':
+                geom_year = year
+
+            if geom_year != '9999' or '9999' not in map_geojson.keys():
+                map_geojson[geom_year] = {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            # Set the dates list from temporal_resolution
+            dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
+            # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
+            # Query geometry table
+            if not geom_query:
+                geom_query = self.make_geom_query(user_id, rgn_id, year, ['all'])
+
+            # get the relevant geom_ids
+            geom_id_list = []
+            feat_idx_list = []
+            feat_data = []
+
+            for q in geom_query.all():
+                geom_id = q.id
+                geom_id_list.append(geom_id)
+                feat_idx_list.append(q.feature_index)
+                g_data = self.set_geom_json(q)
+                feat_data.append(g_data)
+
+            if not map_geojson[geom_year]['features']:
+                map_geojson[geom_year]['features'] = feat_data
+            del feat_data
+
+            # Query data table
+            data_query = self.session.query(Data).filter(
+                Data.geom_id.in_(geom_id_list),
+                Data.dataset_id == config.statics['db_id_dataset'][self.tv['dataset']],
+                Data.variable_id == config.statics['db_id_variable'][self.tv['variable']],
+                Data.temporal_resolution == self.tv['temporal_resolution'],
+                Data.data_date.in_(dates_list)
+            )
+
+            # Complile results as list of dicts
+            for q in data_query.all():
+                geom_id = q.geom_id
+                idx = geom_id_list.index(geom_id)
+                feat_idx, properties = self.set_data_json(q, geom_id_list, feat_idx_list)
+                map_geojson[year]['features'][idx]['properties'].update(properties)
+        self.end_session()
+        # return etdata, geomdata
+        return json.dumps(map_geojson, ensure_ascii=False)
+
     def read_data_from_db(self, feature_index_list=['all']):
         '''
+        FIXME: depreciated???
 
         :param feature_index_list: list of feature indices;
                if feature_index_list is all, all features for the year will be queried

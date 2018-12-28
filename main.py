@@ -93,6 +93,7 @@ def home():
     except Exception as e:
         tv = runApp(req_args, app_name, 'GET', db_type=db_type)
         tv['error'] = str(e)
+
     if method in ['GET', 'shareLink']:
         return flask.render_template('nasa-roses.html', **tv)
     else:
