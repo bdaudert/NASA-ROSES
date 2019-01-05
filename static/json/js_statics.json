@@ -59,5 +59,6 @@
         "get_map": "Obtaining Map Data",
         "get_ts": "Obtaining Time Series Data",
         "get_value": "Obtaining Data Value"
-    }
+    },
+    "klonantech_vtile_server": "http://roses.dri.edu:8080/data/vector/{z}/{x}/{y}.pbf?debug=true"
 }

@@ -31,22 +31,7 @@ NOT_USED = {
         }
         return color;
     },
-    highlight_feature: function(e) {
-        //highlights feature on mouse over
-        var style = {
-            fillColor: 'black',
-            fillOpacity: 0.7,
-            fill: true,
-            stroke: true,
-            weight: 3,
-            color: '#666'
-        }
-        window.main_map_layer.setFeatureStyle(e.layer.properties.SimsID, style);
-    },
-    reset_highlight: function(e) {
-        //Resets featue on mouseout
-        window.main_map_layer.resetFeatureStyle(e.layer.properties.SimsID);
-    },
+
     delay: function(timeout, id, callback){
         //Delay needed for zooming to work properly
         this.delays = this.delays || [];
@@ -86,6 +71,40 @@ NOT_USED = {
             var center = js_statics.region_properties[window.region]['center'];
             window.map.flyTo(center, zoom);
            LF_MAP_APP.update_mapLayer(null, 'choropleth', e.layer.properties.region);
+        })
+    },
+    set_mapVectorTiles: function(map_type, region) {
+        //Set the map layer (vector tiles protobuf) on the map
+
+        window.main_map_layer = L.vectorGrid.protobuf('http://roses.dri.edu:8080/data/vector/{z}/{x}/{y}.pbf?debug=true', {
+            rendererFactory: L.canvas.tile,
+            vectorTileLayerStyles: {
+                cv_data_all: function(properties, zoom) {
+                var et = properties.et_2017;
+                return {
+                    fillColor: LF_MAP_APP.get_color(et, map_type),
+                    fillOpacity: 0.7,
+                    stroke: true,
+                    fill: true,
+                    color: 'black',
+                    weight: 0.5
+                }
+            }
+          },
+          interactive: true,
+          getFeatureId: function(feature) {
+              return feature.properties.SimsID;
+          }
+        })
+        .on ({
+            mouseover: LF_MAP_APP.highlight_feature,
+            mouseout: LF_MAP_APP.reset_highlight
+        })
+        .addTo(window.map);
+
+        window.main_map_layer
+        .on('click', function(e) {
+            LF_MAP_APP.set_popup_window_single_feat(e);
         })
     },
     delete_mapLayer: function(){
@@ -178,28 +197,28 @@ LF_MAP_APP = {
         else if (g < 0) g = 0;
         return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
     },
-    get_choropleth_data_value: function(feature_index, variable){
+    get_choropleth_data_value: function (feature_index, variable) {
         // Obtain choropleth data value of sinle feature
         var feat_data = window.DATA.map_geojson[$('#region').val()]['features'][feature_index]['properties'];
         // Get the monthly data
-        var data_vals = [],  data_val = 0.0, mon = ''
-        for (var m = 1; m <= 12; m++){
-            if (m < 10){
+        var data_vals = [], data_val = 0.0, mon = ''
+        for (var m = 1; m <= 12; m++) {
+            if (m < 10) {
                 mon = '0' + String(m);
-            }else{
+            } else {
                 mon = String(m);
             }
             data_vals.push(feat_data[variable + '_' + mon]);
         }
         // FIX ME: Sum does not mae sense for NDVI
-        data_val = myRound(data_vals.sum(),4);
+        data_val = myRound(data_vals.sum(), 4);
         return data_val;
     },
-    get_choropleth_data_values: function(region, variable){
+    get_choropleth_data_values: function (region, variable) {
         // Obtain choropleth data values of each feature on geojson
         var g_json = window.DATA.map_geojson[region],
             feat_idx, val_list = [];
-        for (feat_idx = 0; feat_idx < g_json['features'].length; feat_idx++){
+        for (feat_idx = 0; feat_idx < g_json['features'].length; feat_idx++) {
             val_list.push(LF_MAP_APP.get_choropleth_data_value(feat_idx, variable));
         }
         return val_list;
@@ -233,15 +252,14 @@ LF_MAP_APP = {
         cb = {'colors': colors, 'bins': bins}
         return cb;
     },
-     draw_mapColorbar: function (bins, colors, div_id) {
+    draw_mapColorbar: function (bins, colors, div_id) {
         $(div_id).css('display', 'block');
         colorScale(bins, colors, div_id);
     },
-    hide_mapColorbar: function(div_id){
+    hide_mapColorbar: function (div_id) {
         $(div_id).css('display', 'none');
     },
-
-    choroplethStyleFunction: function(feature) {
+    choroplethStyleFunction: function (feature) {
         //Sets the feature styles for Choropleth map
         var feature_index = feature.properties['feature_index'],
             variable = $('#variable').attr('data-id'), color = '#000000', i,
@@ -254,7 +272,7 @@ LF_MAP_APP = {
             dashArray: '3',
             fillOpacity: 0.7
         }
-        if (!feature_index){
+        if (!feature_index) {
             return style;
         }
 
@@ -271,7 +289,23 @@ LF_MAP_APP = {
         style['fillColor'] = color;
         return style;
     },
-    determine_map_type: function(){
+     highlight_feature: function(e) {
+        //highlights feature on mouse over
+        var style = {
+            fillColor: 'black',
+            fillOpacity: 0.7,
+            fill: true,
+            stroke: true,
+            weight: 3,
+            color: '#666'
+        }
+        window.map_layers[0].setFeatureStyle(e.layer.properties.SimsID, style);
+    },
+    reset_highlight: function(e) {
+        //Resets featue on mouseout
+        window.map_layers[0].resetFeatureStyle(e.layer.properties.SimsID);
+    },
+    determine_map_type: function () {
         //Determines map type from form inputs
         if ($('#region').val() == "study_areas") {
             return 'study_areas';
@@ -279,7 +313,7 @@ LF_MAP_APP = {
             return 'choropleth';
         }
     },
-    set_lfRaster: function(){
+    set_lfRaster: function () {
         //Sets default openlayer basemap raster
         //FIXME: there might be a better looking obne, e.g. satellite base
         var layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -287,18 +321,18 @@ LF_MAP_APP = {
         });
         return layer;
     },
-    delete_mapLayers: function(){
+    delete_mapLayers: function () {
         //FIXME: this is a hack, need better solution, first layer is map itself
         var i = 0;
         window.map.eachLayer(function (layer) {
-             if (i != 0) {
-                 window.map.removeLayer(layer);
-                 window.map_layers[i - 1] = null;
-             }
-             i++;
+            if (i != 0) {
+                window.map.removeLayer(layer);
+                window.map_layers[i - 1] = null;
+            }
+            i++;
         });
     },
-    update_geosjon_mapLayers: function() {
+    update_geosjon_mapLayers: function () {
         var map_type = LF_MAP_APP.determine_map_type();
         if (map_type == 'choropleth') {
             LF_MAP_APP.set_choropleth_mapLayer();
@@ -306,7 +340,7 @@ LF_MAP_APP = {
             LF_MAP_APP.set_landing_page_mapLayer();
         }
     },
-    show_field_choropleth: function(){
+    show_field_choropleth: function () {
         //Set the colors for Choropleth map, draw colorbar
         $('.colorbar-container').css('display', 'block');
         var region = $('#region').val(),
@@ -317,14 +351,14 @@ LF_MAP_APP = {
         window.DATA.choropleth_bins = cb['bins'];
         LF_MAP_APP.draw_mapColorbar(window.DATA.choropleth_bins, window.DATA.choropleth_colors, '#colorbar');
 
-        window.map_layers[0] =  L.geoJson(window.DATA.map_geojson[region], {
+        window.map_layers[0] = L.geoJson(window.DATA.map_geojson[region], {
             style: LF_MAP_APP.choroplethStyleFunction,
-            onEachFeature: function(feature, layer) {
-                layer.on("mouseover", function(e) {
+            onEachFeature: function (feature, layer) {
+                layer.on("mouseover", function (e) {
                     var popup_html = LF_MAP_APP.set_feature_popup_html(feature, val_list);
                     layer.bindPopup(popup_html).openPopup();
                 });
-                layer.on("mouseout", function(e){
+                layer.on("mouseout", function (e) {
                     window.map.closePopup();
                 });
                 layer.on("click", function (e) {
@@ -338,10 +372,10 @@ LF_MAP_APP = {
         }).addTo(window.map);
         window.map.fitBounds(window.map_layers[0].getBounds());
     },
-    show_study_areas: function(){
+    show_study_areas: function () {
         var region = 'study_areas';
         var zoom = js_statics.region_properties[region]['zoom'];
-        var center =  js_statics.region_properties[region]['center'];
+        var center = js_statics.region_properties[region]['center'];
         window.map.flyTo(center, zoom);
         for (var g_idx = 0; g_idx < Object.keys(window.DATA.map_geojson).length; g_idx++) {
             $('.popup').css("display", "none");
@@ -357,9 +391,9 @@ LF_MAP_APP = {
                 weight: 0.5
             };
             window.regions.push(r);
-            window.map_layers[g_idx]  = L.geoJson(geojson, {
+            window.map_layers[g_idx] = L.geoJson(geojson, {
                 style: style,
-                onEachFeature: function(feature, layer) {
+                onEachFeature: function (feature, layer) {
                     layer.on("click", function (e) {
                         //Zoom to the region and show the filed choropleth
                         var reg = feature.properties.region;
@@ -373,46 +407,71 @@ LF_MAP_APP = {
             }).addTo(map);
 
             /*
-            // FIX ME: not working
-            //window.main_map_layer = L.vectorGrid.protobuf('http://localhost:8889/data/vector/{z}/{x}/{y}.pbf?debug=true', {
-            window.map_layers[i] = L.vectorGrid.slicer(geojson, {
-                rendererFactory: L.canvas.tile,
-                vectorTileLayerStyles: {
-                    sliced: function(properties, zoom) {
-                        return style;
-                    }
-                },
-                interactive: true,
-                getFeatureId: function(f) {
-		            return f.properties[Object.keys(f.properties)[0]];
-	            }
-            })
-            .on('mouseover', function(e) {
-                console.log(e.layer.properties);
-            })
-            .on('mouseout', function(e) {
-                console.log('mouseover');
-            })
-            .on('click', function(e) {
-                console.log('clicked');
-                //Zoom to the region and show the filed choropleth
-                var r = window.regions[i];
-                var z = js_statics.region_properties[r]['zoom'];
-                var c =  js_statics.region_properties[r]['center'];
-                window.map.flyTo(c,z);
-                LF_MAP_APP.set_choropleth_mapLayer();
-            })
-            .addTo(window.map);
-            */
-
-            /*
             // FIXME: Is there a way to do this with vector tiles?
             var geojsonLayer = L.geoJson(geojson)
             window.map.fitBounds(geojsonLayer.getBounds());
             */
         }
     },
-    set_landing_page_mapLayer: function() {
+    get_choroplethColor: function(data_value, cb){
+        var i, color = '#000000';
+        for (i = 0; i < cb['bins'].length; i++) {
+            if (cb['bins'][i][0] <= data_value && data_value <= cb['bins'][i][1]) {
+                color = cb['colors'][i];
+                break;
+            }
+        }
+        return color;
+    },
+    set_vtile_popup: function(e){
+        /*
+        Sets popup window when user clicks on a single feature
+        e click event
+        */
+        var text = "ET DATA:" +  e.layer.properties.et_2017;
+        $('.popup').empty();
+        $('.popup').css("display", "block");
+        $('.popup').append("<p>"+ text + "</p>");
+
+    },
+    set_mapVectorTiles: function() {
+        //Set the map layer (vector tiles protobuf) on the map
+        //FIXME: the max and min data values bneed to be retrieved from the database
+        var num_colors = 10,
+            val_list = arange(0, 2510, num_colors),
+            cb = LF_MAP_APP.set_choropleth_colors_and_bins(val_list, '#9bc2cf', num_colors, 'darken');
+
+        window.map_layers[0]  = L.vectorGrid.protobuf( js_statics.klonantech_vtile_server, {
+            rendererFactory: L.canvas.tile,
+            vectorTileLayerStyles: {
+                cv_data_all: function(properties, zoom) {
+                var data_value = properties.et_2017;
+                return {
+                    fillColor: LF_MAP_APP.get_choroplethColor(data_value, cb),
+                    fillOpacity: 0.7,
+                    stroke: true,
+                    fill: true,
+                    color: 'black',
+                    weight: 0.5
+                }
+            }
+          },
+          interactive: true,
+          getFeatureId: function(feature) {
+              return feature.properties.SimsID;
+          }
+        })
+        .on ({
+            mouseover: LF_MAP_APP.highlight_feature,
+            mouseout: LF_MAP_APP.reset_highlight
+        })
+        .addTo(window.map);
+
+        window.map_layers[0].on('click', function(e) {
+            LF_MAP_APP.set_vtile_popup(e);
+        })
+    },
+    set_landing_page_mapLayer: function () {
         if (!window.map_layers) {
             window.map_layers = [];
         }
@@ -422,39 +481,41 @@ LF_MAP_APP = {
         //Delete old map layers
         LF_MAP_APP.delete_mapLayers;
         var region = $('#region').val();
-        console.log(region);
         if (region != 'study_areas') {
             ajax_switch_to_study_areas();
         } else {
             LF_MAP_APP.show_study_areas();
         }
     },
-    set_feature_popup_html: function(feature, val_list){
+    set_feature_popup_html: function (feature, val_list) {
         var popup_html = '', region = $('#region').val(),
             feature_index = feature.properties.feature_index,
             metadata_props = statics.study_area_properties[region]['field_metadata'],
             i, prop, variable = $('#variable').attr('data-id');
 
-        if (metadata_props.length == 0){
+        if (metadata_props.length == 0) {
             popup_html += 'Feature ID: ' + String(feature_index) + '<br>';
-        }else{
-            for (i = 0; i < metadata_props.length; i++){
+        } else {
+            for (i = 0; i < metadata_props.length; i++) {
                 prop = metadata_props[i]
-                popup_html += prop + ': ' + feature.properties[prop] +  '<br>';
+                popup_html += prop + ': ' + feature.properties[prop] + '<br>';
             }
         }
         // Add the data
         popup_html += 'ANNUAl ' + variable.toUpperCase() + ': ' + String(val_list[feature_index]);
         return popup_html;
     },
-    set_choropleth_mapLayer: function(){
+    set_choropleth_mapLayer: function () {
         //NEW --> needs to be written
         LF_MAP_APP.delete_mapLayers();
-        //Updates map_geojson data to field data
-        ajax_switch_to_fields();
+        if ($('#region').val() != 'usgs_central_valley_mod') {
+            ajax_switch_to_fields();
+        } else {
+            // Show Klonantech vector tiles for central valley fields
+            LF_MAP_APP.set_mapVectorTiles();
+        }
     }
 }
-
 
 var initialize_lf_map = function() {
     var region = $('#region').val();

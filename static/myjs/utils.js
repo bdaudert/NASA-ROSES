@@ -102,3 +102,17 @@ function compute_stat(val_list, stat){
         return [myRound(val_list.mean(), 4)];
     }
 }
+
+function arange(start, end, size){
+    var arr = [],
+        step = (end - start) / size,
+        s =  start, e = end;
+    while (s <= e){
+        arr.push(s)
+        s += step;
+        if (s > e && s != e){
+            arr.push(e)
+        }
+    }
+    return arr
+}
