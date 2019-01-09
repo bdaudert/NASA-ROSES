@@ -6,7 +6,7 @@
           },
           "WBDHU4_Truckee_Carson_Walker": {
               "geojson": "WBDHU4_Truckee_Carson_Walker.geojson",
-              "field_boundaries": "METRIC_NV_agpoly_subset.geojson",
+              "field_boundaries": "WBDHU4_Truckee_Carson_Walker_METRIC_NV_apoly_subset.geojson",
               "field_metadata": ["OBJECTID", "BASIN"]
           },
           "WBDHU8_Bear": {
@@ -16,17 +16,17 @@
           },
           "WBDHU8_Malheur": {
               "geojson": "WBDHU8_Malheur.geojson",
-              "field_boundaries": "harney_field_boundaries_2016_sw_gw_irr.geojson",
+              "field_boundaries": "WBDHU8_Malheur_harney_field_boundaries_2016_sw_gw_irr.geojson",
               "field_metadata": []
           },
           "usgs_central_valley_mod": {
               "geojson": "usgs_central_valley_mod.geojson",
-              "field_boundaries": "usgs_central_valley_fields_mod",
+              "field_boundaries": "usgs_central_valley_mod_base15_ca_poly_170616.geojson",
               "field_metadata": ["BASIN"]
           },
           "paso-robles": {
               "geojson": "paso-robles.geojson",
-              "field_boundaries": "",
+              "field_boundaries": "paso_robles_base15_ca_poly_170616.geojson",
               "field_metadata": ["COUNTY", "SimsID"]
           }
     },

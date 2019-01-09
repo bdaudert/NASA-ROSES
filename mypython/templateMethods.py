@@ -65,7 +65,6 @@ def read_geomdata_from_bucket(geoFName):
 
 def get_map_geojson_from_bucket(region, type):
     map_geojson = {}
-
     if region != 'study_areas':
         regions = [region]
     else:
@@ -78,11 +77,13 @@ def get_map_geojson_from_bucket(region, type):
         if type == 'field_boundaries':
             geoFName = statics['study_area_properties'][r]['field_boundaries']
         url = GEO_BUCKET_URL + geoFName
+
         try:
             # Replace python None values with empty strings for javascript
             map_geojson[r] = json.loads(json.dumps(json.load(urlopen(url))).replace('null', '""'))
         except:
             map_geojson[r] = {}
+        
     return map_geojson
 
 def set_fake_data(template_variables, geomdata):
@@ -198,7 +199,7 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
 
     elif tv['variables']['tool_action'] == 'switch_to_fields':
         # geojson + etdata stored
-        geomdata = get_map_geojson_from_bucket(region , 'field_boundaries')[region]
+        geomdata = get_map_geojson_from_bucket(region, 'field_boundaries')[region]
         if db_type == 'FAKE':
             tv['map_geojson'] = {region: set_fake_data(tv, geomdata)}
         else:
