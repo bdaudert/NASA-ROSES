@@ -83,7 +83,7 @@ def get_map_geojson_from_bucket(region, type):
             map_geojson[r] = json.loads(json.dumps(json.load(urlopen(url))).replace('null', '""'))
         except:
             map_geojson[r] = {}
-        
+
     return map_geojson
 
 def set_fake_data(template_variables, geomdata):
