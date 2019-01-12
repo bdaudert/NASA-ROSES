@@ -36,6 +36,8 @@ Base.metadata = db.MetaData(schema=schema)
 
 #######################################
 # OpenET database tables
+# FIXME: These tables need to be synced with the VALID tables defined in POSTGIS/db_methods
+# Better, find a way to just have one copy of the tables in one place!!!
 #######################################
 class Region(Base):
     # States, Counties, HUCs or fields or custom
