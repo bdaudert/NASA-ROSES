@@ -299,11 +299,11 @@ LF_MAP_APP = {
             weight: 3,
             color: '#666'
         }
-        window.map_layers[0].setFeatureStyle(e.layer.properties.SimsID, style);
+        window.map_layers[0].setFeatureStyle(e.layer, style);
     },
     reset_highlight: function(e) {
         //Resets featue on mouseout
-        window.map_layers[0].resetFeatureStyle(e.layer.properties.SimsID);
+        window.map_layers[0].resetFeatureStyle(e.layer);
     },
     determine_map_type: function () {
         //Determines map type from form inputs
@@ -373,6 +373,7 @@ LF_MAP_APP = {
         window.map.fitBounds(window.map_layers[0].getBounds());
     },
     show_study_areas: function () {
+        LF_MAP_APP.delete_mapLayers();
         var region = 'study_areas';
         var zoom = js_statics.region_properties[region]['zoom'];
         var center = js_statics.region_properties[region]['center'];
