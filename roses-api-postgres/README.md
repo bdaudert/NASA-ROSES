@@ -24,7 +24,7 @@ The roses server has node and express installed. Also, in the API directory ther
   OR curl roses.dri.edu:<port number>/<route name> (outside of DRI)
   curl localhost.edu:<port number>/<route name> (on the roses server)
   
-  POST - curl --data <data> <url>:<port number>/<route name>. 
+  POST - curl --data <data> <url>:<port number>/<route name></br> 
   Ex. curl --data "min=50&max=75" http://localhost:8080/etdatarange
   
   Javascript AJAX call -  
