@@ -77,8 +77,8 @@ def home():
     ee.Initialize(config.EE_CREDENTIALS)
     ee.data.setDeadline(180000)
 
-    db_type= 'TEST_SERVER' # Jordan's db
-    # db_type = 'DATASTORE'
+    #db_type= 'TEST_SERVER' # Jordan's or DRI test db
+    db_type = 'FAKE'
     app_name = 'main'
     method = flask.request.method
     if method == 'POST':
@@ -152,7 +152,7 @@ def application_error(e):
     tv = {}
     tv = runApp({}, 'main', 'ERROR', db_type='TEST_SERVER')
     tv['error'] = str(e)
-    return flask.render_template('open-et-1.html', **tv)
+    return flask.render_template('nasa-roses.html', **tv)
 
 if __name__ == '__main__':
     # This is used when running locally. Gunicorn is used to run the

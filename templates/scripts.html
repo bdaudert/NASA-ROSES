@@ -1,15 +1,7 @@
 <!--css-->
 <head>
-    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.4/css/ol.css" type="text/css">
     <link rel="stylesheet" href="static/css/nasa-roses.css">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css"/>
 </head>
-<!--jQuery-->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<!--Bootstrap (needs to be after jQuery)-->
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <!--Highcharts-->
 <script src="//code.highcharts.com/highcharts.js"></script>
 <script src="//code.highcharts.com/highcharts-more.js"></script>
@@ -22,9 +14,9 @@
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
    integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
-   crossorigin=""></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js"></script>
-
+   crossorigin="">
+</script>
+<script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
 <!--EXTERNAL JS-->
 <!--Needed to zoom to fusiontables!!!-->
 <script src="/static/js/geoxml3.js"></script>
@@ -40,7 +32,6 @@
 <script src="static/myjs/form-functions.js"></script>
 <script src="static/myjs/map-functions.js"></script>
 <script src="static/myjs/ts-functions.js"></script>
-<script src="static/myjs/listeners.js"></script>
 <script src="static/myjs/ajax-calls.js"></script>
 
 <!--Run Time Scripts-->
@@ -63,16 +54,13 @@
             js_statics = data;
         }
     });
-    window.DATA = {};
-    {% if etdata %}
-        window.DATA['etdata'] = {{ etdata|safe }};
-        window.DATA['geomdata'] = {{ geomdata|safe}};
-    {% endif %}
-    {% if featsdata %}
-       window.DATA['featsdata'] = {{ featsdata|safe }};
-       window.DATA['featsgeomdata'] = {{ featsgeomdata|safe}}; 
-    {% endif %}
 
+    //Set global variables 
+    window.DATA = {};
+    {% if map_geojson %}
+        window.DATA['map_geojson'] = {{ map_geojson|safe }};
+    {% endif %}
+   
     //Set up leaflet map
     $( document ).ready(function() {
         initialize_lf_map();

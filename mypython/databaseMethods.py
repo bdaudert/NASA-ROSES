@@ -29,19 +29,61 @@ import config
 
 # TEST SERVER MODELS
 Base = declarative_base()
+# schema='openet geodatabase'
+schema = 'test'
+# schema = 'public'
+Base.metadata = db.MetaData(schema=schema)
+
 #######################################
 # OpenET database tables
+# FIXME: These tables need to be synced with the VALID tables defined in POSTGIS/db_methods
+# Better, find a way to just have one copy of the tables in one place!!!
 #######################################
+class Region(Base):
+    # States, Counties, HUCs or fields or custom
+    __tablename__ = 'region'
+    __table_args__ = {'schema': schema}
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    geometries = relationship('Geom', back_populates='region', cascade='save-update, merge, delete')
 
-# For many-to-many relationships (user-- geom)
-class Association(Base):
-    __tablename__ = 'association'
-    user = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    geom= db.Column(db.Integer, db.ForeignKey('geom.id'), primary_key=True)
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+class Dataset(Base):
+    __tablename__ = 'dataset'
+    __table_args__ = {'schema': schema}
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    ee_collection = db.Column(db.String())
+    parameters = relationship('Parameter', back_populates='dataset', cascade='save-update, merge, delete')
+    data = relationship('Data', back_populates='dataset', cascade='save-update, merge, delete')
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+class Variable(Base):
+    __tablename__ = 'variable'
+    __table_args__ = {'schema': schema}
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String())
+    units = db.Column(db.String())
+    data = relationship('Data', back_populates='variable', cascade='save-update, merge, delete')
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
+GeomUserLink = db.Table('geom_user_link', Base.metadata,
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='cascade', onupdate='cascade')),
+    db.Column('geom_id', db.Integer, db.ForeignKey('geom.id', ondelete='cascade', onupdate='cascade'))
+)
 
 
 class User(Base):
     __tablename__ = 'user'
+    __table_args__ = {'schema': schema}
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String())
     email = db.Column(db.String())
@@ -52,86 +94,53 @@ class User(Base):
     notes = db.Column(db.String())
     active = db.Column(db.String())
     role = db.Column(db.String())
-
-    geometries = relationship("Geom", secondary='association', back_populates="users")
-
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-class Region(Base):
-    # States, Counties, HUCs or fields or custom
-    __tablename__ = 'region'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String())
-
-    geometries = relationship("Geom", back_populates="region")
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
-
-
-class Dataset(Base):
-    __tablename__ = 'dataset'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String())
-    ee_collection = db.Column(db.String())
-
-    parameters = relationship("Parameter", back_populates="dataset")
-    data = relationship("Data", back_populates="dataset")
+    geometries = relationship('Geom', secondary=GeomUserLink, back_populates='users', cascade='save-update, merge, delete')
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
-class Variable(Base):
-    __tablename__ = 'variable'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String())
-    units = db.Column(db.String())
-
-    data = relationship("Data", back_populates="variable")
-
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
 
 class Geom(Base):
     __tablename__ = 'geom'
+    __table_args__ = {'schema': schema}
     id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('user.id'), nullable=False)
+    # user_id = db.Column(db.Integer(), db.ForeignKey(schema + '.' + 'user.id'), nullable=False)
     year = db.Column(db.Integer())
-    region_id = db.Column(db.Integer(), db.ForeignKey('region.id'), nullable=False)
+    region_id = db.Column(db.Integer(), db.ForeignKey(schema + '.' + 'region.id'), nullable=False)
     feature_index = db.Column(db.Integer())
     name = db.Column(db.String())
     type = db.Column(db.String())
     area = db.Column(db.Float(precision=4))
     coords = db.Column(Geometry(geometry_type='MULTIPOLYGON'))
-
-    region = relationship("Region", back_populates="geometries")
-    users = relationship("User", secondary='association', back_populates="geometries")
-    meta_data = relationship("GeomMetadata", back_populates="geom")
-    data = relationship("Data", back_populates="geom")
+    region = relationship('Region', back_populates='geometries', cascade='save-update, merge, delete')
+    meta_data = relationship('GeomMetadata', back_populates='geom', cascade='save-update, merge, delete')
+    data = relationship('Data', back_populates='geom', cascade='save-update, merge, delete')
+    users = relationship('User', secondary=GeomUserLink, back_populates='geometries', cascade='save-update, merge, delete')
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
+
 class GeomMetadata(Base):
     __tablename__ = 'geom_metadata'
+    __table_args__ = {'schema': schema}
     id = db.Column(db.Integer(), primary_key=True)
-    geom_id = db.Column(db.Integer(), db.ForeignKey('geom.id'), nullable=False)
+    geom_id = db.Column(db.Integer(), db.ForeignKey(schema + '.' + 'geom.id'), nullable=False)
     name = db.Column(db.String())
     properties = db.Column(db.String())
-
-    geom = relationship("Geom", back_populates="meta_data")
+    geom = relationship('Geom', back_populates='meta_data', cascade='save-update, merge, delete')
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
 class Parameter(Base):
     __tablename__ = 'parameter'
+    __table_args__ = {'schema': schema}
     id = db.Column(db.Integer(), primary_key=True)
-    dataset_id = db.Column(db.Integer(), db.ForeignKey('dataset.id'), nullable=False)
+    dataset_id = db.Column(db.Integer(), db.ForeignKey(schema + '.'  + 'dataset.id'), nullable=False)
     name = db.Column(db.String())
     properties =  db.Column(db.String())
-
-    dataset = relationship("Dataset", back_populates="parameters")
+    dataset = relationship('Dataset', back_populates='parameters', cascade='save-update, merge, delete')
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -139,19 +148,20 @@ class Parameter(Base):
 
 class Data(Base):
     __tablename__ = 'data'
+    __table_args__ = {'schema': schema}
     id = db.Column(db.Integer(), primary_key=True)
-    geom_id = db.Column(db.Integer(), db.ForeignKey('geom.id'), nullable=False)
+    geom_id = db.Column(db.Integer(), db.ForeignKey(schema + '.' + 'geom.id'), nullable=False)
     geom_name = db.Column(db.String())
     geom_area = db.Column(db.Float(precision=4))
-    dataset_id =  db.Column(db.Integer(), db.ForeignKey('dataset.id'), nullable=False)
-    variable_id =  db.Column(db.Integer(), db.ForeignKey('variable.id'), nullable=False)
+    year = db.Column(db.Integer())
+    dataset_id =  db.Column(db.Integer(), db.ForeignKey(schema + '.' + 'dataset.id'), nullable=False)
+    variable_id =  db.Column(db.Integer(), db.ForeignKey(schema + '.' + 'variable.id'), nullable=False)
     temporal_resolution = db.Column(db.String())
     data_date = db.Column(db.DateTime())
     data_value = db.Column(db.Float(precision=4))
-
-    geom = relationship("Geom", back_populates="data")
-    dataset = relationship("Dataset", back_populates="data")
-    variable = relationship("Variable", back_populates="data")
+    geom = relationship('Geom', back_populates='data', cascade='save-update, merge, delete')
+    dataset = relationship('Dataset', back_populates='data', cascade='save-update, merge, delete')
+    variable = relationship('Variable', back_populates='data', cascade='save-update, merge, delete')
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -298,6 +308,7 @@ class postgis_Util(object):
         sets up geometry for year as geojson
         :return: geojson
         '''
+        self.start_session()
         geomdata = {
             'type': 'FeatureCollection',
             'features': []
@@ -305,12 +316,20 @@ class postgis_Util(object):
         # Set the geom_names from region and feature index
         region = self.tv['region']
         rgn_id = config.statics['db_id_region'][region]
-
+        geom_query = self.session.query(Geom). \
+            filter(
+                Geom.region_id == rgn_id,
+                Geom.year == year
+            ). \
+            filter(Geom.users.any(id=0))
+        '''
         geom_query = self.session.query(Geom).filter(
             Geom.user_id == 0,
             Geom.region_id == rgn_id,
             Geom.year == year
         )
+        '''
+
         feat_data = []
         for q in geom_query.all():
             g_data = self.set_geom_json(q)
@@ -318,27 +337,102 @@ class postgis_Util(object):
             geomdata['features'].append(g_data)
         del g_data
         data = {str(year): geomdata}
+        self.end_session()
         return json.dumps(data, ensure_ascii=False)
 
     def make_geom_query(self, user_id, rgn_id, year, feature_index_list):
         # Query the database
         if len(feature_index_list) == 1 and feature_index_list[0] == 'all':
             geom_query = self.session.query(Geom).filter(
-                Geom.user_id == user_id,
                 Geom.region_id == rgn_id,
                 Geom.year == int(year)
-            )
+            ).filter(Geom.users.any(id=user_id))
         else:
             geom_query = self.session.query(Geom).filter(
-                Geom.user_id == user_id,
                 Geom.region_id == rgn_id,
                 Geom.year == int(year),
                 Geom.feature_index.in_(feature_index_list)
-            )
+            ).filter(Geom.users.any(id=user_id))
+
         return geom_query
+
+    def read_map_geojson_from_db(self):
+        '''
+        :return: map_geojson: contains everything stored in geojson + et data
+        '''
+        # Set the geom_names from region and feature index
+        region = self.tv['region']
+        rgn_id = config.statics['db_id_region'][region]
+        user_id = 0  # public
+        # Set the dates list from temporal_resolution
+        DateUtil = date_Util()
+
+        map_geojson = {}
+        self.start_session()
+
+        geom_year = None
+        geom_query = None
+        if self.tv['region'] not in config.statics['regions_changing_by_year']:
+            geom_year = '9999'
+
+        if geom_year == '9999':
+            # We only need to query the data base once
+            geom_query = self.make_geom_query(user_id, rgn_id, geom_year, feature_index_list)
+
+        for year in self.tv['years']:
+            if geom_year != '9999':
+                geom_year = year
+
+            if geom_year != '9999' or '9999' not in map_geojson.keys():
+                map_geojson[geom_year] = {
+                    'type': 'FeatureCollection',
+                    'features': []
+                }
+            # Set the dates list from temporal_resolution
+            dates_list = DateUtil.set_datetime_dates_list(year, self.tv)
+            # FIX ME: se join to query more efficiently? See SANDBOX/POSTGIS
+            # Query geometry table
+            if not geom_query:
+                geom_query = self.make_geom_query(user_id, rgn_id, year, ['all'])
+
+            # get the relevant geom_ids
+            geom_id_list = []
+            feat_idx_list = []
+            feat_data = []
+
+            for q in geom_query.all():
+                geom_id = q.id
+                geom_id_list.append(geom_id)
+                feat_idx_list.append(q.feature_index)
+                g_data = self.set_geom_json(q)
+                feat_data.append(g_data)
+
+            if not map_geojson[geom_year]['features']:
+                map_geojson[geom_year]['features'] = feat_data
+            del feat_data
+
+            # Query data table
+            data_query = self.session.query(Data).filter(
+                Data.geom_id.in_(geom_id_list),
+                Data.dataset_id == config.statics['db_id_dataset'][self.tv['dataset']],
+                Data.variable_id == config.statics['db_id_variable'][self.tv['variable']],
+                Data.temporal_resolution == self.tv['temporal_resolution'],
+                Data.data_date.in_(dates_list)
+            )
+
+            # Complile results as list of dicts
+            for q in data_query.all():
+                geom_id = q.geom_id
+                idx = geom_id_list.index(geom_id)
+                feat_idx, properties = self.set_data_json(q, geom_id_list, feat_idx_list)
+                map_geojson[year]['features'][idx]['properties'].update(properties)
+        self.end_session()
+        # return etdata, geomdata
+        return json.dumps(map_geojson, ensure_ascii=False)
 
     def read_data_from_db(self, feature_index_list=['all']):
         '''
+        FIXME: depreciated???
 
         :param feature_index_list: list of feature indices;
                if feature_index_list is all, all features for the year will be queried

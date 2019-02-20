@@ -1,30 +1,46 @@
 {
-    "map_zoom_by_region": {
-      "ee_map": 4,
-      "Mason": 11,
-      "CentralValley_15": 10,
-      "US_fields": 11,
-      "US_states_west_500k": 5,
-      "US_counties_west_500k": 7,
-      "US_HUC4_west": 8
-    },
-    "region_by_map_zoom": {
-      "5": "US_states_west_500k",
-      "7": "US_counties_west_500k",
-      "11": "Mason"
-    },
-    "map_center_by_region": {
-      "ee_map": {"lat": 38.96, "lng": -119.16},
-      "Mason": {"lat": 38.96, "lng": -119.16},
-      "CentralValley_15": {"lat": 38.0, "lng": -121.0},
-      "US_fields": {"lat": 38.96, "lng": -119.16},
-      "US_states_west_500k": {"lat": 38.96, "lng": -119.16},
-      "US_counties_west_500k": {"lat": 38.96, "lng": -119.16},
-      "US_HUC2_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC4_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC6_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC8_west": {"lat": 38.96, "lng": -119.16},
-      "US_HUC10_west": {"lat": 38.96, "lng": -119.16}
+  "region_properties": {
+        "ee_map": {
+          "zoom": 4,
+          "center": {"lat": 38.96, "lng": -119.16},
+          "color": ""
+        },
+        "study_areas": {
+          "zoom": 6,
+          "center": {"lat": 40.13, "lng": -116.52},
+          "color": "#E59866",
+          "field_boundaries": ""
+        },
+        "WBDHU4_Truckee_Carson_Walker": {
+          "zoom": 7,
+          "center": {"lat": 39.27, "lng": -119.27},
+          "color": "#F7DC6F",
+          "field_boundaries": "METRIC_NV_agpoly_subset"
+        },
+        "WBDHU8_Bear": {
+          "zoom": 7,
+          "center": {"lat": 41.92, "lng": -111.11},
+          "color": "#73C6B6",
+          "field_boundaries": "BRC_Combined_subset_2009"
+        },
+        "WBDHU8_Malheur": {
+          "zoom": 7,
+          "center": {"lat": 43.55, "lng": -118.76},
+          "color": "#85C1E9",
+          "field_boundaries": "harney_field_boundaries_2016_sw_gw_irr"
+        },
+        "usgs_central_valley_mod": {
+          "zoom": 6,
+          "center": {"lat": 37.78, "lng": -121},
+          "color": "#BB8FCE",
+          "field_boundaries": "usgs_central_valley_fields_mod"
+        },
+        "paso-robles": {
+          "zoom": 7,
+          "center": {"lat": 35.69, "lng": -120.52},
+          "color": "#F5B7B1",
+          "field_boundaries": ""
+        }
     },
     "default_generalCauseMessage": {
         "formChecks": "One or more form entries are invalid.",
@@ -37,5 +53,12 @@
         "shareLink": "Regenerate your link using the latest version of the interface",
         "ajax": "",
         "pageload": "Are you using Chrome? Refresh the webpage and try again=,<br>Check your internet connection,<br>"
-    }
+    },
+    "msg_for_tool_action": {
+        "switch_to_fields": "Obtaining Field Data",
+        "get_map": "Obtaining Map Data",
+        "get_ts": "Obtaining Time Series Data",
+        "get_value": "Obtaining Data Value"
+    },
+    "klonantech_vtile_server": "http://roses.dri.edu:8080/data/vector/{z}/{x}/{y}.pbf?debug=true"
 }

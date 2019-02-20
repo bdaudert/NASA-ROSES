@@ -1,4 +1,4 @@
-function clearOut_URL() {
+function set_ajaxURL() {
     var new_url = window.location.href.split('?')[0];
     //clears out the query string stuff in URL, but doesn't reload hte page
     if (history.pushState) {
@@ -56,25 +56,33 @@ function set_error(error, cause, resolution, method) {
     $('#generalErrorModal').modal('show');
 }
 
+function set_form_data(){
+    var form_data = 'region=' + $('#region').val();
+    form_data += '&tool_action=' + $('#tool_action').val();
+    form_data += '&variable=' + $('#variable').attr('data-id');
+    form_data += '&dataset=' +  $('#dataset').attr('data-id');
+    form_data += '&year=' +  String($('#year').attr('data-id'));
+    return form_data;
+}
 
-function ajax_update_etdata_and_map(auto_set_region=false){
-    //Only used when single year request
-    var tool_action = 'update_data',
-        url = clearOut_URL(),
-        form_data, jqXHR,
-        err_code, r, method = 'ajax', error, cause, i, tv_var;
-    //Update the tool_action
-    $('#tool_action').val(tool_action);
-    //Get the form data
-    form_data = $("#form_all").serialize();
-    var msg = 'Obtaining data';
-    start_progressbar(mgs=msg);
+function make_ajax_request(tool_action){
+    //NOTE: this is only a template, we can't use this because we need to run
+    //async ajax call fro the UI not to freeexe (no progresbar)
+    // And therefor we need to execute specific code for each tool_action in the .done section
+    //General ajax request
+    var form_data = set_form_data(),
+        msg = js_statics.msg_for_tool_action[tool_action],
+        method = 'ajax',
+        url = set_ajaxURL(),
+        jqXHR, err_code, r, error, cause, i, tv_var;
+
+    start_progressbar(msg);
     jqXHR = $.ajax({
         url: url,
         method: "POST",
         timeout: 60 * 5 * 1000,
-        data: form_data,
-
+        //async: false,
+        data: form_data
     })
     .done(function(response) {
         r = $.parseJSON(response);
@@ -86,47 +94,41 @@ function ajax_update_etdata_and_map(auto_set_region=false){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            window.DATA[tv_var] = $.parseJSON(r[tv_var]);
+            window.DATA[tv_var] = r[tv_var];
         }
-        //Set new map layer
-        var map_type = MAP_APP.determine_map_type(),
-		    geojson = MAP_APP.set_geojson();
-	    LF_MAP_APP.update_mapLayer(geojson, map_type,  auto_set_region = false);
-
-        LF_MAP_APP.set_map_zoom_pan_listener(auto_set_region=auto_set_region);
         end_progressbar();
     })
     .fail(function(jqXHR) {
+        end_progressbar();
         err_code = jqXHR.status;
         error = 'Server request failed with code ' + String(err_code) + '!'
         set_error(error, '', '', method)
-        end_progressbar();
     });
+    // return jqXHR;
 }
 
-function ajax_set_featdata_on_feature_click(feat, layer){
-    // Sets feature data on map click of single feature for
-    // multiple years
-    var tool_action = 'get_feat_data',
-        url = clearOut_URL(),
-        form_data, jqXHR, f_idx,
-        err_code, r, method = 'ajax', error, cause, i, tv_var;
-    //Update the tool_action
+
+function ajax_switch_to_study_areas(){
+    $('#region').val('study_areas');
+    var tool_action = 'switch_to_study_areas';
     $('#tool_action').val(tool_action);
-    //Get the form data
-    form_data = $("#form_all").serialize();
-    var msg = 'Obtaining feature data';
-    start_progressbar(mgs=msg);
+
+    var form_data = set_form_data(),
+        msg = js_statics.msg_for_tool_action[tool_action],
+        method = 'ajax',
+        url = set_ajaxURL(),
+        jqXHR, err_code, r, error, cause, i, tv_var;
+
+    start_progressbar(msg);
     jqXHR = $.ajax({
         url: url,
         method: "POST",
         timeout: 60 * 5 * 1000,
-        data: form_data,
-
+        //async: false,
+        data: form_data
     })
     .done(function(response) {
-        var r = $.parseJSON(response),
-            feat_idx_list, feat_idx, year, html = '';
+        r = $.parseJSON(response);
         if (r.hasOwnProperty('error')) {
             error = r.error;
             set_error( error, '', '', method);
@@ -135,45 +137,40 @@ function ajax_set_featdata_on_feature_click(feat, layer){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            window.DATA[tv_var] = JSON.parse(r[tv_var]);
+            window.DATA[tv_var] = r[tv_var];
         }
-        html += MAP_APP.set_dataModalHeader();
-        html += MAP_APP.set_popup_data(JSON.parse(r['featsdata']));
-        layer.bindPopup(html).openPopup();
+        LF_MAP_APP.show_study_areas();
         end_progressbar();
-    }) // successfully got JSON response
+    })
     .fail(function(jqXHR) {
+        end_progressbar();
         err_code = jqXHR.status;
         error = 'Server request failed with code ' + String(err_code) + '!'
         set_error(error, '', '', method)
-        end_progressbar();
     });
+    // return jqXHR;
 }
 
-
-function ajax_set_featdata_on_dragbox(selectedFeatures){
-    //Sets feature data on map click single eature
-    var tool_action = 'get_feat_data',
-        url = clearOut_URL(),
-        form_data, jqXHR, f_idx,
-        err_code, r, method = 'ajax', error, cause, i, tv_var,
-        popup_content = document.getElementById('popup-content');
-    //Update the tool_action
+function ajax_switch_to_fields(){
+    var tool_action = 'switch_to_fields';
     $('#tool_action').val(tool_action);
-    //Get the form data
-    form_data = $("#form_all").serialize();
-    var msg = 'Obtaining feature data';
-    start_progressbar(mgs=msg);
+
+    var form_data = set_form_data(),
+        msg = js_statics.msg_for_tool_action[tool_action],
+        method = 'ajax',
+        url = set_ajaxURL(),
+        jqXHR, err_code, r, error, cause, i, tv_var;
+
+    start_progressbar(msg);
     jqXHR = $.ajax({
         url: url,
         method: "POST",
         timeout: 60 * 5 * 1000,
-        data: form_data,
-
+        //async: false,
+        data: form_data
     })
     .done(function(response) {
-        var r = $.parseJSON(response),
-            feat_idx_list, feat_idx, year, html = '';
+        r = $.parseJSON(response);
         if (r.hasOwnProperty('error')) {
             error = r.error;
             set_error( error, '', '', method);
@@ -182,23 +179,19 @@ function ajax_set_featdata_on_dragbox(selectedFeatures){
         //Set the new template variables
         for (i=0; i < statics.response_vars[tool_action].length; i++){
             tv_var = statics.response_vars[tool_action][i];
-            //FIX ME, not sure why featsdata do not need to be json parsed
-            window.DATA[tv_var] = JSON.parse(r[tv_var]);
+            window.DATA[tv_var] = r[tv_var];
         }
-        year = $('#years').val()[0];
-        feat_idx_list = $('#feature_indices').val().replace(', ', ',').split(',');
-        if (feat_idx_list.length != 0){
-            // Set the popup data
-            html += MAP_APP.set_dataModalHeader();
-            html += MAP_APP.set_popup_data(r['featsdata']);
-            selectedFeatures[0].bindPopup(html).openPopup();
-        }
+        LF_MAP_APP.show_field_choropleth();
+
         end_progressbar();
-    }) // successfully got JSON response
+    })
     .fail(function(jqXHR) {
+        end_progressbar();
         err_code = jqXHR.status;
         error = 'Server request failed with code ' + String(err_code) + '!'
         set_error(error, '', '', method)
-        end_progressbar();
     });
+
 }
+
+

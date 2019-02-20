@@ -37,11 +37,11 @@ You can find the most up-to-date deployments [here](http://nasa-roses.appspot.co
 
     To install the necessary external Python modules:
     ```
-    conda install -c anaconda numpy cryptography pyOpenSSL cffi sqlalchemy psycopg2 gunicorn
+    conda install -c anaconda numpy oauth2client httplib2 cryptography pyOpenSSL cffi sqlalchemy psycopg2 gunicorn
     
     conda install -c anaconda jinja2 flask
     
-    conda install -c conda-forge earthengine-api shapely geoalchemy2 psycopg2 oauth2client httplib2 geojson
+    conda install -c conda-forge earthengine-api shapely geoalchemy2 psycopg2 geojsony
     
     pip install --upgrade google-cloud-datastore
     ```
