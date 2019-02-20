@@ -223,30 +223,13 @@ LF_MAP_APP = {
         }
         return val_list;
     },
-    set_choropleth_colors_and_bins: function (val_list, start_color, num_colors, DOrL) {
-        //Creates bins and colors gradients for data in val_list, DOrL = 'lighten' or 'darken'
-        var j, colors = [], val_list, d, mn, mx,
-            bins = [], step, amt, num_colors = 10, cb = {'colors': [], 'bins': []}, new_color;
+    set_choropleth_colors_and_bins: function (data_min, data_max, colorbar_name, num_colors) {
+        var colors = colors_by_clorbar_name[colorbar_name][num_colors], bins, cb,
+            step = myRound((data_max - data_min) / num_colors, 0),
+            j = data_min;
 
-        if (!val_list) {
-            return cb;
-        }
-        mn = Math.floor(Math.min.apply(null, val_list));
-        mx = Math.ceil(Math.max.apply(null, val_list));
-        step = myRound((mx - mn) / num_colors, 2);
-        if ((mx - mn) % num_colors != 0) {
-            mx = mx + step;
-        }
-        amt = 0, j = mn;
-        while (j < mx) {
-            new_color = LF_MAP_APP.LightenDarkenColor(start_color, amt);
-            colors.push(new_color);
-            bins.push([myRound(j, 2), myRound(j + step, 2)]);
-            if (DOrL != 'darken') {
-                amt += 15;
-            } else {
-                amt -= 15;
-            }
+        while (j < data_max) {
+            bins.push([myRound(j, 0), myRound(j + step, 0)]);
             j += step;
         }
         cb = {'colors': colors, 'bins': bins}
@@ -346,11 +329,11 @@ LF_MAP_APP = {
         var region = $('#region').val(),
             variable = $('#variable').attr('data-id'),
             val_list = LF_MAP_APP.get_choropleth_data_values(region, variable);
-        var cb = LF_MAP_APP.set_choropleth_colors_and_bins(val_list, '#9bc2cf', 10, 'darken');
+        // NOTE: num_colors = 1 is max right now: see colorbrewer.js
+        var cb = LF_MAP_APP.set_choropleth_colors_and_bins((data_min, data_max, 'ETActual', 11));
         window.DATA.choropleth_colors = cb['colors'];
         window.DATA.choropleth_bins = cb['bins'];
         LF_MAP_APP.draw_mapColorbar(window.DATA.choropleth_bins, window.DATA.choropleth_colors, '#colorbar');
-
         window.map_layers[0] = L.geoJson(window.DATA.map_geojson[region], {
             style: LF_MAP_APP.choroplethStyleFunction,
             onEachFeature: function (feature, layer) {

@@ -97,16 +97,23 @@ def set_fake_data(template_variables, geomdata):
     }
     ds = template_variables['variables']['dataset']
     # Loop over features
+    data_min = 9999999
+    data_max = -9999999
     for feat_idx, feat in enumerate(geomdata['features']):
         feat_data = copy.deepcopy(feat)
         feat_data['properties']['feature_index'] = feat_idx
         months = list(statics['all_months'].keys())
         months.remove('all')
         for m in months:
-            feat_data['properties'][variable + '_' + m] = round(random.uniform(0.0, 100.0), 4)
+            val = round(random.uniform(0.0, 100.0), 4)
+            if val < data_min:
+                data_min = val
+            if val > data_max:
+                data_max = val
+            feat_data['properties'][variable + '_' + m] = val
         etdata['features'].append(feat_data)
     # return json.dumps(etdata, ensure_ascii=False)
-    return etdata
+    return etdata, data_min, data_max
 
 def set_etdata_from_test_server(template_variables, db_engine):
     '''
@@ -119,22 +126,8 @@ def set_etdata_from_test_server(template_variables, db_engine):
     feat_index_list = ['all']
     tv = deepcopy(template_variables)
     DU = databaseMethods.postgis_Util(tv['variables'], db_engine)
-    map_geojson = DU.read_map_geojson_from_db(feature_index_list=feat_index_list)
-    '''
-    tv['featsdata'], tv['featsgeomdata'] = {}, {}
-    if len(feat_index_list) >= 1 and feat_index_list[0] != 'all':
-        tv['featsdata'], tv['featsgeomdata'] = DU.read_data_from_db(feature_index_list=feat_index_list)
-    map_type = determine_map_type(template_variables['variables'])
-
-    if map_type == "Choropleth" or len(tv['variables']['years']) == 1:
-        tv['etdata'], tv['geomdata'] = DU.read_data_from_db(feature_index_list=['all'])
-    else:
-        # Reads only the geometry data to generate non-choropleth map
-        tv['geomdata'] = DU.read_geomdata_from_db(9999)
-        tv['etdata'] = json.dumps({}, ensure_ascii=False)
-    return tv['etdata']
-    '''
-    return map_geojson
+    map_geojson, data_min, data_max = DU.read_map_geojson_from_db(feature_index_list=feat_index_list)
+    return map_geojson, data_min, data_max
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):
     '''
