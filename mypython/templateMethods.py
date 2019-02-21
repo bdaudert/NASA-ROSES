@@ -12,7 +12,7 @@ import copy
 
 from config import statics
 from config import GEO_BUCKET_URL
-from mypython import databaseMethods
+
 
 
 def set_form_options(variables):
@@ -57,45 +57,37 @@ def determine_map_type(tv_vars):
 def read_geomdata_from_bucket(geoFName):
     url = GEO_BUCKET_URL + geoFName
     try:
-        geomdata = json.load(urlopen(url))
+        # Replace python None values with empty strings for javascript
+        geomdata = json.loads(json.dumps(json.load(urlopen(url))).replace('null', '""'))
     except Exception as e:
         logging.error(e)
         raise Exception(e)
     return geomdata
 
-def get_map_geojson_from_bucket(region, type):
-    map_geojson = {}
-    if region != 'study_areas':
-        regions = [region]
-    else:
-        regions = list(statics['study_area_properties'].keys())
-        regions.remove('study_areas')
-
+def get_study_area_geojson_from_bukcet():
+    gjson = {}
+    regions = list(statics['study_area_properties'].keys())
+    regions.remove('study_areas')
     for r in regions:
-        if type == 'study_areas':
-            geoFName = statics['study_area_properties'][r]['geojson']
-        if type == 'field_boundaries':
-            geoFName = statics['study_area_properties'][r]['field_boundaries']
-        url = GEO_BUCKET_URL + geoFName
+        geoFName = statics['study_area_properties'][r]['geojson']
+        gjson[r] = read_geomdata_from_bucket(geoFName)
+    return gjson
 
-        try:
-            # Replace python None values with empty strings for javascript
-            map_geojson[r] = json.loads(json.dumps(json.load(urlopen(url))).replace('null', '""'))
-        except:
-            map_geojson[r] = {}
-
-    return map_geojson
+def get_field_boundary_region_geojson_from_bucket(region):
+    geoFName = statics['study_area_properties'][region]['field_boundaries']
+    gjson = read_geomdata_from_bucket(geoFName)
+    return gjson
 
 def set_fake_data(template_variables, geomdata):
     region = template_variables['variables']['region']
     variable = template_variables['variables']['variable']
     if region == 'study_areas':
        return {}
-    etdata = {
+
+    map_geojson = {
         'type': 'FeatureCollection',
         'features': []
     }
-    ds = template_variables['variables']['dataset']
     # Loop over features
     data_min = 9999999
     data_max = -9999999
@@ -111,22 +103,8 @@ def set_fake_data(template_variables, geomdata):
             if val > data_max:
                 data_max = val
             feat_data['properties'][variable + '_' + m] = val
-        etdata['features'].append(feat_data)
-    # return json.dumps(etdata, ensure_ascii=False)
-    return etdata, data_min, data_max
-
-def set_etdata_from_test_server(template_variables, db_engine):
-    '''
-    Sets geondata, etdata, featsgeomdata, featsdata from Jordan's db
-    :param template_variablesv: dict of template variables
-    :param feat_index_list: list of feature indices to to be displayed on map
-    :return: tv: updated template variables
-    FIXME: NEED to check that read_map_geojson works as expected, neeeds to match output from fake data
-    '''
-    feat_index_list = ['all']
-    tv = deepcopy(template_variables)
-    DU = databaseMethods.postgis_Util(tv['variables'], db_engine)
-    map_geojson, data_min, data_max = DU.read_map_geojson_from_db(feature_index_list=feat_index_list)
+        map_geojson['features'].append(feat_data)
+    # return json.dumps(map_geojson, ensure_ascii=False)
     return map_geojson, data_min, data_max
 
 def set_template_values(req_args, app_name, method, db_type, db_engine):
@@ -185,16 +163,17 @@ def set_template_values(req_args, app_name, method, db_type, db_engine):
     # Set the map_geojson file(s)
     region = tv['variables']['region']
 
-
     if tv['variables']['tool_action'] in ['None', 'switch_to_study_areas']:
         # Only geojsons area stored
-        tv['map_geojson'] = get_map_geojson_from_bucket(region, 'study_areas')
+        tv['map_geojson'] = get_study_area_geojson_from_bukcet()
 
     elif tv['variables']['tool_action'] == 'switch_to_fields':
-        # geojson + etdata stored
-        geomdata = get_map_geojson_from_bucket(region, 'field_boundaries')[region]
+        geomdata = get_field_boundary_region_geojson_from_bucket(region)
         if db_type == 'FAKE':
-            tv['map_geojson'] = {region: set_fake_data(tv, geomdata)}
+            map_geojson, tv['data_min'], tv['data_max'] = set_fake_data(tv, geomdata)
+            tv['map_geojson'] = {region: map_geojson}
         else:
-            tv['map_geojson'] = {region: set_etdata_from_test_server(tv, db_engine)}
+            tv['map_geojson'] = {region: {}}
+            tv['data_min'] =  -9999
+            tv['data_max'] = -9999
     return tv

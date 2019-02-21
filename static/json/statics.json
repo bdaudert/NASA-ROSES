@@ -1,4 +1,51 @@
 {
+    "feature_collections": {
+        "WBDHU4_Truckee_Carson_Walker_METRIC_NV_apoly_subset": {
+          "study_area": "WBDHU4_Truckee_Carson_Walker",
+          "study_area_geojson": "WBDHU4_Truckee_Carson_Walker.geojson",
+          "users": [0],
+          "metadata": ["OBJECTID", "BASIN"],
+          "feature_collection_name": "/projects/nasa-roses/WBDHU4_Truckee_Carson_Walker_METRIC_NV_apoly_subset",
+          "feature_collection_permission": "public",
+          "url_path_to_shapefile": ""
+        },
+        "BRC_Combined_subset_2009": {
+          "study_area": "WBDHU8_Bear",
+          "study_area_geojson": "WBDHU8_Bear.geojson",
+          "users": [0],
+          "metadata": ["OBJECTID"],
+          "feature_collection_name": "/projects/nasa-roses/BRC_Combined_subset_2009",
+          "feature_collection_permission": "public",
+          "url_path_to_shapefile": ""
+        },
+        "WBDHU8_Malheur_harney_field_boundaries_2016_sw_gw_irr": {
+          "study_area": "WBDHU8_Malheur",
+          "study_area_geojson": "WBDHU8_Malheur.geojson",
+          "users": [0],
+          "metadata": [],
+          "feature_collection_name": "/projects/nasa-roses/WBDHU8_Malheur_harney_field_boundaries_2016_sw_gw_irr",
+          "feature_collection_permission": "public",
+          "url_path_to_shapefile": ""
+        },
+        "usgs_central_valley_mod_base15_ca_poly_170616": {
+          "study_area": "usgs_central_valley_mod",
+          "study_area_geojson": "usgs_central_valley_mod.geojson",
+          "users": [0],
+          "metadata": ["BASIN"],
+          "feature_collection_name": "/projects/nasa-roses/sgs_central_valley_mod_base15_ca_poly_170616",
+          "feature_collection_permission": "public",
+          "url_path_to_shapefile": ""
+        },
+        "paso_robles_base15_ca_poly_170616": {
+          "study_area": "paso-robles",
+          "study_area_geojson": "paso-robles.geojson",
+          "users": [0],
+          "metadata": ["COUNTY", "SimsID"],
+          "feature_collection_name": "/projects/nasa-roses/paso_robles_base15_ca_poly_170616",
+          "feature_collection_permission": "public",
+          "url_path_to_shapefile": ""
+        }
+    },
     "study_area_properties": {
           "study_areas": {
               "geojson": "",
@@ -99,7 +146,7 @@
     "mon_len": [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31],
     "response_vars": {
         "None": [],
-        "switch_to_fields": ["map_geojson"],
+        "switch_to_fields": ["map_geojson", "data_min", "data_max"],
         "switch_to_study_areas": ["map_geojson"],
         "get_map": [
             "mapid",
@@ -123,24 +170,5 @@
     },
     "var_by_dataset": {
         "SSEBop": ["et", "etnet", "precip", "ndvi"]
-    },
-    "db_id_region": {
-        "Custom": 0,
-        "US_states_west_500k": 1,
-        "US_counties_west_500k": 2,
-        "Mason": 3,
-        "CentralValley_15": 4
-    },
-    "db_id_dataset": {
-        "SSEBop": 1
-    },
-    "db_id_parameters_by_dataset": {
-        "SSEBop": []
-    },
-    "db_id_variable": {
-        "et": 1,
-        "etnet": 2,
-        "precip": 3,
-        "ndvi": 4
     }
 }

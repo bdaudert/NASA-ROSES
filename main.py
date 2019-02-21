@@ -21,7 +21,6 @@ import flask
 from sqlalchemy import create_engine
 
 from mypython import templateMethods
-from mypython import databaseMethods
 from mypython import JinjaFilters
 
 import config
@@ -48,8 +47,8 @@ def runApp(req_args, app_name, method, db_type=None):
     # Set the database engine
     if db_type == 'TEST_SERVER':
         # Set up database
-        db_string = "postgresql+psycopg2://" + config.DB_USER + ":" + config.DB_PASSWORD
-        db_string += "@" + config.DB_HOST + ":" + str(config.DB_PORT) + '/' + config.DB_NAME
+        db_string = "postgresql+psycopg2://" + config.DRI_DB_USER + ":" + config.DRI_DB_PASSWORD
+        db_string += "@" + config.DRI_DB_HOST + ":" + str(config.DRO_DB_PORT) + '/' + config.DRI_DB_NAME
         db_engine = create_engine(db_string, pool_size=20, max_overflow=0)
     elif db_type == 'cloudSQL':
         db_engine = None # FIX ME: what is db engine for cloudSQL?
@@ -111,31 +110,6 @@ def home():
         return json.dumps(response, ensure_ascii=False)
 
 
-@app.route('/databaseTasks', methods=['GET'])
-def databaseTasks():
-    '''
-    Populates DATASTORE
-    FIX ME: depriciated??
-    Currently we use Jordan's database and populate it standalone
-    see SANDBOX/POSTGIS
-    :return:
-    '''
-    app_name = 'databaseTask'
-    ee.Initialize(config.EE_CREDENTIALS)
-    ee.data.setDeadline(180000)
-    req_args = flask.request.args
-    tv = templateMethods.set_template_values(
-        req_args, 'databaseTask', 'GET')
-    tv['json_data'] = {}
-    for region in ['US_states_west_500k', 'Mason', 'US_counties_west_500k']:
-        for year in ['2003']:
-            logging.info('PROCESSING Region/Year ' + region + '/' + year)
-            for ds in ['SSEBop']:
-                DU = databaseMethods.Datatstore_Util(region, year, ds)
-                DU.add_to_db()
-            logging.info(region + '/' + year + ' PROCESSED!')
-    return flask.render_template('databaseTasks.html', **tv)
-
 @app.errorhandler(404)
 def page_not_found(e):
     """Return a custom 404 error."""
@@ -150,7 +124,8 @@ def application_error(e):
     # return 'Sorry, unexpected error: {}'.format(e), 500
     # return flask.redirect(flask.url_for('home'))
     tv = {}
-    tv = runApp({}, 'main', 'ERROR', db_type='TEST_SERVER')
+    db_type = 'FAKE'
+    tv = runApp({}, 'main', 'ERROR', db_type=db_type)
     tv['error'] = str(e)
     return flask.render_template('nasa-roses.html', **tv)
 

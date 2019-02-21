@@ -221,10 +221,13 @@ LF_MAP_APP = {
         for (feat_idx = 0; feat_idx < g_json['features'].length; feat_idx++) {
             val_list.push(LF_MAP_APP.get_choropleth_data_value(feat_idx, variable));
         }
+        // Update data min, max
+        window.DATA.data_min = Math.min.apply(null,val_list);
+        window.DATA.data_max = Math.max.apply(null, val_list);
         return val_list;
     },
     set_choropleth_colors_and_bins: function (data_min, data_max, colorbar_name, num_colors) {
-        var colors = colors_by_clorbar_name[colorbar_name][num_colors], bins, cb,
+        var colors = colors_by_colorbar_name[colorbar_name][num_colors], bins = [], cb,
             step = myRound((data_max - data_min) / num_colors, 0),
             j = data_min;
 
@@ -328,9 +331,11 @@ LF_MAP_APP = {
         $('.colorbar-container').css('display', 'block');
         var region = $('#region').val(),
             variable = $('#variable').attr('data-id'),
-            val_list = LF_MAP_APP.get_choropleth_data_values(region, variable);
+            val_list = LF_MAP_APP.get_choropleth_data_values(region, variable),
+            data_min = window.DATA.data_min,
+            data_max = window.DATA.data_max;
         // NOTE: num_colors = 1 is max right now: see colorbrewer.js
-        var cb = LF_MAP_APP.set_choropleth_colors_and_bins((data_min, data_max, 'ETActual', 11));
+        var cb = LF_MAP_APP.set_choropleth_colors_and_bins(data_min, data_max, 'ETActual', 11);
         window.DATA.choropleth_colors = cb['colors'];
         window.DATA.choropleth_bins = cb['bins'];
         LF_MAP_APP.draw_mapColorbar(window.DATA.choropleth_bins, window.DATA.choropleth_colors, '#colorbar');
