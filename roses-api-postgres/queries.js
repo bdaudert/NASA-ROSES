@@ -61,44 +61,36 @@ function test(request, response) {
     my_query(sql_text, params, pool_britta, 'test', response, 200);
 }
 
+
+
 function getMapGeojson (request, response) {
     var html_code, params, sql_text;
     if (request.method == "GET") {
         var uid = parseInt(request.query.user_id);
         var fc = String(request.query.feature_collection_name);
-        var sd = String(request.query.start_date);
-        var ed = String(request.query.end_date);
-        var model = String(request.query.model);
-        var variable = String(request.query.variable);
-        var tr = String(request.query.temporal_resolution);
+        var year = parseInt(request.query.year);
         html_code = 200;
     }else{
-        var { uid, fc, sd, ed, model, variable, tr } = request.body;
+        var { uid, fc, year} = request.body;
         html_code = 201;
     }
-    params = [fc, sd, ed, uid, model, variable, tr];
+    params = [uid, fc, year];
     sql_text = `
         SELECT
         /*ST_AsGeoJSON(roses.feature.geometry) AS geom,*/
-        roses.feature.feature_id AS feat_id,
-        roses.feature_metadata.feature_metadata_name AS meta_name,
-        roses.feature_metadata.feature_metadata_name AS meta_value,
-        roses.timeseries.start_date AS sd,
-        roses.timeseries.end_date AS ed,
-        roses.timeseries.data_value AS dv
+        roses.feature.feature_collection_name as feature_collection_name,
+        roses.feature.feature_id AS feature_id,
+        roses.feature_metadata.feature_metadata_name AS metadata_name,
+        roses.feature_metadata.feature_metadata_name AS metadata_properties,
+        roses.feature.year AS feature_year
         FROM
-        roses.timeseries
-        LEFT JOIN roses.data ON roses.data.timeseries_id = roses.timeseries.timeseries_id
-        LEFT JOIN roses.feature ON roses.feature.feature_id = roses.data.feature_id
-        LEFT JOIN roses.feature_metadata ON roses.feature_metadata.feature_id = roses.data.feature_id
+        roses.feature 
+        LEFT JOIN roses.feature_collection ON roses.feature_collection.feature_collection_name = roses.feature.feature_collection_name
+        LEFT JOIN roses.feature_metadata ON roses.feature_metadata.feature_metadata_id = roses.feature.feature_id
         WHERE
-        roses.feature.feature_collection_name = $1
-        AND roses.timeseries.start_date >= $2::timestamp
-        AND roses.timeseries.end_date <= $3::timestamp
-        AND roses.data.user_id = $4
-        AND roses.data.model_name = $5
-        AND roses.data.variable_name = $6
-        AND roses.data.temporal_resolution = $7
+        roses.feature_collection.user_id = $1
+        AND roses.feature_collection.feature_collection_name = $2
+        AND roses.feature.year = $3
         ORDER BY roses.feature.feature_id
     `
     my_query(sql_text, params, pool_britta, 'test', response, html_code);
