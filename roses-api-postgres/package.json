@@ -1,7 +1,7 @@
 {
-  "name": "node-api-postgres",
+  "name": "api-postgres",
   "version": "1.0.0",
-  "description": "",
+  "description": "## What's included in the directory:<br/>   index.js - entry point for the server<br/>   queries.js - contains functions for API<br/>   package.json - contains npm metadata<br/>   (located on /home/shared/roses-api-postgres/)",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
-    "pg": "^7.8.0"
-  }
+    "pg": "^7.8.1"
+  },
+  "devDependencies": {}
 }
