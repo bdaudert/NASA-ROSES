@@ -21,6 +21,7 @@ app.get('/', (request, response) => {
 app.get('/map_geojson/:user_id/:feature_collection_name/:start_date/:end_date/:model/:variable/:temporal_resoution', db.get_getMapGeojson)
 app.post('/map_geojson', db.post_getMapGeojson)
 */
+app.get('/test', db.test_basic)
 app.get('/test/:feature_id', db.test)
 app.get('/etdata', db.getEtdata)
 app.get('/etdata/:id', db.getEtdataById)
