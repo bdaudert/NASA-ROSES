@@ -48,7 +48,10 @@ async function my_query(sql, params, pool, schema, response, html_code) {
 
 
 function test(request, response) {
-    var sql_text =  'SELECT * FROM roses.feature WHERE roses.feature.feature_id = $1';
+    var sql_text =  `
+      SELECT * 
+      FROM roses.feature WHERE roses.feature.feature_id = $1
+    `;
     var params = [];
     if (request.query.feature_id){
         params = [request.query.feature_id];
@@ -58,10 +61,48 @@ function test(request, response) {
     my_query(sql_text, params, pool_britta, 'test', response, 200);
 }
 
-function get_getMapGeojson (request, response) {
+function getMapGeojson (request, response) {
+    var html_code, params, sql_text;
+    if (request.method == "GET") {
+        var uid = parseInt(request.query.user_id);
+        var fc = String(request.query.feature_collection_name);
+        var sd = String(request.query.start_date);
+        var ed = String(request.query.end_date);
+        var model = String(request.query.model);
+        var variable = String(request.query.variable);
+        var tr = String(request.query.temporal_resolution);
+        html_code = 200;
+    }else{
+        var { uid, fc, sd, ed, model, variable, tr } = request.body;
+        html_code = 201;
+    }
+    params = [fc, sd, ed, uid, model, variable, tr];
+    sql_text = `
+        SELECT
+        /*ST_AsGeoJSON(roses.feature.geometry) AS geom,*/
+        roses.feature.feature_id AS feat_id,
+        roses.feature_metadata.feature_metadata_name AS meta_name,
+        roses.feature_metadata.feature_metadata_name AS meta_value,
+        roses.timeseries.start_date AS sd,
+        roses.timeseries.end_date AS ed,
+        roses.timeseries.data_value AS dv
+        FROM
+        roses.timeseries
+        LEFT JOIN roses.data ON roses.data.timeseries_id = roses.timeseries.timeseries_id
+        LEFT JOIN roses.feature ON roses.feature.feature_id = roses.data.feature_id
+        LEFT JOIN roses.feature_metadata ON roses.feature_metadata.feature_id = roses.data.feature_id
+        WHERE
+        roses.feature.feature_collection_name = $1
+        AND roses.timeseries.start_date >= $2::timestamp
+        AND roses.timeseries.end_date <= $3::timestamp
+        AND roses.data.user_id = $4
+        AND roses.data.model_name = $5
+        AND roses.data.variable_name = $6
+        AND roses.data.temporal_resolution = $7
+        ORDER BY roses.feature.feature_id
+    `
+    my_query(sql_text, params, pool_britta, 'test', response, html_code);
 }
-
-function post_getMapGeojson (request, response) {}
 
 function getEtdata (request, response) {
     var sql_text, params = ''
@@ -110,9 +151,8 @@ const postEtdataRange = (request, response) => {
 }
 
 module.exports = {
-    get_getMapGeojson,
-    post_getMapGeojson,
     test,
+    getMapGeojson,
     getEtdata,
     //getEtdataById,
     postEtdata,
