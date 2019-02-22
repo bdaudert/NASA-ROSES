@@ -47,50 +47,38 @@ async function my_query(sql, params, pool, schema, response, html_code) {
 }
 
 
-const test_basic = (request, response) => {
-    var sql_text =  'SELECT roses.feature.feature_id FROM roses.feature WHERE roses.feature.feature_id = $1';
-    var params = [1];
+function test(request, response) {
+    var sql_text =  'SELECT * FROM roses.feature WHERE roses.feature.feature_id = $1';
+    var params = [];
+    if (request.query.feature_id){
+        params = [request.query.feature_id];
+    }else{
+        params = [1];
+    }
     my_query(sql_text, params, pool_britta, 'test', response, 200);
 }
 
-
-
-const test = (request, response) => {
-    var sql_text =  'SELECT * FROM feature WHERE feature.feature_id = $1';
-    var params = [parseInt(request.params.feature_id)];
-    console.log('LOOOOK')
-    console.log(params)
-    my_query(sql_text, params, pool_britta, 'test', response, 200);
+function get_getMapGeojson (request, response) {
 }
 
-const get_getMapGeojson = (request, response) => {
-}
+function post_getMapGeojson (request, response) {}
 
-const post_getMapGeojson = (request, response) => {}
-
-const getEtdata = (request, response) => {
-  pool_jody.query(
-      'SELECT ogc_fid, cmdtymast, acresmast, et_2017 FROM base15_ca_poly_170616_data_all ORDER BY ogc_fid ASC',
-      (error, results) => {
+function getEtdata (request, response) {
+    var sql_text, params = ''
+    if (request.query.id){
+        sql_text = 'SELECT ogc_fid, cmdtymast, acresmast, et_2017 FROM base15_ca_poly_170616_data_all WHERE ogc_fid = $1'
+        params = [parseInt(request.query.id)]
+    }else{
+        sql_text = 'SELECT ogc_fid, cmdtymast, acresmast, et_2017 FROM base15_ca_poly_170616_data_all ORDER BY ogc_fid ASC'
+    }
+    pool_jody.query(
+      sql_text, params,
+      function (error, results) {
           if (error) {
               throw error
           }
           response.status(200).json(results.rows)
-      })
-}
-
-const getEtdataById = (request, response) => {
-  const id = parseInt(request.params.id)
-
-  pool_jody.query(
-      'SELECT ogc_fid, cmdtymast, acresmast, et_2017 FROM base15_ca_poly_170616_data_all WHERE ogc_fid = $1',
-      [id],
-      (error, results) => {
-          if (error) {
-              throw error
-          }
-          response.status(200).json(results.rows)
-      })
+    })
 }
 
 const postEtdata = (request, response) => {
@@ -124,10 +112,9 @@ const postEtdataRange = (request, response) => {
 module.exports = {
     get_getMapGeojson,
     post_getMapGeojson,
-    test_basic,
     test,
     getEtdata,
-    getEtdataById,
+    //getEtdataById,
     postEtdata,
     postEtdataRange
 }
