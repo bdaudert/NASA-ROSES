@@ -18,6 +18,8 @@ app.get('/', (request, response) => {
 })
 
 
+app.get('/test_json', db.testJson)
+app.post('/test_json', db.testJson)
 app.get('/map_geojson', db.getMapGeojson)
 app.post('/map_geojson', db.getMapGeojson)
 app.get('/test', db.test)

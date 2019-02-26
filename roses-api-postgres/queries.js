@@ -28,7 +28,7 @@ async function my_query(sql, params, pool, schema, response, html_code) {
         await client.query('SET search_path TO ' + schema);
         // Run the actual SQL we want to execute
         const results = await client.query(sql, params);
-        //console.log(results.rows);
+        console.log(results);
         response.status(200).json(results.rows);
         // This is done in two steps so that we can catch the error and discard the connection
         //return results.rows;
@@ -62,8 +62,7 @@ function test(request, response) {
 }
 
 
-
-function getMapGeojson (request, response) {
+function testJson (request, response) {
     var html_code, params, sql_text;
     if (request.method == "GET") {
         var uid = parseInt(request.query.user_id);
@@ -92,6 +91,28 @@ function getMapGeojson (request, response) {
         AND roses.feature_collection.feature_collection_name = $2
         AND roses.feature.year = $3
         ORDER BY roses.feature.feature_id
+    `
+    my_query(sql_text, params, pool_britta, 'test', response, html_code);
+}
+
+function getMapGeojson (request, response) {
+    var html_code, params, sql_text;
+    if (request.method == "GET") {
+        var uid = parseInt(request.query.user_id);
+        var fc = String(request.query.feature_collection_name);
+        var year = parseInt(request.query.year);
+        html_code = 200;
+    }else {
+        var {uid, fc, year} = request.body;
+        html_code = 201;
+    }
+    params = [uid, fc, year];
+    sql_text = `
+        SELECT row_to_json(fc) FROM (
+          SELECT 'FeatureCollection' AS type, array_to_json(array_agg(f)) AS features FROM (
+            SELECT 'Feature' AS type, ST_AsGeoJSON(lg.geometry)::json AS geometry FROM roses.feature as lg LIMIT 10
+          ) AS f
+        ) AS fc  
     `
     my_query(sql_text, params, pool_britta, 'test', response, html_code);
 }
@@ -144,6 +165,7 @@ const postEtdataRange = (request, response) => {
 
 module.exports = {
     test,
+    testJson,
     getMapGeojson,
     getEtdata,
     //getEtdataById,
