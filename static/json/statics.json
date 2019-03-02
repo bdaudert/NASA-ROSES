@@ -102,22 +102,12 @@
         "SSEBop": "SSEBop-MODIS"
     },
     "all_year": {
-        "SSEBop": [
-            "2003",
-            "2004",
-            "2005",
-            "2006",
-            "2007",
-            "2008",
-            "2009",
-            "2010",
-            "2011"
-        ]
+        "SSEBop": ["2003"]
     },
     "all_variable": {
         "et": "Actual ET",
-        "etnet": "Net ET (ET - PPT)",
-        "precip": "Precipitation (PPT)",
+        "eto": "Ref ET (Grass)",
+        "etr": "Ref ET (Alfalfa)",
         "ndvi": "NDVI"
     },
     "all_tool_action": {
@@ -164,11 +154,11 @@
     "regions_changing_by_year": ["paso-robles"],
     "dataset_by_var": {
         "et": ["SSEBop"],
-        "etnet": ["SSEBop"],
-        "precip": ["SSEBop"],
+        "et0": ["SSEBop"],
+        "etr": ["SSEBop"],
         "ndvi": ["SSEBop"]
     },
     "var_by_dataset": {
-        "SSEBop": ["et", "etnet", "precip", "ndvi"]
+        "SSEBop": ["et", "eto", "etr", "ndvi"]
     }
 }
